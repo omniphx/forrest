@@ -28,7 +28,10 @@ class ForrestServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app['forrest'] = $this->app->share(function($app)
+		{
+			return new Forrest;
+		});
 	}
 
 	/**
@@ -38,7 +41,7 @@ class ForrestServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return array(forrest);
 	}
 
 }

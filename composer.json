@@ -1,15 +1,19 @@
 {
     "name": "omniphx/forrest",
     "description": "",
+    "license":"MIT",
+    "keywords":["laravel","force.com","salesforce","rest","api"],
     "authors": [
         {
-            "name": "omniphx",
-            "email": "mattjmitchener@gmail.com"
+            "name": "Matthew Mitchener",
+            "email": "mattjmitchener@gmail.com",
+            "role": "Developer"
         }
     ],
     "require": {
         "php": ">=5.3.0",
-        "illuminate/support": "4.1.*"
+        "illuminate/support": "4.1.*",
+        "guzzlehttp/guzzle": "~4.0"
     },
     "autoload": {
         "classmap": [
@@ -19,5 +23,5 @@
             "Omniphx\\Forrest\\": "src/"
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "dev"
 }
