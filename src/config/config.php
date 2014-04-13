@@ -1,5 +1,5 @@
 <?php
 
 return array(
-	'settings' => ''
+	'RequestService' => 'CurlClient'
 );
