@@ -11,17 +11,16 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0",
-        "illuminate/support": "4.1.*",
-        "illuminate/session": "4.1.*",
-        "illuminate/config": "4.1.*",
-        "illuminate/log": "4.1.*",
-        "illuminate/foundation": "4.1.*",
-        "guzzlehttp/guzzle": "~4.0"
+        "php": ">=5.4.0",
+        "illuminate/support": "~4",
+        "guzzlehttp/guzzle": "~4"
+    },
+    "require-dev": {
+        "mockery/mockery": "dev-master",
+        "php-vcr/phpunit-testlistener-vcr": "*"
     },
     "autoload": {
         "classmap": [
-            "src/migrations"
         ],
         "psr-0": {
             "Omniphx\\Forrest\\": "src/"
