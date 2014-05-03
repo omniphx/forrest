@@ -6,7 +6,7 @@ use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 
-class RestAPI {
+class RESTClient {
 
     /**
      * Interface for HTTP Client
