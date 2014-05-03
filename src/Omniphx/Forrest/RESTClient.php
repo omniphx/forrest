@@ -47,30 +47,32 @@ class RESTClient {
         $this->settings = $settings;
     }
 
-    public function resource($pURI,$options=[]){
+    public function resource($pURI,$pOptions=[]){
         $accessToken = $this->session->get('token')['access_token'];
         $instanceURL = $this->session->get('token')['instance_url'];
 
         $url = $instanceURL . $pURI;
-        $header = array("Authorization" => "OAuth $accessToken");
 
-        switch($options['method']){
-            case 'GET':
-                $response = $this->client->get($url, [
-                    'headers' => $header
-                ]);
-                if($options['format'] == 'JSON'){
-                    return $response->json();
-                } elseif($options['format'] == 'XML'){
-                    return $response->xml();
-                }
-                break;
-            case 'POST':
-                break;
+        $headers = array("Authorization" => "OAuth $accessToken");
+        $options = ['headers' => $headers];
+
+        $request = $this->client->createRequest($pOptions['method'],$url,$options);
+
+        $response = $this->client->send($request);
+
+        if($pOptions['format'] == 'XML'){
+            return $response->xml();
+        } else {
+            return $response->json();
         }
     }
 
-	public function authenticate()
+    /**
+     * Call this method to redirect user to login page and initiate
+     * the Web Server OAuth Authentication Flow.
+     * @return void
+     */
+    public function authenticate()
     {
         return $this->redirect->to($this->settings['loginURI']
                         	. '/services/oauth2/authorize?response_type=code&client_id='
@@ -79,6 +81,11 @@ class RESTClient {
                         	. urlencode($this->settings['redirectURI']));
     }
 
+    /**
+     * When settings up your callback route, you will need to call this method to
+     * acquire an authorization token. This token will be used for the API requests.
+     * @return function Redirect()
+     */
     public function callback()
     {
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
@@ -138,6 +145,11 @@ class RESTClient {
         return $response->json();
     }
 
+    
+    /**
+     * Revokes access Token from Salesforce. Will not flush token from Session.
+     * @return function Redirect()
+     */
     public function revoke(){
         $accessToken = $this->session->get('token')['access_token'];
         $url = 'https://login.salesforce.com/services/oauth2/revoke';
@@ -149,6 +161,11 @@ class RESTClient {
         return Redirect::to('/');
     }
 
+    /**
+     * Request that 
+     * @param  array  $options
+     * @return json
+     */
     public function versions($options = array('method'=>'GET','format'=>'JSON')){
         $uri = "/services/data/";
         $resource = $this->resource($uri,$options);
