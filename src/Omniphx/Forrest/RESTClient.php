@@ -11,7 +11,7 @@ class RESTClient {
      * Interface for HTTP Client
      * @var GuzzleHttp\ClientInterface
      */
-    public $client;
+    protected $client;
 
     /**
      * Interface for Session calls
