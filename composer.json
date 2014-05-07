@@ -12,12 +12,10 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/support": "~4",
         "guzzlehttp/guzzle": "~4"
     },
     "require-dev": {
-        "mockery/mockery": "dev-master",
-        "php-vcr/phpunit-testlistener-vcr": "*"
+        "phpspec/phpspec": "2.0.*@dev"
     },
     "autoload": {
         "classmap": [
