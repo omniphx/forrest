@@ -130,6 +130,23 @@ class RESTClientSpec extends ObjectBehavior
         $this->appMenu($options)->shouldReturn('appMenu');
     }
 
+    function it_should_return_sobject_resource(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get("resources")->shouldBeCalled(1);
+        $mockedSession->get("token")->shouldBeCalled(1)->willReturn(['access_token'=>'asdfasdf','instance_url'=>'bligtyblopitydoo']);
+
+        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+        $mockedResponse->json()->shouldBeCalled(1)->willReturn('sobject');
+
+        $options = array('method'=>'GET','format'=>'JSON');
+        $this->sobject('Account',$options)->shouldReturn('sobject'); 
+    }
+
     function it_should_return_the_appmenu_resource(
         ClientInterface $mockedClient,
         SessionInterface $mockedSession,
