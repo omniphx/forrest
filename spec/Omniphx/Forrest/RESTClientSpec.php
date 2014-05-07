@@ -110,7 +110,7 @@ class RESTClientSpec extends ObjectBehavior
         $options = array('method'=>'GET','format'=>'JSON');
 
         $mockedSession->get('resources')->shouldBeCalled()->willReturn(array('sobjects'=>'resourceURI'));
-        $mockedResource->request('resourceURI/AppSwitcher/',$options)->shouldBeCalled()->willReturn('sObject');
+        $mockedResource->request('resourceURI/Account',$options)->shouldBeCalled()->willReturn('sObject');
 
         $this->sObject('Account')->shouldReturn('sObject');
     }
@@ -122,7 +122,7 @@ class RESTClientSpec extends ObjectBehavior
         $options = array('method'=>'GET','format'=>'JSON');
 
         $mockedSession->get("resources")->shouldBeCalled()->willReturn(array('appMenu'=>'resourceURI'));
-        $mockedResource->request('resourceURI',Argument::type('array'))->shouldBeCalled()->willReturn('appMenu');
+        $mockedResource->request('resourceURI/AppSwitcher/',Argument::type('array'))->shouldBeCalled()->willReturn('appMenu');
 
         $this->appMenu()->shouldReturn('appMenu');
     }
