@@ -4,8 +4,15 @@ use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
+use Omniphx\Forrest\Interfaces\ResourceInterface;
 
 class RESTClient {
+
+    /**
+     * Inteface for Resource calls
+     * @var Omniphx\Forrest\Interfaces\ResourceInterface
+     */
+    protected $resource;
 
     /**
      * Interface for HTTP Client
@@ -38,7 +45,8 @@ class RESTClient {
      */
     protected $settings;
 
-    public function __construct(ClientInterface $client, SessionInterface $session, RedirectInterface $redirect, InputInterface $input, $settings){
+    public function __construct(ResourceInterface $resource, ClientInterface $client, SessionInterface $session, RedirectInterface $redirect, InputInterface $input, $settings){
+        $this->resource = $resource;
         $this->client  = $client;
         $this->session = $session;
         $this->redirect = $redirect;
@@ -46,26 +54,26 @@ class RESTClient {
         $this->settings = $settings;
     }
 
-    public function resource($pURI,$pOptions=[]){
-        $token = $this->session->get('token');
-        $accessToken = $token['access_token'];
-        $instanceURL = $token['instance_url'];
+    // public function resource($pURI,$pOptions=[]){
+    //     $token = $this->session->get('token');
+    //     $accessToken = $token['access_token'];
+    //     $instanceURL = $token['instance_url'];
 
-        $url = $instanceURL . $pURI;
+    //     $url = $instanceURL . $pURI;
 
-        $headers = ["Authorization" => "OAuth $accessToken"];
-        $options = ["headers" => $headers];
+    //     $headers = ["Authorization" => "OAuth $accessToken"];
+    //     $options = ["headers" => $headers];
 
-        $request = $this->client->createRequest($pOptions['method'],$url,$options);
+    //     $request = $this->client->createRequest($pOptions['method'],$url,$options);
 
-        $response = $this->client->send($request);
+    //     $response = $this->client->send($request);
 
-        if($pOptions['format'] == 'XML'){
-            return $response->xml();
-        } else {
-            return $response->json();
-        }
-    }
+    //     if($pOptions['format'] == 'XML'){
+    //         return $response->xml();
+    //     } else {
+    //         return $response->json();
+    //     }
+    // }
 
     /**
      * Call this method to redirect user to login page and initiate
@@ -171,13 +179,13 @@ class RESTClient {
      */
     public function versions($options = array('method'=>'GET','format'=>'JSON')){
         $uri = "/services/data/";
-        $resource = $this->resource($uri,$options);
+        $resource = $this->resource->request($uri,$options);
         return $resource;
     }
 
     public function version($options = array('method'=>'GET','format'=>'JSON')){
         $uri = $this->session->get('version')['url'];
-        $resource = $this->resource($uri,$options);
+        $resource = $this->resource->request($uri,$options);
 
         return $resource;
     }
@@ -185,9 +193,9 @@ class RESTClient {
     public function sObject($sObjectName, $options = array('method'=>'GET','format'=>'JSON'))
     {
         $resourceURI = $this->session->get('resources')['sobjects'];
-        $uri = $resourceURI.'/'.$sObjectName;
+        $uri = "$resourceURI/$sObjectName";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function describe($sObjectName,$options = array('method'=>'GET','format'=>'JSON'))
@@ -195,7 +203,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/describe";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectDeleted($sObjectName,$startDateAndTime,$endDateAndTime,$options = array('method'=>'GET','format'=>'JSON'))
@@ -203,7 +211,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/deleted/?start=$startDateAndTime&end=$endDateAndTime";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectUpdated($sObjectName,$startDateAndTime,$endDateAndTime,$options = array('method'=>'GET','format'=>'JSON'))
@@ -211,7 +219,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/updated/?start=$startDateAndTime&end=$endDateAndTime";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectById($sObjectName,$id,$options = array('method'=>'GET','format'=>'JSON'))
@@ -219,7 +227,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObject/$id";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectByExternalId($sObjectName,$fieldName,$fieldValue,$options = array('method'=>'GET','format'=>'JSON'))
@@ -227,7 +235,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/$fieldName/$fieldValue";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectApprovalLayout($sObjectName,$approvalProcessName=null,$options = array('method'=>'GET','format'=>'JSON'))
@@ -235,7 +243,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/describe/approvalLayouts/$approvalProcessName";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectCompactLayout($sObjectName,$options = array('method'=>'GET','format'=>'JSON'))
@@ -243,7 +251,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/describe/compactLayouts/";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectLayout($sObjectName,$options = array('method'=>'GET','format'=>'JSON'))
@@ -251,7 +259,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/describe/layouts/"; 
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectQuickActions($sObjectName,$actionName=null,$options = array('method'=>'GET','format'=>'JSON'))
@@ -259,7 +267,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/quickActions/$actionName";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectQuickActionsDescribe($sObjectName,$actionName,$parentId=null,$options = array('method'=>'GET','format'=>'JSON'))
@@ -267,7 +275,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/quickActions/$actionName/describe/$parentId";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function sObjectQuickActionsDefaultValues($sObjectName,$actionName,$parentId=null,$options = array('method'=>'GET','format'=>'JSON'))
@@ -275,7 +283,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/$sObjectName/quickActions/$actionName/defaultValues/$parentId";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function suggestedCaseArticle($caseSubject,$caseDescription,$articleLanguage='en',$options = array('method'=>'GET','format'=>'JSON'))
@@ -283,7 +291,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/Case/suggestedArticles?language=$articleLanguage&subject=$caseSubject&description=$caseDescription";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function suggestedCaseArticleById($caseId,$articleLanguage='en',$options = array('method'=>'GET','format'=>'JSON'))
@@ -291,78 +299,77 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/Case/$caseId/suggestedArticles?language=$articleLanguage";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function userPassword($userId,$options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['sobjects'];
         $uri = "$resourceURI/User/$userId/password";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
-    //New Call
     public function appMenu($options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['appMenu'];
         $uri = "$resourceURI/AppSwitcher/";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function appMenuSF1($options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['appMenu'];
         $uri = "$resourceURI/Salesforce1/";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function flexiPage($flexiId,$options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['flexiPage'];
         $uri = "$resourceURI/$flexiId";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function processApprovals($options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['process'];
         $uri = "$resourceURI/approvals/";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function processRules($sObjectName,$workflowRuleId,$options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['process'];
         $uri = "$resourceURI/rules/$sObjectName/$workflowRuleId";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function query($query,$options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['query'];
         $uri = "$resourceURI?q=".urlencode($query);
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function queryExplain($query,$options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['query'];
         $uri = "$resourceURI?explain=" . urlencode($query);
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function queryAll($query,$format,$options = array('method'=>'GET','format'=>'JSON')) {
         $resourceURI = $this->session->get('resources')['queryAll'];
         $uri = "$resourceURI?q=" . urlencode($query);
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function quickActions($options = array('method'=>'GET','format'=>'JSON')){
         $resourceURI = $this->session->get('resources')['quickActions'];
         $uri = "$resourceURI";
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function search($query,$options = array('method'=>'GET','format'=>'JSON'))
@@ -370,42 +377,42 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['search'];
         $uri = "$resourceURI?s=" . urlencode($query);
         
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function searchScopeOrder($options = array('method'=>'GET','format'=>'JSON')){
         $resourceURI = $this->session->get('resources')['search'];
         $uri = "$resourceURI/scopeOrder";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function searchLayouts($objectList,$options = array('method'=>'GET','format'=>'JSON')){
         $resourceURI = $this->session->get('resources')['search'];
         $uri = "$resourceURI/layout/?q=" . urlencode($objectList);
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function searchSuggestedArticles($options = array('method'=>'GET','format'=>'JSON')){
         $resourceURI = $this->session->get('resources')['search'];
         $uri = "$resourceURI/scopeOrder";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function searchSuggestedQueries($query, $language = 'en', $options = array('method'=>'GET','format'=>'JSON')){
         $resourceURI = $this->session->get('resources')['search'];
         $uri = "$resourceURI/suggestSearchQueries?q=" . urlencode($query) . "&language=$language";
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
     public function recentlyViewed($options = array('method'=>'GET','format'=>'JSON')){
         $resourceURI = $this->session->get('resources')['recent'];
         $uri = $resourceURI;
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
 
     }
 
@@ -413,7 +420,7 @@ class RESTClient {
         $resourceURI = $this->session->get('resources')['theme'];
         $uri = $resourceURI;
 
-        return $this->resource($uri,$options);
+        return $this->resource->request($uri,$options);
     }
 
 }

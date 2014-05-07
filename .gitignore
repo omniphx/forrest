@@ -5,3 +5,4 @@ composer.lock
 /src/config/local
 mm.log
 /vin
+/bin

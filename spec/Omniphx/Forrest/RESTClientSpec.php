@@ -4,6 +4,7 @@ namespace spec\Omniphx\Forrest;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Omniphx\Forrest\Interfaces\ResourceInterface;
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -14,7 +15,7 @@ use GuzzleHttp\Message\ResponseInterface;
 class RESTClientSpec extends ObjectBehavior
 {
 
-	function let(ClientInterface $mockedClient, SessionInterface $mockedSession, RedirectInterface $mockedRedirect, InputInterface $mockedInput)
+	function let(ResourceInterface $mockedResource, ClientInterface $mockedClient, SessionInterface $mockedSession, RedirectInterface $mockedRedirect, InputInterface $mockedInput)
 	{
 		$settings  = [
 			'clientId' => 'testingClientId',
@@ -22,7 +23,7 @@ class RESTClientSpec extends ObjectBehavior
 			'redirectURI' => 'callbackURL',
 			'loginURI' => 'https://login.salesforce.com',
 			'authRedirect' => 'redirectURL'];
-		$this->beConstructedWith($mockedClient,$mockedSession,$mockedRedirect,$mockedInput,$settings);
+		$this->beConstructedWith($mockedResource, $mockedClient,$mockedSession,$mockedRedirect,$mockedInput,$settings);
 	}
 
     function it_is_initializable()
@@ -36,29 +37,10 @@ class RESTClientSpec extends ObjectBehavior
     	$this->authenticate()->shouldReturn('redirectURL');
     }
 
-    function it_should_return_a_resource(
-        ClientInterface $mockedClient,
-        SessionInterface $mockedSession,
-        RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
-    {
-    	$mockedSession->get('token')->shouldBeCalled(1)->willReturn(['access_token'=>'asdfasdf','instance_url'=>'bligtyblopitydoo']);
-
-        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-        $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
-        $mockedResponse->json()->shouldBeCalled(1)->willReturn('jsonResponse');
-        $mockedResponse->xml()->shouldBeCalled(1)->willReturn('xmlResponse');
-
-        $options1 = ['method'=>'GET','format'=>'JSON'];
-    	$this->resource('string',$options1)->shouldReturn('jsonResponse');
-
-        $options2 = ['method'=>'GET','format'=>'XML'];
-        $this->resource('string',$options2)->shouldReturn('xmlResponse');
-
-    }
-
     function it_should_callback(
         ClientInterface $mockedClient,
+        ResourceInterface $mockedResource,
+        SessionInterface $mockedSession,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse,
         InputInterface $mockedInput,
@@ -73,9 +55,16 @@ class RESTClientSpec extends ObjectBehavior
 
     	$mockedResponse->json()->shouldBeCalled()->willReturn(array('version1','version2'));
 
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->willReturn(array('version1','version2'));
+
         $mockedRedirect->to(Argument::type('string'))->willReturn('redirectURL');
 
-    	$this->callback($mockedClient)->shouldReturn('redirectURL');
+        $mockedSession->get('version')->willReturn(array('url'=>'sampleURL'));
+        $mockedSession->put('token',Argument::type('array'))->shouldBeCalled();
+        $mockedSession->put('version',Argument::type('string'))->shouldBeCalled();
+        $mockedSession->put('resources',Argument::type('array'))->shouldBeCalled();
+
+    	$this->callback()->shouldReturn('redirectURL');
     }
 
     function it_should_get_the_user_info(
@@ -97,72 +86,48 @@ class RESTClientSpec extends ObjectBehavior
         $this->revoke()->shouldReturn('redirectURL');
     }
 
-    function it_should_return_the_versions_resource(
-        ClientInterface $mockedClient,
-        SessionInterface $mockedSession,
-        RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
-    {
-        $mockedSession->get("token")->shouldBeCalled(1)->willReturn(['access_token'=>'asdfasdf','instance_url'=>'bligtyblopitydoo']);
+    function it_should_return_the_versions_resource(ResourceInterface $mockedResource)
+    {   
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('versions');
 
-        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
-        $mockedResponse->json()->shouldBeCalled(1)->willReturn('versions');
-
-        $options = array('method'=>'GET','format'=>'JSON');
-        $this->versions($options)->shouldReturn('versions');
+        $this->versions()->shouldReturn('versions');
     }
 
     function it_should_return_version_resource(
-        ClientInterface $mockedClient,
         SessionInterface $mockedSession,
-        RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
+        ResourceInterface $mockedResource)
     {
-        $mockedSession->get("resources")->shouldBeCalled(1);
-        $mockedSession->get("token")->shouldBeCalled(1)->willReturn(['access_token'=>'asdfasdf','instance_url'=>'bligtyblopitydoo']);
+        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('versionURLs');
 
-        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
-        $mockedResponse->json()->shouldBeCalled(1)->willReturn('appMenu');
-
-        $options = array('method'=>'GET','format'=>'JSON');
-        $this->appMenu($options)->shouldReturn('appMenu');
+        $this->version()->shouldReturn('versionURLs');
     }
 
     function it_should_return_sobject_resource(
-        ClientInterface $mockedClient,
         SessionInterface $mockedSession,
-        RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
+        ResourceInterface $mockedResource)
     {
-        $mockedSession->get("resources")->shouldBeCalled(1);
-        $mockedSession->get("token")->shouldBeCalled(1)->willReturn(['access_token'=>'asdfasdf','instance_url'=>'bligtyblopitydoo']);
-
-        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
-        $mockedResponse->json()->shouldBeCalled(1)->willReturn('sobject');
-
         $options = array('method'=>'GET','format'=>'JSON');
-        $this->sobject('Account',$options)->shouldReturn('sobject'); 
+
+        $mockedSession->get('resources')->shouldBeCalled()->willReturn(array('sobjects'=>'resourceURI'));
+        $mockedResource->request('resourceURI/AppSwitcher/',$options)->shouldBeCalled()->willReturn('sObject');
+
+        $this->sObject('Account')->shouldReturn('sObject');
     }
 
     function it_should_return_the_appmenu_resource(
-        ClientInterface $mockedClient,
-        SessionInterface $mockedSession,
-        RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
+        ResourceInterface $mockedResource,
+        SessionInterface $mockedSession)
     {
-        $mockedSession->get("resources")->shouldBeCalled(1);
-        $mockedSession->get("token")->shouldBeCalled(1)->willReturn(['access_token'=>'asdfasdf','instance_url'=>'bligtyblopitydoo']);
-
-        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
-        $mockedResponse->json()->shouldBeCalled(1)->willReturn('appMenu');
-
         $options = array('method'=>'GET','format'=>'JSON');
-        $this->appMenu($options)->shouldReturn('appMenu');
+
+        $mockedSession->get("resources")->shouldBeCalled()->willReturn(array('appMenu'=>'resourceURI'));
+        $mockedResource->request('resourceURI',Argument::type('array'))->shouldBeCalled()->willReturn('appMenu');
+
+        $this->appMenu()->shouldReturn('appMenu');
     }
+
+
 
     function letGo()
     {
