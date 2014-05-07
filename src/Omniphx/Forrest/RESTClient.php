@@ -1,6 +1,5 @@
 <?php namespace Omniphx\Forrest;
 
-use Input;
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -12,7 +11,7 @@ class RESTClient {
      * Interface for HTTP Client
      * @var GuzzleHttp\ClientInterface
      */
-    protected $client;
+    public $client;
 
     /**
      * Interface for Session calls
@@ -48,13 +47,14 @@ class RESTClient {
     }
 
     public function resource($pURI,$pOptions=[]){
-        $accessToken = $this->session->get('token')['access_token'];
-        $instanceURL = $this->session->get('token')['instance_url'];
+        $token = $this->session->get('token');
+        $accessToken = $token['access_token'];
+        $instanceURL = $token['instance_url'];
 
         $url = $instanceURL . $pURI;
 
-        $headers = array("Authorization" => "OAuth $accessToken");
-        $options = ['headers' => $headers];
+        $headers = ["Authorization" => "OAuth $accessToken"];
+        $options = ["headers" => $headers];
 
         $request = $this->client->createRequest($pOptions['method'],$url,$options);
 
@@ -105,6 +105,7 @@ class RESTClient {
         ]);
 
         $jsonResponse = $response->json();
+
         $this->session->put('token', $jsonResponse);
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         // Can be accessed now with $this->session->get('token')['access_token']
@@ -133,8 +134,9 @@ class RESTClient {
      * @return json
      */
     public function getUser(){
-        $accessToken = $this->session->get('token')['access_token'];
-        $idURL       = $this->session->get('token')['id'];
+        $token = $this->session->get('token');
+        $accessToken = $token['access_token'];
+        $idURL       = $token['id'];
 
         $header = array("Authorization" => "OAuth $accessToken");
 
@@ -154,15 +156,16 @@ class RESTClient {
         $accessToken = $this->session->get('token')['access_token'];
         $url = 'https://login.salesforce.com/services/oauth2/revoke';
         
-        $response = $this->client->post($url, [
-            'body' => ['token' => $accessToken]
+        $response = $this->client->post($url, 
+            ['body' => 
+                ['token' => $accessToken]
         ]);
 
-        return Redirect::to('/');
+        return $this->redirect->to($this->settings['authRedirect']);
     }
 
     /**
-     * Request that 
+     * Request that returns all supported versions
      * @param  array  $options
      * @return json
      */
