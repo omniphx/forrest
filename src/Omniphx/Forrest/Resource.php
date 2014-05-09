@@ -28,16 +28,21 @@ class Resource implements ResourceInterface {
         $accessToken = $token['access_token'];
         $instanceURL = $token['instance_url'];
 
+        $format = $pOptions['format'];
+
         $url = $instanceURL . $pURI;
 
         $headers = ["Authorization" => "OAuth $accessToken"];
+
+        if($format == 'xml') $headers['Accept'] = 'application/xml';
+
         $options = ["headers" => $headers];
 
         $request = $this->client->createRequest($pOptions['method'],$url,$options);
 
         $response = $this->client->send($request);
 
-        if($pOptions['format'] == 'XML'){
+        if($pOptions['format'] == 'xml'){
             return $response->xml();
         } else {
             return $response->json();
