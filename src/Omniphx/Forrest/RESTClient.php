@@ -54,27 +54,6 @@ class RESTClient {
         $this->settings = $settings;
     }
 
-    // public function resource($pURI,$pOptions=[]){
-    //     $token = $this->session->get('token');
-    //     $accessToken = $token['access_token'];
-    //     $instanceURL = $token['instance_url'];
-
-    //     $url = $instanceURL . $pURI;
-
-    //     $headers = ["Authorization" => "OAuth $accessToken"];
-    //     $options = ["headers" => $headers];
-
-    //     $request = $this->client->createRequest($pOptions['method'],$url,$options);
-
-    //     $response = $this->client->send($request);
-
-    //     if($pOptions['format'] == 'XML'){
-    //         return $response->xml();
-    //     } else {
-    //         return $response->json();
-    //     }
-    // }
-
     /**
      * Call this method to redirect user to login page and initiate
      * the Web Server OAuth Authentication Flow.
@@ -114,10 +93,10 @@ class RESTClient {
 
         $jsonResponse = $response->json();
 
-        $this->session->put('token', $jsonResponse);
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        // Can be accessed now with $this->session->get('token')['access_token']
-
+        // Can be accessed now with $this->session->getToken['access_token'];
+        // putToken() will also encrypt the token.
+        $this->session->putToken($jsonResponse);
 
         //Now that we have the Salesforce instance, we can see what versions it supports
         $versions = $this->versions();
@@ -142,7 +121,7 @@ class RESTClient {
      * @return json
      */
     public function getUser(){
-        $token = $this->session->get('token');
+        $token = $this->session->getToken();
         $accessToken = $token['access_token'];
         $idURL       = $token['id'];
 
@@ -161,7 +140,7 @@ class RESTClient {
      * @return function Redirect()
      */
     public function revoke(){
-        $accessToken = $this->session->get('token')['access_token'];
+        $accessToken = $this->session->getToken()['access_token'];
         $url = 'https://login.salesforce.com/services/oauth2/revoke';
         
         $response = $this->client->post($url, 

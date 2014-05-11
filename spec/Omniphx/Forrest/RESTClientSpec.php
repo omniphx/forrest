@@ -60,7 +60,7 @@ class RESTClientSpec extends ObjectBehavior
         $mockedRedirect->to(Argument::type('string'))->willReturn('redirectURL');
 
         $mockedSession->get('version')->willReturn(array('url'=>'sampleURL'));
-        $mockedSession->put('token',Argument::type('array'))->shouldBeCalled();
+        $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
         $mockedSession->put('version',Argument::type('string'))->shouldBeCalled();
         $mockedSession->put('resources',Argument::type('array'))->shouldBeCalled();
 
@@ -72,7 +72,7 @@ class RESTClientSpec extends ObjectBehavior
         SessionInterface $mockedSession,
         ResponseInterface $mockedResponse)
     {
-        $mockedSession->get('token')->willReturn(['access_token'=>'asdfasdf','id'=>'bligtyblopitydoo']);
+        $mockedSession->getToken()->willReturn(['access_token'=>'asdfasdf','id'=>'bligtyblopitydoo']);
         $mockedClient->get(Argument::type('string'),Argument::type('array'))->willReturn($mockedResponse);
         $mockedResponse->json()->willReturn('The User!');
 
