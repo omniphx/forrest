@@ -13,7 +13,8 @@ class ResourceSpec extends ObjectBehavior
 {
 	function let(ClientInterface $mockedClient, SessionInterface $mockedSession)
 	{
-		$this->beConstructedWith($mockedClient,$mockedSession);
+		$defaults = ['method'=>'get','format'=>'json'];
+		$this->beConstructedWith($mockedClient, $mockedSession, $defaults);
 	}
 
     function it_is_initializable()
@@ -35,8 +36,8 @@ class ResourceSpec extends ObjectBehavior
 
 		$mockedSession->getToken()->willReturn(array('access_token'=>'abc', 'instance_url'=>'def'));
 
-		$this->request('uri',['method'=>'get','format'=>'json'])->shouldReturn('jsonResource');
-		$this->request('uri',['method'=>'get','format'=>'xml'])->shouldReturn('xmlResource');
+		$this->request('uri',[])->shouldReturn('jsonResource');
+		$this->request('uri',['format'=>'xml'])->shouldReturn('xmlResource');
 	}
 
 }

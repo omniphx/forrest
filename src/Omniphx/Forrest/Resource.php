@@ -19,9 +19,16 @@ class Resource implements ResourceInterface {
      */
     protected $session;
 
-	public function __construct(ClientInterface $client, SessionInterface $session){
+    /**
+     * Default settings for the resource request
+     * @var array
+     */
+    protected $defaults;
+
+	public function __construct(ClientInterface $client, SessionInterface $session, $defaults = []){
 		$this->client = $client;
 		$this->session = $session;
+        $this->defaults = $defaults;
 	}
 
 	public function request($pURI,$pOptions=[]){
@@ -31,23 +38,18 @@ class Resource implements ResourceInterface {
         $instanceURL = $token['instance_url'];
         $url = $instanceURL . $pURI;
 
-        if(!isset($pOptions['format'])) Throw new \Exception("No format is specified", 1);
-        $format = $pOptions['format'];
+        $options = array_replace_recursive($this->defaults, $pOptions);
 
-        if(!isset($pOptions['method'])) Throw new \Exception("No method is specified", 1);
-        $method = $pOptions['method'];
+        $format = $options['format'];
+        $method = $options['method'];
 
-        $headers = ["Authorization" => "OAuth $accessToken"];
+        $parameters['headers']['Authorization'] = "OAuth $accessToken";
+        $format == 'xml' ? $parameters['headers']['Accept'] = 'application/xml':0;
 
-        //If format is xml, then add extra header
-        if($format == 'xml') $headers['Accept'] = 'application/xml';
-
-        $options = ["headers" => $headers];
-
-        $request = $this->client->createRequest($method,$url,$options);
+        $request = $this->client->createRequest($method,$url,$parameters);
         $response = $this->client->send($request);
 
-        if($pOptions['format'] == 'xml'){
+        if($format == 'xml'){
             return $response->xml();
         } else {
             return $response->json();

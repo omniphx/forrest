@@ -13,6 +13,13 @@ return array(
 	/**
 	 * After authentication token is received, redirect to:
 	 */
-	'authRedirect' => '<your homepage>'
+	'authRedirect' => '<your homepage>',
+
+	/**
+	 * Default settings for resource requests.
+	 */
+	'defaults' => [
+		'method' => 'get',
+		'format' => 'json']
 
 );
