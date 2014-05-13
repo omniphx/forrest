@@ -2,6 +2,10 @@
 
 interface ResourceInterface {
 
-	public function request($pURI,$pOptions=[]);
+	public function request($pURI, array $pOptions);
+
+	public function setHeaders(array $options);
+
+	public function setBody(array $options);
 
 }

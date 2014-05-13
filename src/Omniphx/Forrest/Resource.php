@@ -25,17 +25,14 @@ class Resource implements ResourceInterface {
      */
     protected $defaults;
 
-	public function __construct(ClientInterface $client, SessionInterface $session, $defaults = []){
+	public function __construct(ClientInterface $client, SessionInterface $session, array $defaults){
 		$this->client = $client;
 		$this->session = $session;
         $this->defaults = $defaults;
 	}
 
-	public function request($pURI,$pOptions=[]){
-        $token = $this->session->getToken();
-        
-        $accessToken = $token['access_token'];
-        $instanceURL = $token['instance_url'];
+	public function request($pURI, array $pOptions){
+        $instanceURL = $this->session->getToken()['instance_url'];
         $url = $instanceURL . $pURI;
 
         $options = array_replace_recursive($this->defaults, $pOptions);
@@ -43,17 +40,53 @@ class Resource implements ResourceInterface {
         $format = $options['format'];
         $method = $options['method'];
 
-        $parameters['headers']['Authorization'] = "OAuth $accessToken";
-        $format == 'xml' ? $parameters['headers']['Accept'] = 'application/xml':0;
+        $parameters['headers'] = $this->setHeaders($options);
+        if(isset($options['body'])) $parameters['body'] = $this->setBody($options);
 
         $request = $this->client->createRequest($method,$url,$parameters);
+
         $response = $this->client->send($request);
 
-        if($format == 'xml'){
+        if($format == 'json'){
+            return $response->json();
+        } else if($format == 'xml'){
             return $response->xml();
         } else {
             return $response->json();
         }
+    }
+
+    public function setHeaders(array $options){
+        $format = $options['format'];
+
+        $accessToken = $this->session->getToken()['access_token'];
+        $headers['Authorization'] = "OAuth $accessToken";
+
+        if($format == 'json'){
+            $headers['Accept'] = 'application/json';
+            $headers['content-type'] = 'application/json';
+        } else if($format == 'xml'){
+            $headers['Accept'] = 'application/xml';
+            $headers['content-type'] = 'application/xml';
+        } else if($format == 'urlencoded'){
+            $headers['Accept'] = 'application/x-www-form-urlencoded';
+            $headers['content-type'] = 'application/x-www-form-urlencoded';
+        }
+
+        return $headers;
+    }
+
+    public function setBody(array $options){
+        $format = $options['format'];
+        $data = $options['body'];
+
+        if($format == 'json'){
+            $body = json_encode($data);
+        } else if($format == 'xml'){
+            $body = $data;
+        }
+
+        return $body;
     }
 
 }
