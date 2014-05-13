@@ -33,7 +33,7 @@ class ForrestServiceProvider extends ServiceProvider {
 
 		$this->app['forrest'] = $this->app->share(function($app)
 		{
-			$settings  = Config::get('forrest::settings');
+			$settings  = Config::get('forrest::config');
 
 			$client   = new \GuzzleHttp\Client();
 			$redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();

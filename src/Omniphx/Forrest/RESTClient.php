@@ -61,11 +61,14 @@ class RESTClient {
      */
     public function authenticate()
     {
-        return $this->redirect->to($this->settings['loginURI']
-                        	. '/services/oauth2/authorize?response_type=code&client_id='
-                        	. $this->settings['clientId']
-                        	. '&redirect_uri='
-                        	. urlencode($this->settings['redirectURI']));
+        return $this->redirect->to($this->settings['loginURI'] . '/services/oauth2/authorize'
+                            . '?response_type=code'
+                            . '&client_id=' . $this->settings['clientId']
+                        	. '&redirect_uri=' . urlencode($this->settings['redirectURI'])
+                            . '&display=' . $this->settings['optional']['display']
+                            . '&immediate=' . $this->settings['optional']['immediate']
+                            . '&state=' . $this->settings['optional']['state']
+                            . '&scope=' . $this->settings['optional']['scope']);
     }
 
     /**
@@ -91,11 +94,11 @@ class RESTClient {
             ]
         ]);
 
+        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        // Can be accessed now with $this->session->getToken['access_token'];
-        // putToken() will also encrypt the token.
+        // Store token and encypt it.
+        // Can be accessed with $this->session->getToken['access_token'];
         $this->session->putToken($jsonResponse);
 
         //Now that we have the Salesforce instance, we can see what versions it supports
@@ -104,11 +107,13 @@ class RESTClient {
         //Find the latest API version.
         $lastestVersion = end($versions);
 
-        //Store latest API version in current session. Referenced in version().
+        //Store latest API version in current session.
         $this->session->put('version', $lastestVersion);
         
+        //Now that we have the API version, we need a list of available resources.
+        $resources = $this->resources();
 
-        $resources = $this->version();
+        //Store
         $this->session->put('resources', $resources);
    
         //Redirect to user's homepage. Can change this in Oauth settings config.
@@ -152,9 +157,12 @@ class RESTClient {
     }
 
     /**
-     * Request that returns all supported versions
+     * Request that returns all currently supported versions.
+     * Includes the verison, label and link to each version's root.
+     * Formats: json, xml
+     * Methods: get
      * @param  array  $options
-     * @return json
+     * @return $resource
      */
     public function versions($options = []){
         $uri = "/services/data/";
@@ -162,13 +170,42 @@ class RESTClient {
         return $resource;
     }
 
-    public function version($options = []){
+    /**
+     * Lists availabe resources for specified API version.
+     * Includes resource name and URI.
+     * Formats: json, xml
+     * Methods: get
+     * @param  $options
+     * @return $resource
+     */
+    public function resources($options = []){
         $uri = $this->session->get('version')['url'];
         $resource = $this->resource->request($uri,$options);
 
         return $resource;
     }
+
+    /**
+     * Lists information about organizational limits.
+     * Available for API version 29.0 and later.
+     * Returns limits for daily API calls, Data storage, etc.
+     * @param  $options
+     * @return $resource
+     */
+    public function limits($options =[]){
+        $resourceURI = $this->session->get('version')['url'];
+        $uri = "$resourceURI/limits/";
+        $resource = $this->resource->request($uri,$options);
+
+        return $resource;
+    }
     
+    /**
+     * [sObject description]
+     * @param  [type] $sObjectName [description]
+     * @param  [type] $options     [description]
+     * @return [type]              [description]
+     */
     public function sObject($sObjectName, $options = [])
     {
         $resourceURI = $this->session->get('resources')['sobjects'];

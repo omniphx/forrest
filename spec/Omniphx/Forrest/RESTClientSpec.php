@@ -22,6 +22,11 @@ class RESTClientSpec extends ObjectBehavior
 			'clientSecret' => 'testingClientSecret',
 			'redirectURI' => 'callbackURL',
 			'loginURI' => 'https://login.salesforce.com',
+            'optional' => [
+                'display' => 'popup',
+                'immediate' => 'false',
+                'state' => '',
+                'scope' => ''],
 			'authRedirect' => 'redirectURL'];
 		$this->beConstructedWith($mockedResource, $mockedClient,$mockedSession,$mockedRedirect,$mockedInput,$settings);
 	}
@@ -93,14 +98,14 @@ class RESTClientSpec extends ObjectBehavior
         $this->versions()->shouldReturn('versions');
     }
 
-    function it_should_return_version_resource(
+    function it_should_return_resources_resource(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
         $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
         $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('versionURLs');
 
-        $this->version()->shouldReturn('versionURLs');
+        $this->resources()->shouldReturn('versionURLs');
     }
 
     function it_should_return_sobject_resource(
