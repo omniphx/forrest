@@ -147,11 +147,10 @@ class RESTClient {
     public function revoke(){
         $accessToken = $this->session->getToken()['access_token'];
         $url = 'https://login.salesforce.com/services/oauth2/revoke';
-        
-        $response = $this->client->post($url, 
-            ['body' => 
-                ['token' => $accessToken]
-        ]);
+
+        $body['body']['token'] = $accessToken;
+
+        $this->client->post($url,$body);
 
         return $this->redirect->to($this->settings['authRedirect']);
     }
@@ -241,7 +240,7 @@ class RESTClient {
     public function sObjectById($sObjectName,$id,$options = [])
     {
         $resourceURI = $this->session->get('resources')['sobjects'];
-        $uri = "$resourceURI/$sObject/$id";
+        $uri = "$resourceURI/$sObjectName/$id";
 
         return $this->resource->request($uri,$options);
     }
@@ -332,7 +331,7 @@ class RESTClient {
         return $this->resource->request($uri,$options);
     }
 
-    public function appMenuSF1($options = []) {
+    public function appMenuOne($options = []) {
         $resourceURI = $this->session->get('resources')['appMenu'];
         $uri = "$resourceURI/Salesforce1/";
         
@@ -374,7 +373,7 @@ class RESTClient {
         return $this->resource->request($uri,$options);
     }
 
-    public function queryAll($query,$format,$options = []) {
+    public function queryAll($query,$options = []) {
         $resourceURI = $this->session->get('resources')['queryAll'];
         $uri = "$resourceURI?q=" . urlencode($query);
         

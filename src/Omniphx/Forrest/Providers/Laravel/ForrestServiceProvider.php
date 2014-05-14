@@ -52,7 +52,7 @@ class ForrestServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array(forrest);
+		return array();
 	}
 
 }

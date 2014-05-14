@@ -25,13 +25,26 @@ class Resource implements ResourceInterface {
      */
     protected $defaults;
 
-	public function __construct(ClientInterface $client, SessionInterface $session, array $defaults){
+    /**
+     * Constructor
+     * @param ClientInterface  $client   HTTP Request client
+     * @param SessionInterface $session  Session handler
+     * @param array            $defaults Config defaults
+     */
+    public function __construct(ClientInterface $client, SessionInterface $session, array $defaults){
 		$this->client = $client;
 		$this->session = $session;
         $this->defaults = $defaults;
 	}
 
-	public function request($pURI, array $pOptions){
+    /**
+     * Method creates the request for the intended resource
+     * @param  string $pURI     Resource URI
+     * @param  array  $pOptions Options for type of request and format of request/response
+     * @return array            Response in the format of specifed format
+     */
+    public function request($pURI, array $pOptions){
+
         $instanceURL = $this->session->getToken()['instance_url'];
         $url = $instanceURL . $pURI;
 
@@ -52,10 +65,14 @@ class Resource implements ResourceInterface {
         } else if($format == 'xml'){
             return $response->xml();
         } else {
-            return $response->json();
+            return $response;
         }
     }
 
+    /**
+     * Set the headers for the request
+     * @param array $options
+     */
     public function setHeaders(array $options){
         $format = $options['format'];
 
@@ -76,9 +93,13 @@ class Resource implements ResourceInterface {
         return $headers;
     }
 
+    /**
+     * Set the body for the request
+     * @param array $options
+     */
     public function setBody(array $options){
         $format = $options['format'];
-        $data = $options['body'];
+        $data   = $options['body'];
 
         if($format == 'json'){
             $body = json_encode($data);
@@ -87,6 +108,22 @@ class Resource implements ResourceInterface {
         }
 
         return $body;
+    }
+
+    /**
+     * Returns the response in the specified format
+     * @param  GuzzleHttp\Message\ResponseInterface $response
+     * @param  string $format
+     * @return response
+     */
+    public function responseFormat($response,$format){
+        if($format == 'json'){
+            return $response->json();
+        } else if($format == 'xml'){
+            return $response->xml();
+        } else {
+            return $response;
+        }
     }
 
 }
