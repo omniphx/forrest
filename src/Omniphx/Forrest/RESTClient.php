@@ -40,7 +40,7 @@ class RESTClient {
     protected $input;
 
     /**
-     * Array of OAuth settings: client Id, client secret, callback URL, login URL, and redirect URL
+     * Array of OAuth settings: client Id, client secret, callback URI, login URL, and redirect URL after authenticaiton.
      * @var array
      */
     protected $settings;
@@ -61,10 +61,10 @@ class RESTClient {
      */
     public function authenticate()
     {
-        return $this->redirect->to($this->settings['loginURI'] . '/services/oauth2/authorize'
+        return $this->redirect->to($this->settings['loginURL'] . '/services/oauth2/authorize'
                             . '?response_type=code'
                             . '&client_id=' . $this->settings['clientId']
-                        	. '&redirect_uri=' . urlencode($this->settings['redirectURI'])
+                        	. '&redirect_uri=' . urlencode($this->settings['callbackURI'])
                             . '&display=' . $this->settings['optional']['display']
                             . '&immediate=' . $this->settings['optional']['immediate']
                             . '&state=' . $this->settings['optional']['state']
@@ -83,14 +83,14 @@ class RESTClient {
         $state = $this->input->get('state');
 
         //Now we must make a request for the authorization token.
-        $tokenURL = $this->settings['loginURI'] . '/services/oauth2/token';
+        $tokenURL = $this->settings['loginURL'] . '/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
             'body' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
                 'client_id'     => $this->settings['clientId'],
                 'client_secret' => $this->settings['clientSecret'],
-                'redirect_uri'  => $this->settings['redirectURI']
+                'redirect_uri'  => $this->settings['callbackURI']
             ]
         ]);
 

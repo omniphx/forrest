@@ -1,5 +1,8 @@
 <?php 
 
+/**
+ * Configuration options for Salesforce Oath settings and REST API defaults.
+ */
 return array(
 
 	/**
@@ -7,8 +10,8 @@ return array(
 	 */
 	'clientId' => '<insert your client Id>',
 	'clientSecret' => '<insert your client secret>',
-	'redirectURI' => '<insert your callback URL>',
-	'loginURI' => 'https://login.salesforce.com',
+	'callbackURI' => '<insert your callback URI>',
+	'loginURL' => 'https://login.salesforce.com',
 
 	/**
 	 * Display can be page, popup, touch or mobile
@@ -25,7 +28,7 @@ return array(
 	/**
 	 * After authentication token is received, redirect to:
 	 */
-	'authRedirect' => '<your homepage>',
+	'authRedirect' => '/',
 
 	/**
 	 * Default settings for resource requests.
