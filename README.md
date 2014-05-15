@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
-Forrest is a Force.com REST API Client package for Laravel 4. Provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. This code is decoupled so that it can be extended into any framework or vanilla PHP application.
+Forrest is a Force.com REST API client for Laravel 4. Provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. This code is decoupled so that it can be extended into any framework or vanilla PHP application.
 
 ## Installation
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:

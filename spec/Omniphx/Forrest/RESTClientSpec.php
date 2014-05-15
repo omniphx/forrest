@@ -20,8 +20,8 @@ class RESTClientSpec extends ObjectBehavior
 		$settings  = [
             'clientId'     => 'testingClientId',
             'clientSecret' => 'testingClientSecret',
-            'redirectURI'  => 'callbackURL',
-            'loginURI'     => 'https://login.salesforce.com',
+            'callbackURI'  => 'callbackURL',
+            'loginURL'     => 'https://login.salesforce.com',
             'optional'     => [
                 'display'   => 'popup',
                 'immediate' => 'false',
