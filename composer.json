@@ -15,8 +15,7 @@
         "guzzlehttp/guzzle": "~4"
     },
     "require-dev": {
-        "phpspec/phpspec": "2.0.*@dev",
-        "phpdocumentor/phpdocumentor": "2.*"
+        "phpspec/phpspec": "2.0.*@dev"
     },
     "autoload": {
         "classmap": [

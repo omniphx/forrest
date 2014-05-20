@@ -299,7 +299,7 @@ class RESTClient {
 
     /**
      * Returns a list of Salesforce Knowledge articles whose titles match the user’s
-     * search query string. Provides a shortcut to navigate directly to likely
+     * search query. Provides a shortcut to navigate directly to likely
      * relevant articles, before the user performs a search.
      * Available for API version 30.0 or later
      * @param  string $query
@@ -328,8 +328,6 @@ class RESTClient {
     /**
      * Returns a list of suggested searches based on the user’s query string text
      * matching searches that other users have performed in Salesforce Knowledge.
-     * Provides a way to improve search effectiveness, before the user performs a
-     * search.
      * Available for API version 30.0 or later
      * @param  string $query            
      * @param  array $searchParameters 

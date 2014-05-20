@@ -176,13 +176,26 @@ Returns results for a specified SOQL query, but will also inlcude deleted record
     Forrest::queryExplain('SELECT Id FROM Account');
 
 #### Search
+Returns the specified SOSL query
+
+    Forrest::search('Find foo');
 
 #### Scope Order
+Global search keeps track of which objects the user interacts with and arranges them when the user performs a global search. This call will return this ordered list of objects.
+
+    Forrest:scopeOrder();
 
 #### Search Layouts
+Returns the search results layout for the objects in the query string. List should be formatted as a string, but delimited by a comma.
+
+    Forrest::searchLayouts('Account,Contact,Lead');
 
 #### Suggested Articles
-Returns a list of Salesforce Knowledge articles based on teh 
+Returns a list of Salesforce Knowledge articles based on the a search query. Second parameter is used for additional options.Available for API verison 30.0 or later.
+
+    Forrest::searchArticles('foo', [
+        'language'=>'en',
+        'channel'=>'App']);
 
 #### Suggested Queries
 Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Available for API version 30.0 or later.
@@ -190,9 +203,48 @@ Returns a list of suggested searches based on a search text query. Matches searc
     Forrest::suggestedQueries('foo',['publishStatus'=>'Online']);
 
 ### Additional API Requests
-For a complete listing of resources see the REST API Guide in [Additional Resources](#additional-resources)
 
-## Additional Resources
-[Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
+The above resources were explicitly defined because `search` and `query` resources require URL encoding. Other resources such as `sobject` and `describe` can be dynamically called using method overloading.
 
-[Building a Ruby App in Heroku tutorial](http://www.salesforce.com/us/developer/docs/integration_workbook/integration_workbook.pdf)
+First, determine which resources you have access to:
+    
+    Forrest::resources();
+
+This returns a list of available resources:
+```php
+Array
+(
+    [sobjects] => /services/data/v30.0/sobjects
+    [connect] => /services/data/v30.0/connect
+    [query] => /services/data/v30.0/query
+    [theme] => /services/data/v30.0/theme
+    [queryAll] => /services/data/v30.0/queryAll
+    [tooling] => /services/data/v30.0/tooling
+    [chatter] => /services/data/v30.0/chatter
+    [analytics] => /services/data/v30.0/analytics
+    [recent] => /services/data/v30.0/recent
+    [process] => /services/data/v30.0/process
+    [identity] => https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000aaaaAAA
+    [flexiPage] => /services/data/v30.0/flexiPage
+    [search] => /services/data/v30.0/search
+    [quickActions] => /services/data/v30.0/quickActions
+    [appMenu] => /services/data/v30.0/appMenu
+)
+```
+Next, you can call resource simply by referring to the key in the resources array:
+
+    Forrest::theme();
+
+or
+
+    Forrest:appMenu();
+
+For additional parameters, just add the remaining url as an argument:
+    
+    Forrest::sobjects('Account/describe/approvalLayouts/');
+
+You can also add option methods and formats to calls:
+
+    Forrest::theme(null,['format'=>'url']);
+
+For a complete listing of resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
