@@ -2,12 +2,12 @@
 
 [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
-Forrest is a Force.com REST API client for Laravel 4. Provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. This code is decoupled so that it can be extended into any framework or vanilla PHP application.
+Forrest is a Force.com REST API client for Laravel 4. Provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
 ## Installation
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
 
-	"omniphx/forrest": "dev-master"
+    "omniphx/forrest": "dev-master"
 
 After adding the key, run composer update from the command line to install the package:
 
@@ -17,11 +17,11 @@ composer update
 
 Add the service provider to the `providers` array in your `app/config/app.php` file.
 
-	'Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider'
+    'Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider'
 
 Add the alias to the `aliases` array
 
-	'Forrest' => 'Omniphx\Forrest\Providers\Laravel\Facades\Forrest'
+    'Forrest' => 'Omniphx\Forrest\Providers\Laravel\Facades\Forrest'
 
 ## Getting Started
 ### Setting up a Connected App
@@ -30,26 +30,26 @@ Add the alias to the `aliases` array
 3. Under Build click Create -> Apps
 4. Scroll to the bottom and click New under Connected Apps.
 5. Enter the following details for the remote application:
-	* Connected App Name
-	* API Name
-	* Contact Email
-	* Enable OAuth Settings under the API dropdown
-	* Callback URL
-	* Select access scope (Full is recommended)
+    * Connected App Name
+    * API Name
+    * Contact Email
+    * Enable OAuth Settings under the API dropdown
+    * Callback URL
+    * Select access scope (Full is recommended)
 6. Click Save
 
 After saving, you will now be given a Consumer Key and Consumer Secret.
 
 ### Configuration
-Run the following `artisan` command to publish your config file:
+Publish your config file using the `artisan` command:
 
 ```bash
 php artisan config:publish omniphx/forrest
 ```
 
-The config file can now be found in: `app/config/omniphx/forrest/config.php`
+The config file is published in: `app/config/omniphx/forrest/config.php`
 
-Update your config file with your `clientId`, `clientSecret`, `loginURL` and `callbackURI` that you plan on using.
+Update your config file with your `clientId`, `clientSecret`, `loginURL` and `callbackURI`.
 
 Additionally, you can specify a `authRedirect` that will redirect the user once the callback is complete.
 
@@ -58,15 +58,15 @@ Create the following Routes to complete the Web Server OAuth Authentication Flow
 
 ```php
 Route::get('/authenticate', function(){
-	return Forrest::authenticate();
+    return Forrest::authenticate();
 });
 
 Route::get('/callback', function(){
-	return Forrest::callback();
+    return Forrest::callback();
 });
 ```
 
->Note: The routes can be called anything you like, but the callback must match what is configured in the Connected App settings and Laravel config file.
+>Note: The routes can be called anything you like, but the callback must match what is configured in the Connected App settings and the published config file.
 
 ## Usage
 ### Query a record
@@ -107,8 +107,8 @@ Create records with the POST method by passing it to the `method` key. Likewise,
 ```php
 $body = ['Name' => 'New Account'];
 Forrest::sobject('Account',[
-	'method' => 'post',
-	'body'   => $body]);
+    'method' => 'post',
+    'body'   => $body]);
 ```
 
 ### Update a record
@@ -117,8 +117,8 @@ Update a record with the PATCH method.
 ```php
 $body = ['Phone' => '555-555-5555'];
 Forrest::sobject('Account/001i000000FO9zgAAD',[
-	'method' => 'patch',
-	'body'   => $body]);
+    'method' => 'patch',
+    'body'   => $body]);
 ```
 
 ### Delete a record
@@ -127,8 +127,8 @@ Delete a record with the DELETE method.
 ```php
 $body = ['Phone' => '555-555-5555'];
 Forrest::sobject('Account/001i000000FO9zgAAD',[
-	'method' => 'delete',
-	'body'   => $body]);
+    'method' => 'delete',
+    'body'   => $body]);
 ```
 
 ### XML format
@@ -191,14 +191,14 @@ Returns the search results layout for the objects in the query string. List shou
     Forrest::searchLayouts('Account,Contact,Lead');
 
 #### Suggested Articles
-Returns a list of Salesforce Knowledge articles based on the a search query. Second parameter is used for additional options.Available for API verison 30.0 or later.
+Returns a list of Salesforce Knowledge articles based on the a search query. Pass additional parameters into the second argument. Available for API verison 30.0 or later.
 
     Forrest::searchArticles('foo', [
         'language'=>'en',
         'channel'=>'App']);
 
 #### Suggested Queries
-Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Available for API version 30.0 or later.
+Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Like Suggest Articles, additional parameters can be passed into the second argument. Available for API version 30.0 or later.
 
     Forrest::suggestedQueries('foo',['publishStatus'=>'Online']);
 
