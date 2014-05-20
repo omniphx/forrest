@@ -1,3 +1,3 @@
 <?php namespace Omniphx\Forrest\Exceptions;
 
-class MissingTokenException extends \Exception {}
+class MissingTokenException extends \RuntimeException {}

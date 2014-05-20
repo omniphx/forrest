@@ -17,17 +17,32 @@ class RESTClientSpec extends ObjectBehavior
 
 	function let(ResourceInterface $mockedResource, ClientInterface $mockedClient, SessionInterface $mockedSession, RedirectInterface $mockedRedirect, InputInterface $mockedInput)
 	{
-		$settings  = [
-            'clientId'     => 'testingClientId',
-            'clientSecret' => 'testingClientSecret',
-            'callbackURI'  => 'callbackURL',
-            'loginURL'     => 'https://login.salesforce.com',
-            'optional'     => [
+		$settings  = array(
+            'oauth' => array(
+
+                'clientId'     => 'testingClientId',
+                'clientSecret' => 'testingClientSecret',
+                'callbackURI'  => 'callbackURL',
+                'loginURL'     => 'https://login.salesforce.com',
+
+            ),
+            'optional'     => array(
+
                 'display'   => 'popup',
                 'immediate' => 'false',
                 'state'     => '',
-                'scope'     => ''],
-			'authRedirect' => 'redirectURL'];
+                'scope'     => '',
+
+            ),
+			'authRedirect' => 'redirectURL',
+            'version' => '30.0',
+            'defaults' => array(
+
+                'method' => 'get',
+                'format' => 'json',
+                
+            ),
+        );
 
 
         $mockedSession->get('resources')->willReturn([
@@ -52,7 +67,8 @@ class RESTClientSpec extends ObjectBehavior
 
         $mockedSession->getToken()->willReturn([
             'access_token' => 'accessToken',
-            'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX']);
+            'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
+            'instance_url' => 'https://na00.salesforce.com']);
 
 
 		$this->beConstructedWith($mockedResource, $mockedClient,$mockedSession,$mockedRedirect,$mockedInput,$settings);
@@ -93,22 +109,8 @@ class RESTClientSpec extends ObjectBehavior
 
         $mockedSession->get('version')->willReturn(array('url'=>'sampleURL'));
         $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
-        $mockedSession->put('version',Argument::type('string'))->shouldBeCalled();
-        $mockedSession->put('resources',Argument::type('array'))->shouldBeCalled();
 
     	$this->callback()->shouldReturn('redirectURL');
-    }
-
-    function it_should_get_the_user_info(
-        ClientInterface $mockedClient,
-        SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
-    {
-        $mockedSession->getToken()->shouldBeCalled();
-        $mockedClient->get(Argument::type('string'),Argument::type('array'))->willReturn($mockedResponse);
-        $mockedResponse->json()->willReturn('The User!');
-
-        $this->getUser()->shouldReturn('The User!');
     }
 
     function it_should_revoke_the_authentication_token(
@@ -122,24 +124,38 @@ class RESTClientSpec extends ObjectBehavior
         $this->revoke()->shouldReturn('redirectURL');
     }
 
-    function it_should_return_the_versions_resource(ResourceInterface $mockedResource)
-    {   
+    function it_should_return_the_versions(
+        SessionInterface $mockedSession,
+        ResourceInterface $mockedResource)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
         $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('versions');
 
         $this->versions()->shouldReturn('versions');
     }
 
-    function it_should_return_resources_resource(
+    function it_should_return_resources(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
+        $mockedSession->getToken()->shouldBeCalled();
         $mockedSession->get('version')->shouldBeCalled();
         $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('versionURLs');
 
         $this->resources()->shouldReturn('versionURLs');
     }
 
-    function it_should_return_limits_resource(
+    function it_should_return_identity (
+        SessionInterface $mockedSession,
+        ResourceInterface $mockedResource)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->willReturn('Identity');
+
+        $this->identity()->shouldReturn('Identity');
+    }
+
+    function it_should_return_limits(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
@@ -149,207 +165,7 @@ class RESTClientSpec extends ObjectBehavior
         $this->limits()->shouldReturn('limits');
     }
 
-    function it_should_return_sobject_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObject');
-
-        $this->sObject('Account')->shouldReturn('sObject');
-    }
-
-    function it_should_return_describe_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('describe');
-
-        $this->describe('Account')->shouldReturn('describe');
-    }
-
-    function it_should_return_sObjectDeleted_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectDeleted');
-
-        $this->sObjectDeleted('Account','startDate','endDate')->shouldReturn('sObjectDeleted');
-    }
-
-    function it_should_return_sObjectUpdated_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectUpdated');
-
-        $this->sObjectUpdated('Account','startDate','endDate')->shouldReturn('sObjectUpdated');
-    }
-
-    function it_should_return_sObjectById_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectById');
-
-        $this->sObjectById('Account','id')->shouldReturn('sObjectById');
-    }
-
-    function it_should_return_sObjectByExternalId_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectByExternalId');
-
-        $this->sObjectByExternalId('sObject','fieldName','fieldValue')->shouldReturn('sObjectByExternalId');
-    }
-
-    function it_should_return_sObjectApprovalLayout_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectApprovalLayout');
-
-        $this->sObjectApprovalLayout('sObject','approvalProcess')->shouldReturn('sObjectApprovalLayout');
-    }
-
-    function it_should_return_sObjectCompactLayout_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectCompactLayout');
-
-        $this->sObjectCompactLayout('sObject')->shouldReturn('sObjectCompactLayout');
-    }
-
-    function it_should_return_sObjectLayout_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectLayout');
-
-        $this->sObjectLayout('sObject')->shouldReturn('sObjectLayout');
-    }
-
-    function it_should_return_sObjectQuickActions_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectQuickActions');
-
-        $this->sObjectQuickActions('sObject','actionName')->shouldReturn('sObjectQuickActions');
-    }
-
-    function it_should_return_sObjectQuickActionsDescribe_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectQuickActionsDescribe');
-
-        $this->sObjectQuickActionsDescribe('sObject','actionName','parentId')->shouldReturn('sObjectQuickActionsDescribe');
-    }
-
-    function it_should_return_sObjectQuickActionsDefaultValues_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('sObjectQuickActionsDefaultValues');
-
-        $this->sObjectQuickActionsDefaultValues('sObject','actionName','parentId')->shouldReturn('sObjectQuickActionsDefaultValues');
-    }
-
-    function it_should_return_suggestedCaseArticle_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('suggestedCaseArticle');
-
-        $this->suggestedCaseArticle('caseSubject','caseDescription')->shouldReturn('suggestedCaseArticle');
-    }
-
-    function it_should_return_suggestedCaseArticleById_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('suggestedCaseArticleById');
-
-        $this->suggestedCaseArticleById('caseId')->shouldReturn('suggestedCaseArticleById');
-    }
-
-    function it_should_return_userPassword_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('userPassword');
-
-        $this->userPassword('userId')->shouldReturn('userPassword');
-    }
-
-    function it_should_return_appMenu_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('appMenu');
-
-        $this->appMenu()->shouldReturn('appMenu');
-    }
-
-    function it_should_return_appMenuOne_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('appMenuOne');
-
-        $this->appMenuOne()->shouldReturn('appMenuOne');
-    }
-
-    function it_should_return_flexiPage_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('flexiPage');
-
-        $this->flexiPage('flexiId')->shouldReturn('flexiPage');
-    }
-
-    function it_should_return_processApprovals_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('processApprovals');
-
-        $this->processApprovals()->shouldReturn('processApprovals');
-    }
-
-    function it_should_return_processRules_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('processRules');
-
-        $this->processRules('sObject','workflowRuleId')->shouldReturn('processRules');
-    }
-
-    function it_should_return_query_resource(
+    function it_should_return_query(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
@@ -359,7 +175,7 @@ class RESTClientSpec extends ObjectBehavior
         $this->query('query')->shouldReturn('query');
     }
 
-    function it_should_return_queryExplain_resource(
+    function it_should_return_queryExplain(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
@@ -369,7 +185,7 @@ class RESTClientSpec extends ObjectBehavior
         $this->queryExplain('query')->shouldReturn('queryExplain');
     }
 
-    function it_should_return_queryAll_resource(
+    function it_should_return_queryAll(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
@@ -379,7 +195,7 @@ class RESTClientSpec extends ObjectBehavior
         $this->queryAll('query')->shouldReturn('queryAll');
     }
 
-    function it_should_return_quickActions_resource(
+    function it_should_return_quickActions(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
@@ -389,7 +205,7 @@ class RESTClientSpec extends ObjectBehavior
         $this->quickActions()->shouldReturn('quickActions');
     }
 
-    function it_should_return_search_resource(
+    function it_should_return_search(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
@@ -399,64 +215,48 @@ class RESTClientSpec extends ObjectBehavior
         $this->search('query')->shouldReturn('search');
     }
 
-    function it_should_return_searchScopeOrder_resource(
+    function it_should_return_ScopeOrder(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
+        $mockedSession->getToken()->shouldBeCalled();
         $mockedSession->get('resources')->shouldBeCalled();
         $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('searchScopeOrder');
 
-        $this->searchScopeOrder()->shouldReturn('searchScopeOrder');
+        $this->scopeOrder()->shouldReturn('searchScopeOrder');
     }
 
-    function it_should_return_searchLayouts_resource(
+    function it_should_return_searchLayouts(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
+        $mockedSession->getToken()->shouldBeCalled();
         $mockedSession->get('resources')->shouldBeCalled();
         $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('searchLayouts');
 
         $this->searchLayouts('objectList')->shouldReturn('searchLayouts');
     }
 
-    function it_should_return_searchSuggestedArticles_resource(
+    function it_should_return_suggestedArticles(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
+        $mockedSession->getToken()->shouldBeCalled();
         $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('searchSuggestedArticles');
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('suggestedArticles');
 
-        $this->searchSuggestedArticles()->shouldReturn('searchSuggestedArticles');
+        $this->suggestedArticles('query')->shouldReturn('suggestedArticles');
     }
 
-    function it_should_return_searchSuggestedQueries_resource(
+    function it_should_return_suggestedQueries(
         SessionInterface $mockedSession,
         ResourceInterface $mockedResource)
     {
+        $mockedSession->getToken()->shouldBeCalled();
         $mockedSession->get('resources')->shouldBeCalled();
         $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('searchSuggestedQueries');
 
-        $this->searchSuggestedQueries('query')->shouldReturn('searchSuggestedQueries');
-    }
-
-    function it_should_return_recentlyViewed_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('recentlyViewed');
-
-        $this->recentlyViewed()->shouldReturn('recentlyViewed');
-    }
-
-    function it_should_return_themes_resource(
-        SessionInterface $mockedSession,
-        ResourceInterface $mockedResource)
-    {
-        $mockedSession->get('resources')->shouldBeCalled()->willReturn(['theme'=>'themeURI']);
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('themes');
-
-        $this->themes()->shouldReturn('themes');
+        $this->suggestedQueries('query')->shouldReturn('searchSuggestedQueries');
     }
 
     function letGo()

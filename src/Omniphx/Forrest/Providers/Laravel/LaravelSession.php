@@ -1,6 +1,7 @@
 <?php namespace Omniphx\Forrest\Providers\Laravel;
 
 use Omniphx\Forrest\Interfaces\SessionInterface;
+use Omniphx\Forrest\Exceptions\MissingTokenException;
 use Session;
 use Crypt;
 
@@ -12,7 +13,7 @@ class LaravelSession implements SessionInterface {
 			return Session::get($key);
 		}
 		
-		Throw new \Exception("No value for requested key");
+		Throw new \Exception(sprintf("No value for requested key: %s",$key));
 	}
 
 	public function put($key, $value){
@@ -30,6 +31,6 @@ class LaravelSession implements SessionInterface {
 			return Crypt::decrypt($token);
 		}
 
-		Throw new \Omniphx\Forrest\Exceptions\MissingTokenException("No token available in the current Session", 0);
+		Throw new MissingTokenException(sprintf('No token available in current Session'));
 	}
 }
