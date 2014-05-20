@@ -43,10 +43,7 @@ class Resource implements ResourceInterface {
      * @param  array  $pOptions Options for type of request and format of request/response
      * @return array            Response in the format of specifed format
      */
-    public function request($pURI, array $pOptions){
-
-        $instanceURL = $this->session->getToken()['instance_url'];
-        $url = $instanceURL . $pURI;
+    public function request($pURL, array $pOptions){
 
         $options = array_replace_recursive($this->defaults, $pOptions);
 
@@ -54,19 +51,17 @@ class Resource implements ResourceInterface {
         $method = $options['method'];
 
         $parameters['headers'] = $this->setHeaders($options);
-        if(isset($options['body'])) $parameters['body'] = $this->setBody($options);
+        
+        if(isset($options['body'])){
+            $parameters['body'] = $this->setBody($options);
+        }
 
-        $request = $this->client->createRequest($method,$url,$parameters);
+        $request = $this->client->createRequest($method,$pURL,$parameters);
 
         $response = $this->client->send($request);
 
-        if($format == 'json'){
-            return $response->json();
-        } else if($format == 'xml'){
-            return $response->xml();
-        } else {
-            return $response;
-        }
+        return $this->responseFormat($response,$format);
+        
     }
 
     /**
@@ -114,16 +109,16 @@ class Resource implements ResourceInterface {
      * Returns the response in the specified format
      * @param  GuzzleHttp\Message\ResponseInterface $response
      * @param  string $format
-     * @return response
+     * @return array $response Format of array can be XML, JSON or a Guzzle response object if no format is specified.
      */
     public function responseFormat($response,$format){
         if($format == 'json'){
             return $response->json();
         } else if($format == 'xml'){
             return $response->xml();
-        } else {
-            return $response;
         }
+
+        return $response;
     }
 
 }

@@ -106,7 +106,7 @@ Create records with the POST method by passing it to the `method` key. Likewise,
 
 ```php
 $body = ['Name' => 'New Account'];
-Forrest::sObject('Account',[
+Forrest::sobject('Account',[
 	'method' => 'post',
 	'body'   => $body]);
 ```
@@ -116,7 +116,7 @@ Update a record with the PATCH method.
 
 ```php
 $body = ['Phone' => '555-555-5555'];
-Forrest::sObjectById('Account', '001i000000FO9zgAAD',[
+Forrest::sobject('Account/001i000000FO9zgAAD',[
 	'method' => 'patch',
 	'body'   => $body]);
 ```
@@ -126,7 +126,7 @@ Delete a record with the DELETE method.
 
 ```php
 $body = ['Phone' => '555-555-5555'];
-Forrest::sObjectById('Account', '001i000000FO9zgAAD',[
+Forrest::sobject('Account/001i000000FO9zgAAD',[
 	'method' => 'delete',
 	'body'   => $body]);
 ```
@@ -135,11 +135,62 @@ Forrest::sObjectById('Account', '001i000000FO9zgAAD',[
 Change the request/response format to XML with the `format` key.
 
 ```php
-Forrest::sObject('Account',['format'=>'xml']);
+Forrest::describe('Account',['format'=>'xml']);
 ```
 
+### API Requests
+
+#### Versions
+Returns all currently supported versions. Includes the verison, label and link to each version's root:
+
+    Forrest::verions();
+
+#### Resources
+Returns list of all available resources for a specified API verision.
+
+    Forrest::resources();
+
+#### Identity
+Returns information about the logged-in user.
+
+    Forrest::identity();
+
+#### Limits
+Lists information about organizational limits. Available for API version 29.0 and later.
+
+    Forrest::limits();
+
+#### Query
+Returns results for a specified SOQL query.
+
+    Forrest::query('SELECT Id FROM Account');
+
+#### Query Explain
+Returns details of how Salesforce will process your query. Available for API verison 30.0 or later.
+
+    Forrest::queryExplain('SELECT Id FROM Account');
+
+#### Query All
+Returns results for a specified SOQL query, but will also inlcude deleted records.
+
+    Forrest::queryExplain('SELECT Id FROM Account');
+
+#### Search
+
+#### Scope Order
+
+#### Search Layouts
+
+#### Suggested Articles
+Returns a list of Salesforce Knowledge articles based on teh 
+
+#### Suggested Queries
+Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Available for API version 30.0 or later.
+
+    Forrest::suggestedQueries('foo',['publishStatus'=>'Online']);
+
 ### Additional API Requests
-Documentation coming soon.
+For a complete listing of resources see the REST API Guide in [Additional Resources](#additional-resources)
 
 ## Additional Resources
 [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)

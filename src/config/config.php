@@ -8,10 +8,14 @@ return array(
 	/**
 	 * Enter your OAuth creditials:
 	 */
-	'clientId' => '<insert your client Id>',
-	'clientSecret' => '<insert your client secret>',
-	'callbackURI' => '<insert your callback URI>',
-	'loginURL' => 'https://login.salesforce.com',
+	'oauth' => array(
+
+			'clientId' => '',
+			'clientSecret' => '',
+			'callbackURI' => '',
+			'loginURL' => 'https://login.salesforce.com',
+
+	),
 
 	/**
 	 * Display can be page, popup, touch or mobile
@@ -19,11 +23,14 @@ return array(
 	 * State specifies any additional URL-encoded state data to be returned in the callback URL after approval.
 	 * Scope specifies what data your application can access. For more details see: https://help.salesforce.com/HTViewHelpDoc?id=remoteaccess_oauth_scopes.htm&language=en_US
 	 */
-	'optional' => [
+	'optional' => array(
+
 		'display' => 'page',
 		'immediate' => 'false',
 		'state' => '',
-		'scope' => ''],
+		'scope' => '',
+
+	),
 
 	/**
 	 * After authentication token is received, redirect to:
@@ -31,10 +38,19 @@ return array(
 	'authRedirect' => '/',
 
 	/**
+	 * If you'd like to specify an API version manually it can be done here.
+	 * Format looks like '30.0'
+	 */
+	'version' => '',
+
+	/**
 	 * Default settings for resource requests.
 	 */
-	'defaults' => [
+	'defaults' => array(
+
 		'method' => 'get',
-		'format' => 'json']
+		'format' => 'json',
+		
+	),
 
 );
