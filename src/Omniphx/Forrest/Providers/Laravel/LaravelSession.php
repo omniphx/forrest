@@ -2,6 +2,7 @@
 
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
+use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Session;
 use Crypt;
 
@@ -13,7 +14,7 @@ class LaravelSession implements SessionInterface {
 			return Session::get($key);
 		}
 		
-		Throw new \Exception(sprintf("No value for requested key: %s",$key));
+		Throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
 	}
 
 	public function put($key, $value){

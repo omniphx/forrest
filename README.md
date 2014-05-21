@@ -143,72 +143,98 @@ Forrest::describe('Account',['format'=>'xml']);
 #### Versions
 Returns all currently supported versions. Includes the verison, label and link to each version's root:
 
-    Forrest::verions();
+```php
+Forrest::verions();
+```
 
 #### Resources
 Returns list of all available resources for a specified API verision.
 
-    Forrest::resources();
+```php
+Forrest::resources();
+```
 
 #### Identity
 Returns information about the logged-in user.
 
-    Forrest::identity();
+```php
+Forrest::identity();
+```
 
 #### Limits
 Lists information about organizational limits. Available for API version 29.0 and later.
 
-    Forrest::limits();
+```php
+Forrest::limits();
+```
 
 #### Query
 Returns results for a specified SOQL query.
 
-    Forrest::query('SELECT Id FROM Account');
+```php
+Forrest::query('SELECT Id FROM Account');
+```
 
 #### Query Explain
 Returns details of how Salesforce will process your query. Available for API verison 30.0 or later.
 
-    Forrest::queryExplain('SELECT Id FROM Account');
+```php
+Forrest::queryExplain('SELECT Id FROM Account');
+```
 
 #### Query All
 Returns results for a specified SOQL query, but will also inlcude deleted records.
 
-    Forrest::queryExplain('SELECT Id FROM Account');
+```php
+Forrest::queryExplain('SELECT Id FROM Account');
+```
 
 #### Search
 Returns the specified SOSL query
 
-    Forrest::search('Find foo');
+```php
+Forrest::search('Find foo');
+```
 
 #### Scope Order
 Global search keeps track of which objects the user interacts with and arranges them when the user performs a global search. This call will return this ordered list of objects.
 
-    Forrest:scopeOrder();
+```php
+Forrest::scopeOrder();
+```
 
 #### Search Layouts
 Returns the search results layout for the objects in the query string. List should be formatted as a string, but delimited by a comma.
 
-    Forrest::searchLayouts('Account,Contact,Lead');
+```php
+Forrest::searchLayouts('Account,Contact,Lead');
+```
 
 #### Suggested Articles
 Returns a list of Salesforce Knowledge articles based on the a search query. Pass additional parameters into the second argument. Available for API verison 30.0 or later.
 
-    Forrest::searchArticles('foo', [
-        'language'=>'en',
-        'channel'=>'App']);
+```php
+Forrest::searchArticles('foo', [
+    'language'=>'en',
+    'channel'=>'App']);
+```
 
 #### Suggested Queries
 Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Like Suggest Articles, additional parameters can be passed into the second argument. Available for API version 30.0 or later.
 
-    Forrest::suggestedQueries('foo',['publishStatus'=>'Online']);
+```php
+Forrest::suggestedQueries('foo',['publishStatus'=>'Online']);
+```
 
 ### Additional API Requests
 
 The above resources were explicitly defined because `search` and `query` resources require URL encoding. Other resources such as `sobject` and `describe` can be dynamically called using method overloading.
 
 First, determine which resources you have access to:
-    
-    Forrest::resources();
+
+```php
+Forrest::resources();
+```
 
 This returns a list of available resources:
 ```php
@@ -233,18 +259,24 @@ Array
 ```
 Next, you can call resource simply by referring to the key in the resources array:
 
-    Forrest::theme();
-
+```php
+Forrest::theme();
+```
 or
-
-    Forrest:appMenu();
+```php
+Forrest::appMenu();
+```
 
 For additional parameters, just add the remaining url as an argument:
-    
-    Forrest::sobjects('Account/describe/approvalLayouts/');
+
+```php
+Forrest::sobjects('Account/describe/approvalLayouts/');
+```
 
 You can also add option methods and formats to calls:
 
-    Forrest::theme(null,['format'=>'url']);
+```php
+Forrest::theme(null,['format'=>'url']);
+```
 
 For a complete listing of resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
