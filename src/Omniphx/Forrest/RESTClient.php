@@ -45,7 +45,14 @@ class RESTClient {
      */
     protected $settings;
 
-    public function __construct(ResourceInterface $resource, ClientInterface $client, SessionInterface $session, RedirectInterface $redirect, InputInterface $input, $settings){
+    public function __construct(
+        ResourceInterface $resource,
+        ClientInterface $client,
+        SessionInterface $session,
+        RedirectInterface $redirect,
+        InputInterface $input, $settings)
+    {
+
         $this->resource = $resource;
         $this->client  = $client;
         $this->session = $session;
@@ -59,9 +66,11 @@ class RESTClient {
      * the Web Server OAuth Authentication Flow.
      * @return void
      */
-    public function authenticate()
-    {
-        return $this->redirect->to($this->settings['oauth']['loginURL'] . '/services/oauth2/authorize'
+    public function authenticate(){
+
+        return $this->redirect->to(
+            $this->settings['oauth']['loginURL']
+            . '/services/oauth2/authorize'
             . '?response_type=code'
             . '&client_id=' . $this->settings['oauth']['clientId']
         	. '&redirect_uri=' . urlencode($this->settings['oauth']['callbackURI'])
@@ -76,8 +85,7 @@ class RESTClient {
      * acquire an authorization token. This token will be used for the API requests.
      * @return RedirectInterface
      */
-    public function callback()
-    {
+    public function callback(){
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
         $state = $this->input->get('state');
@@ -214,7 +222,7 @@ class RESTClient {
      * @param  array $options 
      * @return array $queryExplain
      */
-    public function queryExplain($query,$options = []) {
+    public function queryExplain($query,$options = []){
         $url = $this->session->getToken()['instance_url'];
         $url .= $this->session->get('resources')['query'];
         $url .= '?explain=';
@@ -233,7 +241,7 @@ class RESTClient {
      * @param  array $options 
      * @return array $queryResults     
      */
-    public function queryAll($query,$options = []) {
+    public function queryAll($query,$options = []){
         $url = $this->session->getToken()['instance_url'];
         $url .= $this->session->get('resources')['queryAll'];
         $url .= '?q=';
