@@ -40,8 +40,9 @@ class RESTClientSpec extends ObjectBehavior
 
                 'method' => 'get',
                 'format' => 'json',
-                
+    
             ),
+            'language' => 'en_US',
         );
 
 
@@ -163,6 +164,16 @@ class RESTClientSpec extends ObjectBehavior
         $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('limits');
 
         $this->limits()->shouldReturn('limits');
+    }
+
+    function it_should_return_describe(
+        SessionInterface $mockedSession,
+        ResourceInterface $mockedResource)
+    {
+        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('describe');
+
+        $this->describe()->shouldReturn('describe');        
     }
 
     function it_should_return_query(

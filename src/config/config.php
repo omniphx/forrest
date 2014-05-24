@@ -53,4 +53,6 @@ return array(
 		
 	),
 
+	'language' => 'en_US',
+
 );

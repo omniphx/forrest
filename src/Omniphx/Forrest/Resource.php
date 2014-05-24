@@ -99,7 +99,7 @@ class Resource implements ResourceInterface {
         if($format == 'json'){
             $body = json_encode($data);
         } else if($format == 'xml'){
-            $body = $data;
+            $body = urlencode($data);
         }
 
         return $body;

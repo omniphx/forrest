@@ -164,8 +164,17 @@ Forrest::identity();
 #### Limits
 Lists information about organizational limits. Available for API version 29.0 and later.
 
+>Note: this call is part of a pilot program and may not be availabe to all orgs without a request to Salesforce.
+
 ```php
 Forrest::limits();
+```
+
+#### Describe
+Describes all global objects availabe in the organization.
+
+```php
+Forrest::describe();
 ```
 
 #### Query
@@ -193,7 +202,7 @@ Forrest::queryExplain('SELECT Id FROM Account');
 Returns the specified SOSL query
 
 ```php
-Forrest::search('Find foo');
+Forrest::search('Find {foo}');
 ```
 
 #### Scope Order
@@ -213,22 +222,27 @@ Forrest::searchLayouts('Account,Contact,Lead');
 #### Suggested Articles
 Returns a list of Salesforce Knowledge articles based on the a search query. Pass additional parameters into the second argument. Available for API verison 30.0 or later.
 
-```php
-Forrest::searchArticles('foo', [
-    'language'=>'en',
-    'channel'=>'App']);
-```
+> Salesforce Knowledge must be enabled for this to work.
 
+```php
+//Optional parameters
+$parameters = [
+    'channel'       => 'App',
+    'publishStatus' => 'Draft'];
+
+Forrest::suggestedArticles('foo', ['parameters'=> $parameters]);
+```
+<!-- 
 #### Suggested Queries
-Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Like Suggest Articles, additional parameters can be passed into the second argument. Available for API version 30.0 or later.
+Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Like Suggest Articles, additional parameters can be passed into the second argument with the `parameters` key. Available for API version 30.0 or later.
 
 ```php
-Forrest::suggestedQueries('foo',['publishStatus'=>'Online']);
-```
+Forrest::suggestedQueries('foo');
+``` -->
 
 ### Additional API Requests
 
-The above resources were explicitly defined because `search` and `query` resources require URL encoding. Other resources such as `sobject` and `describe` can be dynamically called using method overloading.
+The above resources were explicitly defined because `search` and `query` resources require URL encoding. Other resources such as `sobject` and `describe` can be called dynamically using method overloading.
 
 First, determine which resources you have access to:
 
@@ -258,7 +272,6 @@ Array
 )
 ```
 Next, you can call resource simply by referring to the key in the resources array:
-
 ```php
 Forrest::theme();
 ```
@@ -267,16 +280,14 @@ or
 Forrest::appMenu();
 ```
 
-For additional parameters, just add the remaining url as an argument:
-
+Resources can be extended by passing the extension into the first argument:
 ```php
 Forrest::sobjects('Account/describe/approvalLayouts/');
 ```
 
 You can also add option methods and formats to calls:
-
 ```php
-Forrest::theme(null,['format'=>'url']);
+Forrest::theme(['format'=>'xml']);
 ```
 
-For a complete listing of resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
+For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)

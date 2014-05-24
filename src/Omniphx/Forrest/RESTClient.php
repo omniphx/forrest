@@ -199,7 +199,21 @@ class RESTClient {
     }
 
     /**
-     * Executes a specified SOQL query
+     * Describes all global objects availabe in the organization.
+     * @return array
+     */
+    public function describe($options =[]){
+        $url = $this->session->getToken()['instance_url'];
+        $url .= $this->session->get('version')['url'];
+        $url .= '/sobjects';
+
+        $describe = $this->resource->request($url,$options);
+
+        return $describe;
+    }
+
+    /**
+     * Executes a specified SOQL query.
      * @param  string $query
      * @param  array $options
      * @return array $queryResults
@@ -261,8 +275,10 @@ class RESTClient {
     public function search($query,$options = []){
         $url = $this->session->getToken()['instance_url'];
         $url .= $this->session->get('resources')['search'];
-        $url .= '?s=';
+        $url .= '?q=';
         $url .= urlencode($query);
+
+        // dd($url);
 
         $searchResults = $this->resource->request($url,$options);
 
@@ -315,13 +331,21 @@ class RESTClient {
      * @param  array $option
      * @return array
      */
-    public function suggestedArticles($query,$searchParameters = [],$options = []){
+    public function suggestedArticles($query,$options = []){
         $url = $this->session->getToken()['instance_url'];
         $url .= $this->session->get('resources')['search'];
         $url .= '/suggestTitleMatches?q=';
         $url .= urlencode($query);
 
-        foreach ($searchParameters as $key => $value) {
+        $parameters = [
+            'language'      => $this->settings['language'],
+            'publishStatus' => 'Online'];
+
+        if(isset($options['parameters'])){
+            $parameters = array_replace_recursive($parameters, $options['parameters']);
+        }
+
+        foreach ($parameters as $key => $value) {
             $url .= '&';
             $url .= $key;
             $url .= '=';
@@ -336,19 +360,28 @@ class RESTClient {
     /**
      * Returns a list of suggested searches based on the user’s query string text
      * matching searches that other users have performed in Salesforce Knowledge.
-     * Available for API version 30.0 or later
+     * Available for API version 30.0 or later.
+     *
+     * Tested this and can't get it to work. I think the request is set up correctly.
+     * 
      * @param  string $query            
      * @param  array $searchParameters 
      * @param  array $options          
      * @return array                   
      */
-    public function suggestedQueries($query,$searchParameters = [],$options = []){
+    public function suggestedQueries($query,$options = []){
         $url = $this->session->getToken()['instance_url'];
         $url .= $this->session->get('resources')['search'];
         $url .= '/suggestSearchQueries?q=';
         $url .= urlencode($query);
 
-        foreach ($searchParameters as $key => $value) {
+        $parameters = ['language' => $this->settings['language']];
+
+        if(isset($options['parameters'])){
+            $parameters = array_replace_recursive($parameters, $options['parameters']);
+        }
+
+        foreach ($parameters as $key => $value) {
             $url .= '&';
             $url .= $key;
             $url .= '=';
@@ -374,14 +407,24 @@ class RESTClient {
         $url = $this->session->getToken()['instance_url'];
 
         $url .= $this->session->get('resources')[$name];
-        if(isset($arguments[0])){
-            $url .= "/$arguments[0]";
-        }
 
         $options = [];
+
+        if(isset($arguments[0])){
+            if(is_string($arguments[0])){
+                $url .= "/$arguments[0]";
+            } else if(is_array($arguments[0])){
+                foreach($arguments[0] as $key => $value){
+                    $options[$key] = $value;
+                }
+            }
+        }
+
         if(isset($arguments[1])){
-            foreach($arguments[1] as $key => $value){
-                $options[$key] = $value;
+            if(is_array($arguments[1])){
+                foreach($arguments[1] as $key => $value){
+                    $options[$key] = $value;
+                }
             }
         }
 
