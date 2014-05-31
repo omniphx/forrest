@@ -441,7 +441,7 @@ class RESTClient {
     private function putVersion(){
         $configVersion = $this->settings['version'];
 
-        if(isset($configVersion)){
+        if(!isset($configVersion)){
             $versions = $this->versions();
             foreach ($versions as $version) {
                 if($version['version'] == $configVersion){
