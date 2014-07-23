@@ -4,18 +4,23 @@ namespace spec\Omniphx\Forrest;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Omniphx\Forrest\Interfaces\ResourceInterface;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Message\ResponseInterface;
+use Omniphx\Forrest\Interfaces\ResourceInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Omniphx\Forrest\Interfaces\InputInterface;
-use GuzzleHttp\Message\RequestInterface;
-use GuzzleHttp\Message\ResponseInterface;
+use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 
 class RESTClientSpec extends ObjectBehavior
 {
 
-	function let(ResourceInterface $mockedResource, ClientInterface $mockedClient, SessionInterface $mockedSession, RedirectInterface $mockedRedirect, InputInterface $mockedInput)
+	function let(
+        ClientInterface $mockedClient,
+        ResponseInterface $mockedResponse,
+        SessionInterface $mockedSession,
+        RedirectInterface $mockedRedirect,
+        ResourceInterface $mockedResource,
+        AuthenticationInterface $mockedAuthentication)
 	{
 		$settings  = array(
             'oauth' => array(
@@ -72,7 +77,13 @@ class RESTClientSpec extends ObjectBehavior
             'instance_url' => 'https://na00.salesforce.com']);
 
 
-		$this->beConstructedWith($mockedResource, $mockedClient,$mockedSession,$mockedRedirect,$mockedInput,$settings);
+		$this->beConstructedWith(
+            $mockedResource,
+            $mockedClient,
+            $mockedSession,
+            $mockedRedirect,
+            $mockedAuthentication,
+            $settings);
 	}
 
     function it_is_initializable()
@@ -80,36 +91,26 @@ class RESTClientSpec extends ObjectBehavior
         $this->shouldHaveType('Omniphx\Forrest\RESTClient');
     }
 
-    function it_should_authenticate(RedirectInterface $mockedRedirect)
+    function it_should_authenticate(AuthenticationInterface $mockedAuthentication)
     {
-    	$mockedRedirect->to(Argument::any())->willReturn('redirectURL');
-    	$this->authenticate()->shouldReturn('redirectURL');
+    	$mockedAuthentication->authenticate()->willReturn('authenticate');
+    	$this->authenticate()->shouldReturn('authenticate');
     }
 
     function it_should_callback(
-        ClientInterface $mockedClient,
-        ResourceInterface $mockedResource,
+        AuthenticationInterface $mockedAuthentication,
         SessionInterface $mockedSession,
-        RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse,
-        InputInterface $mockedInput,
         RedirectInterface $mockedRedirect)
     {
-        $mockedInput->get('code')->shouldBeCalled(1)->willReturn('this code');
-        $mockedInput->get('state')->shouldBeCalled(1)->willReturn('this state');
 
-        $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn($mockedResponse);
-        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+        $mockedAuthentication->callback()->shouldBeCalled()->willReturn($mockedResponse);
 
     	$mockedResponse->json()->shouldBeCalled()->willReturn(array('version1','version2'));
 
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->willReturn(array('version1','version2'));
-
-        $mockedRedirect->to(Argument::type('string'))->willReturn('redirectURL');
-
-        $mockedSession->get('version')->willReturn(array('url'=>'sampleURL'));
         $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
+
+        $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
 
     	$this->callback()->shouldReturn('redirectURL');
     }
