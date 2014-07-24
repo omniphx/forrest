@@ -3,8 +3,8 @@
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\ResourceInterface;
+use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 
 class RESTClient {
 
@@ -34,31 +34,31 @@ class RESTClient {
     protected $redirect;
 
     /**
-     * Inteface for Input calls
-     * @var Omniphx\Forrest\Interfaces\InputInterface
-     */
-    protected $input;
-
-    /**
-     * Array of OAuth settings: client Id, client secret, callback URI, login URL, and redirect URL after authenticaiton.
+     * Array of OAuth settings: client Id, client secret, callback URI, login URL, and redirect URL after authentication.
      * @var array
      */
     protected $settings;
+
+    /**
+     * Authentication flow
+     * @var Authentication
+     */
+    protected $authentication;
 
     public function __construct(
         ResourceInterface $resource,
         ClientInterface $client,
         SessionInterface $session,
         RedirectInterface $redirect,
-        InputInterface $input, $settings)
+        AuthenticationInterface $authentication,
+        $settings)
     {
-
-        $this->resource = $resource;
-        $this->client  = $client;
-        $this->session = $session;
-        $this->redirect = $redirect;
-        $this->input = $input;
-        $this->settings = $settings;
+        $this->resource       = $resource;
+        $this->client         = $client;
+        $this->session        = $session;
+        $this->redirect       = $redirect;
+        $this->authentication = $authentication;
+        $this->settings       = $settings;
     }
 
     /**
@@ -68,16 +68,8 @@ class RESTClient {
      */
     public function authenticate(){
 
-        return $this->redirect->to(
-            $this->settings['oauth']['loginURL']
-            . '/services/oauth2/authorize'
-            . '?response_type=code'
-            . '&client_id=' . $this->settings['oauth']['clientId']
-        	. '&redirect_uri=' . urlencode($this->settings['oauth']['callbackURI'])
-            . '&display=' . $this->settings['optional']['display']
-            . '&immediate=' . $this->settings['optional']['immediate']
-            . '&state=' . $this->settings['optional']['state']
-            . '&scope=' . $this->settings['optional']['scope']);
+        return $this->authentication->authenticate();
+
     }
 
     /**
@@ -86,21 +78,8 @@ class RESTClient {
      * @return RedirectInterface
      */
     public function callback(){
-        //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
-        $code = $this->input->get('code');
-        $state = $this->input->get('state');
-
-        //Now we must make a request for the authorization token.
-        $tokenURL = $this->settings['oauth']['loginURL'] . '/services/oauth2/token';
-        $response = $this->client->post($tokenURL, [
-            'body' => [
-                'code'          => $code,
-                'grant_type'    => 'authorization_code',
-                'client_id'     => $this->settings['oauth']['clientId'],
-                'client_secret' => $this->settings['oauth']['clientSecret'],
-                'redirect_uri'  => $this->settings['oauth']['callbackURI']
-            ]
-        ]);
+        
+        $response = $this->authentication->callback();
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();

@@ -18,6 +18,14 @@ return array(
 	),
 
 	/**
+	 * Choose the type of authentication flow:
+	 *  -WebServer
+	 *  -UserAgent
+	 *  -UsernamePassword
+	 */
+	'authenticationFlow' => 'WebServer',
+
+	/**
 	 * Display can be page, popup, touch or mobile
 	 * Immediate determines whether the user should be prompted for login and approval. Values are either true or false. Default is false.
 	 * State specifies any additional URL-encoded state data to be returned in the callback URL after approval.
@@ -53,6 +61,6 @@ return array(
 		
 	),
 
-	'language' => 'en_US',
+	'language' => 'en_US'
 
 );
