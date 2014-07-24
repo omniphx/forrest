@@ -44,7 +44,7 @@ class ForrestServiceProvider extends ServiceProvider {
 
 			switch ($settings['authenticationFlow']) {
 			    case 'WebServer':
-			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\WebServer($client, $session, $redirect, $input, $settings);
+			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\WebServer($client, $redirect, $input, $settings);
 			        break;
 			    case 'UserAgent':
 			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\UserAgent();
