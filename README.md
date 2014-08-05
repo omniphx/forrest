@@ -106,7 +106,7 @@ Create records with the POST method by passing it to the `method` key. Likewise,
 
 ```php
 $body = ['Name' => 'New Account'];
-Forrest::sobject('Account',[
+Forrest::sobjects('Account',[
     'method' => 'post',
     'body'   => $body]);
 ```
@@ -116,7 +116,7 @@ Update a record with the PATCH method.
 
 ```php
 $body = ['Phone' => '555-555-5555'];
-Forrest::sobject('Account/001i000000FO9zgAAD',[
+Forrest::sobjects('Account/001i000000FO9zgAAD',[
     'method' => 'patch',
     'body'   => $body]);
 ```
@@ -126,7 +126,7 @@ Delete a record with the DELETE method.
 
 ```php
 $body = ['Phone' => '555-555-5555'];
-Forrest::sobject('Account/001i000000FO9zgAAD',[
+Forrest::sobjects('Account/001i000000FO9zgAAD',[
     'method' => 'delete',
     'body'   => $body]);
 ```
@@ -242,7 +242,7 @@ Forrest::suggestedQueries('foo');
 
 ### Additional API Requests
 
-The above resources were explicitly defined because `search` and `query` resources require URL encoding. Other resources such as `sobject` and `describe` can be called dynamically using method overloading.
+The above resources were explicitly defined because `search` and `query` resources require URL encoding. Other resources such as `sobjects` and `describe` can be called dynamically using method overloading.
 
 First, determine which resources you have access to:
 
