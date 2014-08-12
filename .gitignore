@@ -1,0 +1,8 @@
+/vendor
+composer.phar
+composer.lock
+.DS_Store
+/src/config/local
+mm.log
+/vin
+/bin

@@ -1,0 +1,28 @@
+{
+    "name": "omniphx/forrest",
+    "description": "A Laravel 4 client for Salesforce REST API",
+    "license":"MIT",
+    "keywords":["salesforce","laravel","force.com","salesforce rest","rest","api","salesforce rest api","salesforce api","force rest"],
+    "authors": [
+        {
+            "name": "Matthew Mitchener",
+            "email": "mattjmitchener@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "guzzlehttp/guzzle": "~4"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "2.0.*@dev"
+    },
+    "autoload": {
+        "classmap": [
+        ],
+        "psr-0": {
+            "Omniphx\\Forrest\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
