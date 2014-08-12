@@ -10,6 +10,7 @@ use Omniphx\Forrest\Interfaces\ResourceInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
+use GuzzleHttp\Exception\ClientException;
 
 class RESTClientSpec extends ObjectBehavior
 {
@@ -113,6 +114,26 @@ class RESTClientSpec extends ObjectBehavior
         $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
 
     	$this->callback()->shouldReturn('redirectURL');
+    }
+
+    function it_should_refresh(
+        SessionInterface $mockedSession,
+        AuthenticationInterface $mockedAuthentication,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getRefreshToken()
+            ->shouldBeCalled()
+            ->willReturn('token');
+
+        $mockedAuthentication->refresh('token')
+            ->shouldBeCalled()
+            ->willReturn($mockedResponse);
+
+        $mockedSession->putToken(Argument::any())
+            ->shouldBeCalled();
+
+        $this->refresh();
+
     }
 
     function it_should_revoke_the_authentication_token(

@@ -104,11 +104,23 @@ class WebServerSpec extends ObjectBehavior
         $mockedInput->get('code')->shouldBeCalled(1)->willReturn('this code');
         $mockedInput->get('state')->shouldBeCalled(1)->willReturn('this state');
 
-        $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn($mockedResponse);
-        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+        $mockedClient->post('https://login.salesforce.com/services/oauth2/token',Argument::type('array'))->shouldBeCalled()->willReturn($mockedResponse);
 
     	$this->callback()->shouldReturn($mockedResponse);
+    }
+
+    function it_should_refresh(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+
+        $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
+            ->shouldBeCalled()
+            ->willReturn($mockedResponse);
+
+        $this->refresh('token')->shouldReturn($mockedResponse);
+
     }
 
 }
