@@ -15,7 +15,7 @@ class LaravelSession implements SessionInterface {
 			return Session::get($key);
 		}
 
-		Throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
+		throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
 	}
 
 	public function put($key, $value)
@@ -35,7 +35,7 @@ class LaravelSession implements SessionInterface {
 			return Crypt::decrypt($token);
 		}
 
-		Throw new MissingTokenException(sprintf('No token available in current Session'));
+		throw new MissingTokenException(sprintf('No token available in current Session'));
 	}
 
 	public function putRefreshToken($token)
@@ -51,6 +51,6 @@ class LaravelSession implements SessionInterface {
 			return Crypt::decrypt($token);
 		}
 
-		Throw new MissingTokenException(sprintf('No refresh token available in current Session'));
+		throw new MissingTokenException(sprintf('No refresh token available in current Session'));
 	}
 }

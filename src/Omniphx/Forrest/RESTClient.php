@@ -6,6 +6,7 @@ use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\ResourceInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
+use GuzzleHttp\Exception\ClientException;
 
 class RESTClient {
 
@@ -62,13 +63,37 @@ class RESTClient {
         $this->settings       = $settings;
     }
 
-    public function getToken()
+    /**
+     * [getToken description]
+     * @return [type] [description]
+     */
+    private function getToken()
     {
         try {
             return $this->session->getToken();
         } catch (MissingTokenException $e) {
             return $this->refresh();
         }
+    }
+
+    /**
+     * [request description]
+     * @param  [type] $url     [description]
+     * @param  [type] $options [description]
+     * @return [type]          [description]
+     */
+    private function request($url, $options)
+    {
+        try {
+            $queryResults = $this->resource->request($url, $options);;
+        } catch (ClientException $e) {
+            if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
+                $this->refresh();
+                $queryResults = $this->resource->request($url, $options);
+            }
+        }
+
+        return $queryResults;
     }
 
     /**
@@ -92,8 +117,6 @@ class RESTClient {
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
-
-        // var_dump($jsonResponse); exit;
 
         // Encypt token and store token and in session.
         $this->session->putToken($jsonResponse);
@@ -120,7 +143,7 @@ class RESTClient {
 
         $this->session->putToken($jsonResponse);
 
-        return $jsonResponse;
+        return $this->session->getToken();
     }
 
     /**
@@ -135,7 +158,7 @@ class RESTClient {
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['body']['token']           = $accessToken;
 
-        $this->client->post($url,$options);
+        $this->client->post($url, $options);
 
         $redirectURL = $this->settings['authRedirect'];
 
@@ -155,7 +178,7 @@ class RESTClient {
         $url  = $this->getToken()['instance_url'];
         $url .= '/services/data/';
 
-        $versions = $this->resource->request($url,$options);
+        $versions = $this->request($url, $options);
 
         return $versions;
     }
@@ -173,7 +196,7 @@ class RESTClient {
         $url  = $this->getToken()['instance_url'];
         $url .= $this->session->get('version')['url'];
 
-        $resources = $this->resource->request($url,$options);
+        $resources = $this->request($url, $options);
 
         return $resources;
     }
@@ -191,7 +214,7 @@ class RESTClient {
 
         $options['headers']['Authorization'] = "OAuth $accessToken";
 
-        $identity = $this->resource->request($url,$options);
+        $identity = $this->request($url, $options);
 
         return $identity;
     }
@@ -209,7 +232,7 @@ class RESTClient {
         $url .= $this->session->get('version')['url'];
         $url .= '/limits';
 
-        $limits = $this->resource->request($url,$options);
+        $limits = $this->request($url, $options);
 
         return $limits;
     }
@@ -224,7 +247,7 @@ class RESTClient {
         $url .= $this->session->get('version')['url'];
         $url .= '/sobjects';
 
-        $describe = $this->resource->request($url,$options);
+        $describe = $this->request($url, $options);
 
         return $describe;
     }
@@ -237,18 +260,12 @@ class RESTClient {
      */
     public function query($query, $options = [])
     {
-        // try {
-        //     $url  = $this->getToken()['instance_url'];
-        // } catch (MissingTokenException $e) {
-            $this->refresh();
-        // }
-
         $url  = $this->getToken()['instance_url'];
         $url .= $this->session->get('resources')['query'];
         $url .= '?q=';
         $url .= urlencode($query);
 
-        $queryResults = $this->resource->request($url, $options);
+        $queryResults = $this->request($url, $options);
 
         return $queryResults;
     }
@@ -267,7 +284,7 @@ class RESTClient {
         $url .= '?explain=';
         $url .= urlencode($query);
 
-        $queryExplain = $this->resource->request($url,$options);
+        $queryExplain = $this->request($url, $options);
 
         return $queryExplain;
     }
@@ -287,7 +304,7 @@ class RESTClient {
         $url .= '?q=';
         $url .= urlencode($query);
 
-        $queryResults = $this->resource->request($url,$options);
+        $queryResults = $this->request($url, $options);
 
         return $queryResults;
     }
@@ -305,7 +322,7 @@ class RESTClient {
         $url .= '?q=';
         $url .= urlencode($query);
 
-        $searchResults = $this->resource->request($url,$options);
+        $searchResults = $this->request($url, $options);
 
         return $searchResults;
     }
@@ -325,7 +342,7 @@ class RESTClient {
         $url .= $this->session->get('resources')['search'];
         $url .= '/scopeOrder';
 
-        $scopeOrder = $this->resource->request($url,$options);
+        $scopeOrder = $this->request($url, $options);
 
         return $scopeOrder;
     }
@@ -343,7 +360,7 @@ class RESTClient {
         $url .= '/layout/?q=';
         $url .= urlencode($objectList);
 
-        $searchLayouts = $this->resource->request($url,$options);
+        $searchLayouts = $this->request($url, $options);
 
         return $searchLayouts;
     }
@@ -380,7 +397,7 @@ class RESTClient {
             $url .= $value;
         }
 
-        $suggestedArticles = $this->resource->request($url,$options);
+        $suggestedArticles = $this->request($url, $options);
 
         return $suggestedArticles;
     }
@@ -417,7 +434,7 @@ class RESTClient {
             $url .= $value;
         }
 
-        $suggestedQueries = $this->resource->request($url,$options);
+        $suggestedQueries = $this->request($url, $options);
 
         return $suggestedQueries;
     }
@@ -457,7 +474,7 @@ class RESTClient {
             }
         }
 
-        return $this->resource->request($url,$options);
+        return $this->request($url, $options);
     }
 
     /**

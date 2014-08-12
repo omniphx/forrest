@@ -101,27 +101,6 @@ class WebServer implements AuthenticationInterface {
             ]
         ]);
 
-        // try {
-        //     $response = $this->client->post($tokenURL, [
-        //         'body'    => [
-        //             'refresh_token' => $refreshToken,
-        //             'grant_type'    => 'refresh_token',
-        //             'client_id'     => $this->settings['oauth']['clientId'],
-        //             'client_secret' => $this->settings['oauth']['clientSecret']
-        //         ]
-        //     ]);
-        //     echo 'done';
-        //     var_dump($response);
-        //     exit;
-        // } catch (RequestException $e) {
-        //     echo $e->getRequest() . "\n";
-        //     if ($e->hasResponse()) {
-        //         echo $e->getResponse() . "\n";
-        //     }
-        //     exit;
-        // }
-        // exit;
-
         return $response;
     }
 

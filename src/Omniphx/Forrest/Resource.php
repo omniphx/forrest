@@ -33,8 +33,8 @@ class Resource implements ResourceInterface {
      */
     public function __construct(ClientInterface $client, SessionInterface $session, array $defaults)
     {
-		$this->client = $client;
-		$this->session = $session;
+		$this->client   = $client;
+		$this->session  = $session;
         $this->defaults = $defaults;
 	}
 
@@ -53,7 +53,7 @@ class Resource implements ResourceInterface {
 
         $parameters['headers'] = $this->setHeaders($options);
 
-        if(isset($options['body'])){
+        if (isset($options['body'])) {
             $parameters['body'] = $this->setBody($options);
         }
 
