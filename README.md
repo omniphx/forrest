@@ -27,7 +27,7 @@ Add the alias to the `aliases` array
 ### Setting up a Connected App
 1. Log into to your Salesforce org
 2. Click on Setup in the upper right-hand menu
-3. Under Build click Create -> Apps
+3. Under Build click Create > Apps
 4. Scroll to the bottom and click New under Connected Apps.
 5. Enter the following details for the remote application:
     * Connected App Name
@@ -35,7 +35,7 @@ Add the alias to the `aliases` array
     * Contact Email
     * Enable OAuth Settings under the API dropdown
     * Callback URL
-    * Select access scope (Full is recommended)
+    * Select access scope (If you need a refresh token, specify it here)
 6. Click Save
 
 After saving, you will now be given a Consumer Key and Consumer Secret.
@@ -52,6 +52,8 @@ The config file is published in: `app/config/omniphx/forrest/config.php`
 Update your config file with your `clientId`, `clientSecret`, `loginURL` and `callbackURI`.
 
 Additionally, you can specify a `authRedirect` that will redirect the user once the callback is complete.
+
+>If you need a refresh token, be sure to specify `'scope' => 'refresh_token'`. Otherwise the response will not include it. This will only work if you add it to your access scope under the [Connected App](#setting-up-connected-app) settings and you are using the Web Server authorization flow.
 
 ### Setup
 Create the following Routes to complete the Web Server OAuth Authentication Flow:
@@ -125,7 +127,6 @@ Forrest::sobjects('Account/001i000000FO9zgAAD',[
 Delete a record with the DELETE method.
 
 ```php
-$body = ['Phone' => '555-555-5555'];
 Forrest::sobjects('Account/001i000000FO9zgAAD',[
     'method' => 'delete',
     'body'   => $body]);
@@ -139,6 +140,18 @@ Forrest::describe('Account',['format'=>'xml']);
 ```
 
 ### API Requests
+
+#### Refresh
+If a refresh token is set, this will refresh the token on the user's behalf.
+```php
+Forrest::refresh();
+```
+
+#### Revoke
+This will revoke the authorization token.
+```php
+Forrest::revoke();
+```
 
 #### Versions
 Returns all currently supported versions. Includes the verison, label and link to each version's root:
