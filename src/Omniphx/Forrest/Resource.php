@@ -4,6 +4,7 @@ use Omniphx\Forrest\Interfaces\ResourceInterface;
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
+use GuzzleHttp\Exception\RequestException;
 
 class Resource implements ResourceInterface {
 
@@ -58,6 +59,11 @@ class Resource implements ResourceInterface {
         }
 
         $request = $this->client->createRequest($method,$pURL,$parameters);
+
+        if($options['debug'] == true){
+            $response = $this->debug($request);
+            return $response;
+        }
 
         $response = $this->client->send($request);
 
@@ -133,6 +139,18 @@ class Resource implements ResourceInterface {
         }
 
         return $response;
+    }
+
+    private function debug($request)
+    {
+        try {
+            $response = $this->client->send($request);
+        } catch (RequestException $e) {
+            echo $e->getRequest() . "\n";
+            if ($e->hasResponse()) {
+                echo $e->getResponse() . "\n";
+            }
+        }
     }
 
 }
