@@ -31,9 +31,10 @@ class Resource implements ResourceInterface {
      * @param SessionInterface $session  Session handler
      * @param array            $defaults Config defaults
      */
-    public function __construct(ClientInterface $client, SessionInterface $session, array $defaults){
-		$this->client = $client;
-		$this->session = $session;
+    public function __construct(ClientInterface $client, SessionInterface $session, array $defaults)
+    {
+		$this->client   = $client;
+		$this->session  = $session;
         $this->defaults = $defaults;
 	}
 
@@ -43,16 +44,16 @@ class Resource implements ResourceInterface {
      * @param  array  $pOptions Options for type of request and format of request/response
      * @return array            Response in the format of specifed format
      */
-    public function request($pURL, array $pOptions){
-
+    public function request($pURL, array $pOptions)
+    {
         $options = array_replace_recursive($this->defaults, $pOptions);
 
         $format = $options['format'];
         $method = $options['method'];
 
         $parameters['headers'] = $this->setHeaders($options);
-        
-        if(isset($options['body'])){
+
+        if (isset($options['body'])) {
             $parameters['body'] = $this->setBody($options);
         }
 
@@ -61,26 +62,29 @@ class Resource implements ResourceInterface {
         $response = $this->client->send($request);
 
         return $this->responseFormat($response,$format);
-        
+
     }
 
     /**
      * Set the headers for the request
      * @param array $options
      */
-    public function setHeaders(array $options){
+    public function setHeaders(array $options)
+    {
         $format = $options['format'];
 
         $accessToken = $this->session->getToken()['access_token'];
         $headers['Authorization'] = "OAuth $accessToken";
 
-        if($format == 'json'){
+        if ($format == 'json') {
             $headers['Accept'] = 'application/json';
             $headers['content-type'] = 'application/json';
-        } else if($format == 'xml'){
+        }
+        else if ($format == 'xml') {
             $headers['Accept'] = 'application/xml';
             $headers['content-type'] = 'application/xml';
-        } else if($format == 'urlencoded'){
+        }
+        else if ($format == 'urlencoded') {
             $headers['Accept'] = 'application/x-www-form-urlencoded';
             $headers['content-type'] = 'application/x-www-form-urlencoded';
         }
@@ -92,13 +96,15 @@ class Resource implements ResourceInterface {
      * Set the body for the request
      * @param array $options
      */
-    public function setBody(array $options){
+    public function setBody(array $options)
+    {
         $format = $options['format'];
         $data   = $options['body'];
 
-        if($format == 'json'){
+        if ($format == 'json') {
             $body = json_encode($data);
-        } else if($format == 'xml'){
+        }
+        else if($format == 'xml') {
             $body = urlencode($data);
         }
 
@@ -111,10 +117,12 @@ class Resource implements ResourceInterface {
      * @param  string $format
      * @return array $response Format of array can be XML, JSON or a Guzzle response object if no format is specified.
      */
-    public function responseFormat($response,$format){
-        if($format == 'json'){
+    public function responseFormat($response,$format)
+    {
+        if ($format == 'json') {
             return $response->json();
-        } else if($format == 'xml'){
+        }
+        else if ($format == 'xml') {
             return $response->xml();
         }
 

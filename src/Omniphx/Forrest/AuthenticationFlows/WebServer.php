@@ -4,6 +4,7 @@ use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
+use GuzzleHttp\Exception\RequestException;
 
 class WebServer implements AuthenticationInterface {
 
@@ -12,7 +13,7 @@ class WebServer implements AuthenticationInterface {
      * @var GuzzleHttp\ClientInterface
      */
     protected $client;
- 
+
     /**
      * Interface for Redirect calls
      * @var Omniphx\Forrest\Interfaces\RedirectInterface
@@ -37,9 +38,9 @@ class WebServer implements AuthenticationInterface {
         InputInterface $input,
         $settings)
     {
-        $this->client  = $client;
+        $this->client   = $client;
         $this->redirect = $redirect;
-        $this->input = $input;
+        $this->input    = $input;
         $this->settings = $settings;
     }
 
@@ -48,8 +49,8 @@ class WebServer implements AuthenticationInterface {
      * the Web Server OAuth Authentication Flow.
      * @return void
      */
-    public function authenticate(){
-
+    public function authenticate()
+    {
         return $this->redirect->to(
             $this->settings['oauth']['loginURL']
             . '/services/oauth2/authorize'
@@ -67,9 +68,10 @@ class WebServer implements AuthenticationInterface {
      * acquire an authorization token. This token will be used for the API requests.
      * @return RedirectInterface
      */
-    public function callback(){
+    public function callback()
+    {
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
-        $code = $this->input->get('code');
+        $code  = $this->input->get('code');
         $state = $this->input->get('state');
 
         //Now we must make a request for the authorization token.
@@ -85,7 +87,21 @@ class WebServer implements AuthenticationInterface {
         ]);
 
         return $response;
+    }
 
+    public function refresh($refreshToken)
+    {
+        $tokenURL = $this->settings['oauth']['loginURL'] . '/services/oauth2/token';
+        $response = $this->client->post($tokenURL, [
+            'body'    => [
+                'refresh_token' => $refreshToken,
+                'grant_type'    => 'refresh_token',
+                'client_id'     => $this->settings['oauth']['clientId'],
+                'client_secret' => $this->settings['oauth']['clientSecret']
+            ]
+        ]);
+
+        return $response;
     }
 
 }
