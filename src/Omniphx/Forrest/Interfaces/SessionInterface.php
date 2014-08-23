@@ -2,21 +2,46 @@
 
 interface SessionInterface {
 	
-	public function get($key);
-
+	/**
+	 * Store into session.
+	 * @param $key
+	 * @param $value
+	 * @return void
+	 */
 	public function put($key, $value);
 
 	/**
-	 * It's important to encrypt your token, so put logic in this class
-	 * @param string $token authentication token
-	 * @return Session::put('token',$token);
+	 * Get from session
+	 * @param $key
+	 * @return mixed
+	 */
+	public function get($key);
+
+	/**
+	 * Encrypt authentication token and store it in session.
+	 * @param array $token
+	 * @return void
 	 */
 	public function putToken($token);
 
 	/**
-	 * Retrieve your encrypted token from the session and decrypt it.
-	 * @return Crypt::decrypt($token);
+	 * Get token from the session and decrypt it.
+	 * @return mixed
 	 */
 	public function getToken();
+
+	/**
+	 * Encrypt refresh token and pass into session.
+	 * @param  Array $token
+	 * @return void
+	 */
+	public function putRefreshToken($token);
+
+	/**
+	 * Get refresh token from session and decrypt it.
+	 * @return mixed
+	 */
+	public function getRefreshToken();
+
 	
 }

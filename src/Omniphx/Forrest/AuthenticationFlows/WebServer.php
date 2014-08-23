@@ -89,6 +89,11 @@ class WebServer implements AuthenticationInterface {
         return $response;
     }
 
+    /**
+     * Refresh authentication token
+     * @param  Array $refreshToken
+     * @return mixed $response
+     */
     public function refresh($refreshToken)
     {
         $tokenURL = $this->settings['oauth']['loginURL'] . '/services/oauth2/token';

@@ -8,6 +8,22 @@ use Crypt;
 
 class LaravelSession implements SessionInterface {
 
+	/**
+	 * Store into session.
+	 * @param $key
+	 * @param $value
+	 * @return void
+	 */
+	public function put($key, $value)
+	{
+		return Session::put($key, $value);
+	}
+
+	/**
+	 * Get from session
+	 * @param $key
+	 * @return mixed
+	 */
 	public function get($key)
 	{
 		$value = Session::get($key);
@@ -18,17 +34,21 @@ class LaravelSession implements SessionInterface {
 		throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
 	}
 
-	public function put($key, $value)
-	{
-		return Session::put($key, $value);
-	}
-
+	/**
+	 * Encrypt authentication token and store it in session.
+	 * @param array $token
+	 * @return void
+	 */
 	public function putToken($token)
 	{
 		$encyptedToken = Crypt::encrypt($token);
 		return Session::put('token', $encyptedToken);
 	}
 
+	/**
+	 * Get token from the session and decrypt it.
+	 * @return mixed
+	 */
 	public function getToken(){
 		$token = Session::get('token');
 		if (isset($token)) {
@@ -38,12 +58,21 @@ class LaravelSession implements SessionInterface {
 		throw new MissingTokenException(sprintf('No token available in current Session'));
 	}
 
+	/**
+	 * Encrypt refresh token and pass into session.
+	 * @param  Array $token
+	 * @return void
+	 */
 	public function putRefreshToken($token)
 	{
 		$encyptedToken = Crypt::encrypt($token);
 		return Session::put('refresh_token', $encyptedToken);
 	}
 
+	/**
+	 * Get refresh token from session and decrypt it.
+	 * @return mixed
+	 */
 	public function getRefreshToken()
 	{
 		$token = Session::get('refresh_token');

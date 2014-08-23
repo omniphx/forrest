@@ -8,19 +8,19 @@ use Omniphx\Forrest\Exceptions\MissingTokenException;
 class Resource implements ResourceInterface {
 
 	/**
-     * Interface for HTTP Client
-     * @var GuzzleHttp\ClientInterface
+     * HTTP Client
+     * @var Client
      */
     protected $client;
 
     /**
-     * Interface for Session calls
-     * @var Omniphx\Forrest\Interfaces\SessionInterface
+     * Session handler
+     * @var Session
      */
     protected $session;
 
     /**
-     * Default settings for the resource request
+     * Config options
      * @var array
      */
     protected $defaults;
@@ -39,10 +39,10 @@ class Resource implements ResourceInterface {
 	}
 
     /**
-     * Method creates the request for the intended resource
-     * @param  string $pURI     Resource URI
-     * @param  array  $pOptions Options for type of request and format of request/response
-     * @return array            Response in the format of specifed format
+     * Method returns the response for the requested resource
+     * @param  string $pURI 
+     * @param  array  $pOptions
+     * @return mixed
      */
     public function request($pURL, array $pOptions)
     {
@@ -68,13 +68,18 @@ class Resource implements ResourceInterface {
     /**
      * Set the headers for the request
      * @param array $options
+     * @return array $headers
      */
     public function setHeaders(array $options)
     {
         $format = $options['format'];
 
-        $accessToken = $this->session->getToken()['access_token'];
-        $headers['Authorization'] = "OAuth $accessToken";
+        $authToken = $this->session->getToken();
+
+        $accessToken = $authToken['access_token'];
+        $tokenType   = $authToken['token_type'];
+
+        $headers['Authorization'] = "$tokenType $accessToken";
 
         if ($format == 'json') {
             $headers['Accept'] = 'application/json';
@@ -95,6 +100,7 @@ class Resource implements ResourceInterface {
     /**
      * Set the body for the request
      * @param array $options
+     * @return array $body
      */
     public function setBody(array $options)
     {
@@ -112,10 +118,10 @@ class Resource implements ResourceInterface {
     }
 
     /**
-     * Returns the response in the specified format
-     * @param  GuzzleHttp\Message\ResponseInterface $response
+     * Returns the response in the configured  format
+     * @param  Response $response
      * @param  string $format
-     * @return array $response Format of array can be XML, JSON or a Guzzle response object if no format is specified.
+     * @return mixed $response
      */
     public function responseFormat($response,$format)
     {

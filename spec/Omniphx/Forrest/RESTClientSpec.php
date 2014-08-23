@@ -73,9 +73,10 @@ class RESTClientSpec extends ObjectBehavior
             'url' => 'resourceURLs']);
 
         $mockedSession->getToken()->willReturn([
-            'access_token' => 'accessToken',
-            'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
-            'instance_url' => 'https://na00.salesforce.com']);
+            'access_token'  => 'accessToken',
+            'id'            => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
+            'instance_url'  => 'https://na00.salesforce.com',
+            'refresh_token' => 'refreshToken']);
 
 
 		$this->beConstructedWith(
@@ -107,9 +108,12 @@ class RESTClientSpec extends ObjectBehavior
 
         $mockedAuthentication->callback()->shouldBeCalled()->willReturn($mockedResponse);
 
-    	$mockedResponse->json()->shouldBeCalled()->willReturn(array('version1','version2'));
+    	$mockedResponse->json()->shouldBeCalled()->willReturn(array(
+            'access_token'  => 'value1',
+            'refresh_token' => 'value2'));
 
         $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
+         $mockedSession->putRefreshToken(Argument::exact('value2'))->shouldBeCalled();
 
         $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
 

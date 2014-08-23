@@ -11,32 +11,31 @@ use GuzzleHttp\Exception\ClientException;
 class RESTClient {
 
     /**
-     * Inteface for Resource calls
-     * @var Omniphx\Forrest\Interfaces\ResourceInterface
+     * @var Resource
      */
     protected $resource;
 
     /**
-     * Interface for HTTP Client
-     * @var GuzzleHttp\ClientInterface
+     * HTTP request client
+     * @var Client
      */
     protected $client;
 
     /**
-     * Interface for Session calls
-     * @var Omniphx\Forrest\Interfaces\SessionInterface
+     * Session handler
+     * @var Session
      */
     protected $session;
 
 
     /**
-     * Interface for Redirect calls
-     * @var Omniphx\Forrest\Interfaces\RedirectInterface
+     * Redirect handler
+     * @var Redirect
      */
     protected $redirect;
 
     /**
-     * Array of OAuth settings: client Id, client secret, callback URI, login URL, and redirect URL after authentication.
+     * Config options
      * @var array
      */
     protected $settings;
@@ -64,39 +63,6 @@ class RESTClient {
     }
 
     /**
-     * [getToken description]
-     * @return [type] [description]
-     */
-    private function getToken()
-    {
-        try {
-            return $this->session->getToken();
-        } catch (MissingTokenException $e) {
-            return $this->refresh();
-        }
-    }
-
-    /**
-     * [request description]
-     * @param  [type] $url     [description]
-     * @param  [type] $options [description]
-     * @return [type]          [description]
-     */
-    private function request($url, $options)
-    {
-        try {
-            $queryResults = $this->resource->request($url, $options);;
-        } catch (ClientException $e) {
-            if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
-                $this->refresh();
-                $queryResults = $this->resource->request($url, $options);
-            }
-        }
-
-        return $queryResults;
-    }
-
-    /**
      * Call this method to redirect user to login page and initiate
      * the Web Server OAuth Authentication Flow.
      * @return void
@@ -107,9 +73,8 @@ class RESTClient {
     }
 
     /**
-     * When settings up your callback route, you will need to call this method to
-     * acquire an authorization token. This token will be used for the API requests.
-     * @return RedirectInterface
+     * When settings up your callback route, you will need to call this method to acquire an authorization token. This token will be used for the API requests.
+     * @return mixed
      */
     public function callback()
     {
@@ -130,8 +95,8 @@ class RESTClient {
     }
 
     /**
-     * [refresh description]
-     * @return [type] [description]
+     * Refresh the access token
+     * @return void
      */
     public function refresh()
     {
@@ -148,7 +113,7 @@ class RESTClient {
 
     /**
      * Revokes access token from Salesforce. Will not flush token from Session.
-     * @return RedirectInterface
+     * @return mixed
      */
     public function revoke()
     {
@@ -475,6 +440,39 @@ class RESTClient {
         }
 
         return $this->request($url, $options);
+    }
+
+    /**
+     * Try retrieving token, if expired fire refresh method.
+     * @return array
+     */
+    private function getToken()
+    {
+        try {
+            return $this->session->getToken();
+        } catch (MissingTokenException $e) {
+            return $this->refresh();
+        }
+    }
+
+    /**
+     * Try requesting token, if 401 error try refreshing token
+     * @param  string $url
+     * @param  array $options
+     * @return mixed
+     */
+    private function request($url, $options)
+    {
+        try {
+            $queryResults = $this->resource->request($url, $options);;
+        } catch (ClientException $e) {
+            if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
+                $this->refresh();
+                $queryResults = $this->resource->request($url, $options);
+            }
+        }
+
+        return $queryResults;
     }
 
     /**
