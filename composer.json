@@ -2,7 +2,7 @@
     "name": "omniphx/forrest",
     "description": "A Laravel 4 client for Salesforce REST API",
     "license":"MIT",
-    "keywords":["salesforce","laravel","force.com","salesforce rest","rest","api","salesforce rest api","salesforce api","force rest"],
+    "keywords":["salesforce","laravel"],
     "authors": [
         {
             "name": "Matthew Mitchener",

@@ -62,10 +62,10 @@ class Resource implements ResourceInterface {
 
         if($options['debug'] == true){
             $response = $this->debug($request);
-            return $this->responseFormat($response,$format);
+            return $response;
+        } else {
+            $response = $this->client->send($request);
         }
-
-        $response = $this->client->send($request);
 
         return $this->responseFormat($response,$format);
 
@@ -89,15 +89,15 @@ class Resource implements ResourceInterface {
 
         if ($format == 'json') {
             $headers['Accept'] = 'application/json';
-            $headers['content-type'] = 'application/json';
+            $headers['Content-Type'] = 'application/json';
         }
         else if ($format == 'xml') {
             $headers['Accept'] = 'application/xml';
-            $headers['content-type'] = 'application/xml';
+            $headers['Content-Type'] = 'application/xml';
         }
         else if ($format == 'urlencoded') {
             $headers['Accept'] = 'application/x-www-form-urlencoded';
-            $headers['content-type'] = 'application/x-www-form-urlencoded';
+            $headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
 
         return $headers;
