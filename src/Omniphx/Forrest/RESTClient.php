@@ -138,7 +138,7 @@ class RESTClient {
      * @param  array  $options
      * @return array $versions
      */
-    public function versions($options = [])
+    public function versions($options = ['debug'=>false])
     {
         $url  = $this->getToken()['instance_url'];
         $url .= '/services/data/';
@@ -464,7 +464,7 @@ class RESTClient {
     private function request($url, $options)
     {
         try {
-            $queryResults = $this->resource->request($url, $options);;
+            $queryResults = $this->resource->request($url, $options);
         } catch (ClientException $e) {
             if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
                 $this->refresh();
@@ -486,7 +486,7 @@ class RESTClient {
     {
         $configVersion = $this->settings['version'];
 
-        if (!isset($configVersion)){
+        if (isset($configVersion)){
             $versions = $this->versions();
             foreach ($versions as $version) {
                 if ($version['version'] == $configVersion){
@@ -511,6 +511,8 @@ class RESTClient {
     {
         try {
             $version = $this->session->get('version');
+            $resources = $this->resources();
+            $this->session->put('resources', $resources);
         }
         catch (\Exception $e) {
             $this->putVersion();

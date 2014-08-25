@@ -62,7 +62,7 @@ class Resource implements ResourceInterface {
 
         if($options['debug'] == true){
             $response = $this->debug($request);
-            return $response;
+            return $this->responseFormat($response,$format);
         }
 
         $response = $this->client->send($request);
@@ -144,7 +144,7 @@ class Resource implements ResourceInterface {
     private function debug($request)
     {
         try {
-            $response = $this->client->send($request);
+            return $this->client->send($request);
         } catch (RequestException $e) {
             echo $e->getRequest() . "\n";
             if ($e->hasResponse()) {
