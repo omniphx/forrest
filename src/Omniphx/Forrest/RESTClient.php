@@ -88,7 +88,7 @@ class RESTClient {
         $this->session->putRefreshToken($jsonResponse['refresh_token']);
 
         // Store resources into the session.
-        $this->putResources();
+        $this->storeResources();
 
         //Redirect to user's homepage. Can change this in Oauth settings config.
         return $this->redirect->to($this->settings['authRedirect']);
@@ -482,7 +482,7 @@ class RESTClient {
      * session with the 'version' key.
      * @return void
      */
-    private function putVersion()
+    private function storeVersion()
     {
         $configVersion = $this->settings['version'];
 
@@ -502,12 +502,12 @@ class RESTClient {
     }
 
     /**
-     * Checks to see if version is specified. If not then call putVersion.
+     * Checks to see if version is specified. If not then call storeVersion.
      * Once a version is determined, determine the available resources the
      * user has access to and store them in teh user's sesion.
      * @return void
      */
-    private function putResources()
+    private function storeResources()
     {
         try {
             $version = $this->session->get('version');
@@ -515,7 +515,7 @@ class RESTClient {
             $this->session->put('resources', $resources);
         }
         catch (\Exception $e) {
-            $this->putVersion();
+            $this->storeVersion();
             $resources = $this->resources();
             $this->session->put('resources', $resources);
         }
