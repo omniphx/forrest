@@ -5,6 +5,11 @@ use Input;
 
 class LaravelInput implements InputInterface {
 	
+	/**
+	 * Get input from response
+	 * @param  string $parameter
+	 * @return mixed
+	 */
 	public function get($parameter){
 		return Input::get($parameter);
 	}

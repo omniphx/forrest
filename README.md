@@ -1,6 +1,5 @@
 # Omniphx/Forrest, Force.com REST API Client for Laravel 4
-
-[![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
+[![Latest Stable Version](https://poser.pugx.org/omniphx/forrest/v/stable.svg)](https://packagist.org/packages/omniphx/forrest) [![Total Downloads](https://poser.pugx.org/omniphx/forrest/downloads.svg)](https://packagist.org/packages/omniphx/forrest) [![Latest Unstable Version](https://poser.pugx.org/omniphx/forrest/v/unstable.svg)](https://packagist.org/packages/omniphx/forrest) [![License](https://poser.pugx.org/omniphx/forrest/license.svg)](https://packagist.org/packages/omniphx/forrest) [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
 Forrest is a Force.com REST API client for Laravel 4. Provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
@@ -27,7 +26,7 @@ Add the alias to the `aliases` array
 ### Setting up a Connected App
 1. Log into to your Salesforce org
 2. Click on Setup in the upper right-hand menu
-3. Under Build click Create -> Apps
+3. Under Build click Create > Apps
 4. Scroll to the bottom and click New under Connected Apps.
 5. Enter the following details for the remote application:
     * Connected App Name
@@ -35,7 +34,7 @@ Add the alias to the `aliases` array
     * Contact Email
     * Enable OAuth Settings under the API dropdown
     * Callback URL
-    * Select access scope (Full is recommended)
+    * Select access scope (If you need a refresh token, specify it here)
 6. Click Save
 
 After saving, you will now be given a Consumer Key and Consumer Secret.
@@ -52,6 +51,29 @@ The config file is published in: `app/config/omniphx/forrest/config.php`
 Update your config file with your `clientId`, `clientSecret`, `loginURL` and `callbackURI`.
 
 Additionally, you can specify a `authRedirect` that will redirect the user once the callback is complete.
+
+#### Debug
+Sometimes exception handling makes it is difficult to debug API requests. Forrest provides an easy way to output a failed request. Setting `'debug' => true` will help you understand why a request failed. A sample output will look like:
+```
+PATCH /services/data/v30.0/sobjects/Account/001i000000xxxxxx HTTP/1.1
+Host: na15.salesforce.com
+User-Agent: Guzzle/4.1.6 curl/7.30.0 PHP/5.4.24
+Authorization: Bearer 00Di000000xxxxxx
+Accept: application/json
+Content-Type: application/json
+Content-Length: 24
+
+{"Phone":"555-555-5555"}
+HTTP/1.1 404 Not Found
+Date: Mon, 25 Aug 2014 18:10:39 GMT
+Set-Cookie: BrowserId=xxxxxxxx;Path=/;Domain=.salesforce.com;Expires=Fri, 24-Oct-2014 18:10:39 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Sforce-Limit-Info: api-usage=264/15000
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+
+[{"errorCode":"NOT_FOUND","message":"Provided external ID field does not exist or is not accessible: 001i000000xxxxxx"}]
+```
 
 ### Setup
 Create the following Routes to complete the Web Server OAuth Authentication Flow:
@@ -125,7 +147,6 @@ Forrest::sobjects('Account/001i000000FO9zgAAD',[
 Delete a record with the DELETE method.
 
 ```php
-$body = ['Phone' => '555-555-5555'];
 Forrest::sobjects('Account/001i000000FO9zgAAD',[
     'method' => 'delete',
     'body'   => $body]);
@@ -139,6 +160,19 @@ Forrest::describe('Account',['format'=>'xml']);
 ```
 
 ### API Requests
+
+#### Refresh
+If a refresh token is set, the server can refresh the access token on the user's behalf. Refresh tokens are only supported by Web Server or User Agent authentication flows.
+```php
+Forrest::refresh();
+```
+>If you need a refresh token, be sure to specify this under `access scope` in your [Connected App](#setting-up-connected-app). You can also specify this in your configuration file by adding `'scope' => 'full refresh_token'`. Setting scope access in the config file is optional, the default scope access is determined by your Salesforce org.
+
+#### Revoke
+This will revoke the authorization token.
+```php
+Forrest::revoke();
+```
 
 #### Versions
 Returns all currently supported versions. Includes the verison, label and link to each version's root:
@@ -232,13 +266,13 @@ $parameters = [
 
 Forrest::suggestedArticles('foo', ['parameters'=> $parameters]);
 ```
-<!-- 
+
 #### Suggested Queries
 Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Like Suggest Articles, additional parameters can be passed into the second argument with the `parameters` key. Available for API version 30.0 or later.
 
 ```php
-Forrest::suggestedQueries('foo');
-``` -->
+Forrest::suggestedQueries('app&language=en_US');
+```
 
 ### Additional API Requests
 

@@ -15,4 +15,11 @@ interface AuthenticationInterface {
 	 */
 	public function callback();
 
+    /**
+     * Refresh authentication token
+     * @param  Array $refreshToken
+     * @return mixed $response
+     */
+	public function refresh($refreshToken);
+
 }

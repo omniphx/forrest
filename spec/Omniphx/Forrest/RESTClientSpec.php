@@ -10,6 +10,7 @@ use Omniphx\Forrest\Interfaces\ResourceInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
+use GuzzleHttp\Exception\ClientException;
 
 class RESTClientSpec extends ObjectBehavior
 {
@@ -72,9 +73,10 @@ class RESTClientSpec extends ObjectBehavior
             'url' => 'resourceURLs']);
 
         $mockedSession->getToken()->willReturn([
-            'access_token' => 'accessToken',
-            'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
-            'instance_url' => 'https://na00.salesforce.com']);
+            'access_token'  => 'accessToken',
+            'id'            => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
+            'instance_url'  => 'https://na00.salesforce.com',
+            'refresh_token' => 'refreshToken']);
 
 
 		$this->beConstructedWith(
@@ -101,18 +103,48 @@ class RESTClientSpec extends ObjectBehavior
         AuthenticationInterface $mockedAuthentication,
         SessionInterface $mockedSession,
         ResponseInterface $mockedResponse,
-        RedirectInterface $mockedRedirect)
+        RedirectInterface $mockedRedirect,
+        ResourceInterface $mockedResource)
     {
 
         $mockedAuthentication->callback()->shouldBeCalled()->willReturn($mockedResponse);
 
-    	$mockedResponse->json()->shouldBeCalled()->willReturn(array('version1','version2'));
+    	$mockedResponse->json()->shouldBeCalled()->willReturn(array(
+            'access_token'  => 'value1',
+            'refresh_token' => 'value2'));
 
         $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
+        $mockedSession->putRefreshToken(Argument::exact('value2'))->shouldBeCalled();
+
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn(array(
+                '1'=> array('version'=>'29.0'),
+                '2'=> array('version'=>'30.0')));
+
+        $mockedSession->put(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
 
         $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
 
     	$this->callback()->shouldReturn('redirectURL');
+    }
+
+    function it_should_refresh(
+        SessionInterface $mockedSession,
+        AuthenticationInterface $mockedAuthentication,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getRefreshToken()
+            ->shouldBeCalled()
+            ->willReturn('token');
+
+        $mockedAuthentication->refresh('token')
+            ->shouldBeCalled()
+            ->willReturn($mockedResponse);
+
+        $mockedSession->putToken(Argument::any())
+            ->shouldBeCalled();
+
+        $this->refresh();
+
     }
 
     function it_should_revoke_the_authentication_token(
@@ -131,9 +163,9 @@ class RESTClientSpec extends ObjectBehavior
         ResourceInterface $mockedResource)
     {
         $mockedSession->getToken()->shouldBeCalled();
-        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('versions');
+        $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn(array('version'=>'29.0','version'=>'30.0'));
 
-        $this->versions()->shouldReturn('versions');
+        $this->versions()->shouldReturn(array('version'=>'29.0','version'=>'30.0'));
     }
 
     function it_should_return_resources(

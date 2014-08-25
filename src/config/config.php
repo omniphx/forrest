@@ -61,6 +61,21 @@ return array(
 		
 	),
 
+	/**
+	 * Default settings for resource requests.
+	 * Setting debug to true will output your request and response with any Salesforce errors.
+	 */
+	'defaults' => array(
+
+		'method' => 'get',
+		'format' => 'json',
+		'debug' => false,
+		
+	),
+
+	/**
+	 * Langauge
+	 */
 	'language' => 'en_US'
 
 );

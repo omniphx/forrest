@@ -8,30 +8,78 @@ use Crypt;
 
 class LaravelSession implements SessionInterface {
 
-	public function get($key){
-		$value = Session::get($key);
-		if(isset($value)){
-			return Session::get($key);
-		}
-		
-		Throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
-	}
-
-	public function put($key, $value){
+	/**
+	 * Store into session.
+	 * @param $key
+	 * @param $value
+	 * @return void
+	 */
+	public function put($key, $value)
+	{
 		return Session::put($key, $value);
 	}
 
-	public function putToken($token){
+	/**
+	 * Get from session
+	 * @param $key
+	 * @return mixed
+	 */
+	public function get($key)
+	{
+		$value = Session::get($key);
+		if (isset($value)) {
+			return Session::get($key);
+		}
+
+		throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
+	}
+
+	/**
+	 * Encrypt authentication token and store it in session.
+	 * @param array $token
+	 * @return void
+	 */
+	public function putToken($token)
+	{
 		$encyptedToken = Crypt::encrypt($token);
 		return Session::put('token', $encyptedToken);
 	}
 
+	/**
+	 * Get token from the session and decrypt it.
+	 * @return mixed
+	 */
 	public function getToken(){
 		$token = Session::get('token');
-		if(isset($token)){
+		if (isset($token)) {
 			return Crypt::decrypt($token);
 		}
 
-		Throw new MissingTokenException(sprintf('No token available in current Session'));
+		throw new MissingTokenException(sprintf('No token available in current Session'));
+	}
+
+	/**
+	 * Encrypt refresh token and pass into session.
+	 * @param  Array $token
+	 * @return void
+	 */
+	public function putRefreshToken($token)
+	{
+		$encyptedToken = Crypt::encrypt($token);
+		return Session::put('refresh_token', $encyptedToken);
+	}
+
+	/**
+	 * Get refresh token from session and decrypt it.
+	 * @return mixed
+	 */
+	public function getRefreshToken()
+	{
+		$token = Session::get('refresh_token');
+		if (isset($token)) {
+			return Crypt::decrypt($token);
+		}
+
+		throw new MissingTokenException(sprintf('No refresh token available in current Session'));
 	}
 }
