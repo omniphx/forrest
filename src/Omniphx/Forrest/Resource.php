@@ -62,13 +62,15 @@ class Resource implements ResourceInterface {
 
         if($options['debug'] == true){
             $response = $this->debug($request);
-            return $response;
+            if(is_object($response))
+            {
+                return $this->responseFormat($response,$format);
+            }
         } else {
             $response = $this->client->send($request);
+
+            return $this->responseFormat($response,$format);
         }
-
-        return $this->responseFormat($response,$format);
-
     }
 
     /**
@@ -146,8 +148,12 @@ class Resource implements ResourceInterface {
         try {
             return $this->client->send($request);
         } catch (RequestException $e) {
+            echo "Request\n";
+            echo "-------\n";
             echo $e->getRequest() . "\n";
             if ($e->hasResponse()) {
+                echo "\nResponse\n";
+                echo "--------\n";
                 echo $e->getResponse() . "\n";
             }
         }
