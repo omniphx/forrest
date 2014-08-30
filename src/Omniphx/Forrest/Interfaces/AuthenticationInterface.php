@@ -4,9 +4,10 @@ interface AuthenticationInterface {
 
 	/**
 	 * Begin authentication process
+	 * @param String $url
 	 * @return mixed
 	 */
-	public function authenticate();
+	public function authenticate($url);
 
 	/**
 	 * Send callback for Web Server flow.

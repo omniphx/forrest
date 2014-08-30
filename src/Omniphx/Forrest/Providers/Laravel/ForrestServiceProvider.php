@@ -21,6 +21,8 @@ class ForrestServiceProvider extends ServiceProvider {
 	public function boot()
 	{
 		$this->package('omniphx/forrest', null, __DIR__.'/../../../..');
+
+		include __DIR__ . '/routes.php';
 	}
 
 	/**
@@ -42,17 +44,7 @@ class ForrestServiceProvider extends ServiceProvider {
 
 			$resource = new \Omniphx\Forrest\Resource($client, $session, $settings['defaults']);
 
-			switch ($settings['authenticationFlow']) {
-			    case 'WebServer':
-			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\WebServer($client, $redirect, $input, $settings);
-			        break;
-			    case 'UserAgent':
-			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\UserAgent();
-			        break;
-			    case 'UsernamePassword':
-			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\UsernamePassword();
-			        break;
-			}
+			$authentication = new \Omniphx\Forrest\Authentication($client, $redirect, $input, $settings);
 
 			return new RESTClient($resource, $client, $session, $redirect, $authentication, $settings);
 		});

@@ -1,4 +1,4 @@
-<?php namespace spec\Omniphx\Forrest\AuthenticationFlows;
+<?php namespace spec\Omniphx\Forrest;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -10,7 +10,7 @@ use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 
-class WebServerSpec extends ObjectBehavior
+class AuthenticationSpec extends ObjectBehavior
 {
 	function let(
         ClientInterface $mockedClient,
@@ -24,8 +24,8 @@ class WebServerSpec extends ObjectBehavior
 		$settings  = array(
             'oauth' => array(
 
-                'clientId'     => 'testingClientId',
-                'clientSecret' => 'testingClientSecret',
+                'consumerKey'     => 'testingClientId',
+                'consumerSecret' => 'testingClientSecret',
                 'callbackURI'  => 'callbackURL',
                 'loginURL'     => 'https://login.salesforce.com',
 
@@ -86,7 +86,7 @@ class WebServerSpec extends ObjectBehavior
 
     function it_is_initializable()
     {
-        $this->shouldHaveType('Omniphx\Forrest\AuthenticationFlows\WebServer');
+        $this->shouldHaveType('Omniphx\Forrest\Authentication');
     }
 
     function it_should_authenticate(RedirectInterface $mockedRedirect)

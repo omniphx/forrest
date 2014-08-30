@@ -1,4 +1,4 @@
-<?php namespace Omniphx\Forrest\AuthenticationFlows;
+<?php namespace Omniphx\Forrest;
 
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -6,7 +6,7 @@ use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 use GuzzleHttp\Exception\RequestException;
 
-class WebServer implements AuthenticationInterface {
+class Authentication implements AuthenticationInterface {
 
     /**
      * Interface for HTTP Client
@@ -49,13 +49,16 @@ class WebServer implements AuthenticationInterface {
      * the Web Server OAuth Authentication Flow.
      * @return void
      */
-    public function authenticate()
+    public function authenticate($loginURL = null)
     {
-        return $this->redirect->to(
-            $this->settings['oauth']['loginURL']
+        if(!isset($loginURL)){
+            $loginURL = $this->settings['oauth']['loginURL'];
+        }
+
+        return $this->redirect->to($loginURL
             . '/services/oauth2/authorize'
             . '?response_type=code'
-            . '&client_id=' . $this->settings['oauth']['clientId']
+            . '&client_id=' . $this->settings['oauth']['consumerKey']
         	. '&redirect_uri=' . urlencode($this->settings['oauth']['callbackURI'])
             . '&display=' . $this->settings['optional']['display']
             . '&immediate=' . $this->settings['optional']['immediate']
@@ -80,8 +83,8 @@ class WebServer implements AuthenticationInterface {
             'body' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
-                'client_id'     => $this->settings['oauth']['clientId'],
-                'client_secret' => $this->settings['oauth']['clientSecret'],
+                'client_id'     => $this->settings['oauth']['consumerKey'],
+                'client_secret' => $this->settings['oauth']['consumerSecret'],
                 'redirect_uri'  => $this->settings['oauth']['callbackURI']
             ]
         ]);
@@ -101,8 +104,8 @@ class WebServer implements AuthenticationInterface {
             'body'    => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',
-                'client_id'     => $this->settings['oauth']['clientId'],
-                'client_secret' => $this->settings['oauth']['clientSecret']
+                'client_id'     => $this->settings['oauth']['consumerKey'],
+                'client_secret' => $this->settings['oauth']['consumerSecret']
             ]
         ]);
 

@@ -1,12 +1,12 @@
 # Omniphx/Forrest, Force.com REST API Client for Laravel 4
 [![Latest Stable Version](https://poser.pugx.org/omniphx/forrest/v/stable.svg)](https://packagist.org/packages/omniphx/forrest) [![Total Downloads](https://poser.pugx.org/omniphx/forrest/downloads.svg)](https://packagist.org/packages/omniphx/forrest) [![Latest Unstable Version](https://poser.pugx.org/omniphx/forrest/v/unstable.svg)](https://packagist.org/packages/omniphx/forrest) [![License](https://poser.pugx.org/omniphx/forrest/license.svg)](https://packagist.org/packages/omniphx/forrest) [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
-Forrest is a Force.com REST API client for Laravel 4. Provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
+Forrest is a Force.com REST API client for Laravel 4. It provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
 ## Installation
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
 
-    "omniphx/forrest": "dev-master"
+    "omniphx/forrest": "1.*"
 
 After adding the key, run composer update from the command line to install the package:
 
@@ -21,23 +21,6 @@ Add the service provider to the `providers` array in your `app/config/app.php` f
 Add the alias to the `aliases` array
 
     'Forrest' => 'Omniphx\Forrest\Providers\Laravel\Facades\Forrest'
-
-## Getting Started
-### Setting up a Connected App
-1. Log into to your Salesforce org
-2. Click on Setup in the upper right-hand menu
-3. Under Build click Create > Apps
-4. Scroll to the bottom and click New under Connected Apps.
-5. Enter the following details for the remote application:
-    * Connected App Name
-    * API Name
-    * Contact Email
-    * Enable OAuth Settings under the API dropdown
-    * Callback URL
-    * Select access scope (If you need a refresh token, specify it here)
-6. Click Save
-
-After saving, you will now be given a Consumer Key and Consumer Secret.
 
 ### Configuration
 Publish your config file using the `artisan` command:
@@ -74,21 +57,53 @@ Transfer-Encoding: chunked
 
 [{"errorCode":"NOT_FOUND","message":"Provided external ID field does not exist or is not accessible: 001i000000xxxxxx"}]
 ```
+## Getting Started
+### Setting up a Connected App
+1. Log into to your Salesforce org
+2. Click on Setup in the upper right-hand menu
+3. Under Build click Create > Apps
+4. Scroll to the bottom and click New under Connected Apps.
+5. Enter the following details for the remote application:
+    * Connected App Name
+    * API Name
+    * Contact Email
+    * Enable OAuth Settings under the API dropdown
+    * Callback URL
+    * Select access scope (If you need a refresh token, specify it here)
+6. Click Save
+
+After saving, you will now be given a Consumer Key and Consumer Secret.
 
 ### Setup
-Create the following Routes to complete the Web Server OAuth Authentication Flow:
-
+Forrest will come with the following routes included in it's package:
 ```php
-Route::get('/authenticate', function(){
+Route::get('/authenticate', function()
+{
     return Forrest::authenticate();
 });
 
-Route::get('/callback', function(){
-    return Forrest::callback();
+Route::get('/callback', function()
+{
+    Forrest::callback();
+
+    $url = Config::get('forrest::config')['authRedirect'];
+
+    return Redirect::to($url);
 });
 ```
 
->Note: The routes can be called anything you like, but the callback must match what is configured in the Connected App settings and the published config file.
+>Note: These routes can be overwritten in your `route.php` file, if you would like to customize the authentication process. Feel free to call the routes anything you like, but the callback must match what is configured in your Connected App settings and config file.
+
+#### Custom login urls
+Sometimes users will need to connect to a sandbox or use a custom login. To do this, simply pass the url as an argument for the authenticatation method:
+```php
+Route::get('/authenticate', function()
+{
+    $loginURL = 'https://login.salesforce.com';
+
+    return Forrest::authenticate($loginURL);
+});
+```
 
 ## Usage
 ### Query a record
@@ -108,16 +123,16 @@ The default output format will be JSON, but it can also be changed to [XML](#xml
         {
             "attributes": {
                 "type": "Account",
-                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000FO9zgAAD"
+                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxxxxxx"
             },
-            "Id": "001i000000FO9zgAAD"
+            "Id": "001i000000xxxxxx"
         },
         {
             "attributes": {
                 "type": "Account",
-                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000r0eNtAAI"
+                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxxxxxx"
             },
-            "Id": "001i000000r0eNtAAI"
+            "Id": "001i000000xxxxxx"
         }
     ]
 }
@@ -138,7 +153,7 @@ Update a record with the PATCH method.
 
 ```php
 $body = ['Phone' => '555-555-5555'];
-Forrest::sobjects('Account/001i000000FO9zgAAD',[
+Forrest::sobjects('Account/001i000000xxxxxxx',[
     'method' => 'patch',
     'body'   => $body]);
 ```
@@ -147,7 +162,7 @@ Forrest::sobjects('Account/001i000000FO9zgAAD',[
 Delete a record with the DELETE method.
 
 ```php
-Forrest::sobjects('Account/001i000000FO9zgAAD',[
+Forrest::sobjects('Account/001i000000xxxxxxx',[
     'method' => 'delete',
     'body'   => $body]);
 ```
@@ -160,6 +175,58 @@ Forrest::describe('Account',['format'=>'xml']);
 ```
 
 ### API Requests
+
+With the exception of the `search` and `query` resources, all requests are made dynamically using method overloading. The available resources are stored in the user's session when they are authenticated.
+
+First, determine which resources you have access to by calling:
+```php
+Session::get('resources');
+```
+or
+```php
+Forrest::resources();
+```
+Either will return the following array:
+```php
+Array
+(
+    [sobjects] => /services/data/v30.0/sobjects
+    [connect] => /services/data/v30.0/connect
+    [query] => /services/data/v30.0/query
+    [theme] => /services/data/v30.0/theme
+    [queryAll] => /services/data/v30.0/queryAll
+    [tooling] => /services/data/v30.0/tooling
+    [chatter] => /services/data/v30.0/chatter
+    [analytics] => /services/data/v30.0/analytics
+    [recent] => /services/data/v30.0/recent
+    [process] => /services/data/v30.0/process
+    [identity] => https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000aaaaAAA
+    [flexiPage] => /services/data/v30.0/flexiPage
+    [search] => /services/data/v30.0/search
+    [quickActions] => /services/data/v30.0/quickActions
+    [appMenu] => /services/data/v30.0/appMenu
+)
+```
+Next, you can call resources by referring to the specified key. For instance:
+```php
+Forrest::theme();
+```
+or
+```php
+Forrest::appMenu();
+```
+
+Resources can be extended by passing the additional parameters into the first argument:
+```php
+Forrest::sobjects('Account/describe/approvalLayouts/');
+```
+
+You can also add option methods and formats to calls:
+```php
+Forrest::theme(['format'=>'xml']);
+```
+
+### Additional API Requests
 
 #### Refresh
 If a refresh token is set, the server can refresh the access token on the user's behalf. Refresh tokens are only supported by Web Server or User Agent authentication flows.
@@ -272,56 +339,6 @@ Returns a list of suggested searches based on a search text query. Matches searc
 
 ```php
 Forrest::suggestedQueries('app&language=en_US');
-```
-
-### Additional API Requests
-
-The above resources were explicitly defined because `search` and `query` resources require URL encoding. Other resources such as `sobjects` and `describe` can be called dynamically using method overloading.
-
-First, determine which resources you have access to:
-
-```php
-Forrest::resources();
-```
-
-This returns a list of available resources:
-```php
-Array
-(
-    [sobjects] => /services/data/v30.0/sobjects
-    [connect] => /services/data/v30.0/connect
-    [query] => /services/data/v30.0/query
-    [theme] => /services/data/v30.0/theme
-    [queryAll] => /services/data/v30.0/queryAll
-    [tooling] => /services/data/v30.0/tooling
-    [chatter] => /services/data/v30.0/chatter
-    [analytics] => /services/data/v30.0/analytics
-    [recent] => /services/data/v30.0/recent
-    [process] => /services/data/v30.0/process
-    [identity] => https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000aaaaAAA
-    [flexiPage] => /services/data/v30.0/flexiPage
-    [search] => /services/data/v30.0/search
-    [quickActions] => /services/data/v30.0/quickActions
-    [appMenu] => /services/data/v30.0/appMenu
-)
-```
-Next, you can call resource simply by referring to the key in the resources array:
-```php
-Forrest::theme();
-```
-or
-```php
-Forrest::appMenu();
-```
-
-Resources can be extended by passing the extension into the first argument:
-```php
-Forrest::sobjects('Account/describe/approvalLayouts/');
-```
-
-You can also add option methods and formats to calls:
-```php
-Forrest::theme(['format'=>'xml']);
 ```
 
 For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)

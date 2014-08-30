@@ -1,6 +1,4 @@
-<?php
-
-namespace spec\Omniphx\Forrest;
+<?php namespace spec\Omniphx\Forrest;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -95,15 +93,16 @@ class RESTClientSpec extends ObjectBehavior
 
     function it_should_authenticate(AuthenticationInterface $mockedAuthentication)
     {
-    	$mockedAuthentication->authenticate()->willReturn('authenticate');
-    	$this->authenticate()->shouldReturn('authenticate');
+    	$mockedAuthentication->authenticate(null)->willReturn('default');
+        $mockedAuthentication->authenticate('url')->willReturn('custom');
+    	$this->authenticate()->shouldReturn('default');
+        $this->authenticate('url')->shouldReturn('custom');
     }
 
     function it_should_callback(
         AuthenticationInterface $mockedAuthentication,
         SessionInterface $mockedSession,
         ResponseInterface $mockedResponse,
-        RedirectInterface $mockedRedirect,
         ResourceInterface $mockedResource)
     {
 
@@ -122,9 +121,7 @@ class RESTClientSpec extends ObjectBehavior
 
         $mockedSession->put(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
 
-        $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
-
-    	$this->callback()->shouldReturn('redirectURL');
+    	$this->callback()->shouldReturn(null);
     }
 
     function it_should_refresh(
@@ -143,7 +140,7 @@ class RESTClientSpec extends ObjectBehavior
         $mockedSession->putToken(Argument::any())
             ->shouldBeCalled();
 
-        $this->refresh();
+        $this->refresh()->shouldReturn(null);
 
     }
 

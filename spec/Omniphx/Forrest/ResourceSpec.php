@@ -1,6 +1,4 @@
-<?php
-
-namespace spec\Omniphx\Forrest;
+<?php namespace spec\Omniphx\Forrest;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;

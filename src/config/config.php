@@ -10,20 +10,11 @@ return array(
 	 */
 	'oauth' => array(
 
-			'clientId' => '',
-			'clientSecret' => '',
+			'consumerKey' => '',
+			'consumerSecret' => '',
 			'callbackURI' => '',
 			'loginURL' => 'https://login.salesforce.com',
-
 	),
-
-	/**
-	 * Choose the type of authentication flow:
-	 *  -WebServer
-	 *  -UserAgent
-	 *  -UsernamePassword
-	 */
-	'authenticationFlow' => 'WebServer',
 
 	/**
 	 * Display can be page, popup, touch or mobile
@@ -40,26 +31,11 @@ return array(
 
 	),
 
+	
 	/**
-	 * After authentication token is received, redirect to:
-	 */
+	* After authentication token is received, redirect to:
+	*/
 	'authRedirect' => '/',
-
-	/**
-	 * If you'd like to specify an API version manually it can be done here.
-	 * Format looks like '30.0'
-	 */
-	'version' => '',
-
-	/**
-	 * Default settings for resource requests.
-	 */
-	'defaults' => array(
-
-		'method' => 'get',
-		'format' => 'json',
-		
-	),
 
 	/**
 	 * Default settings for resource requests.
@@ -72,6 +48,12 @@ return array(
 		'debug' => false,
 		
 	),
+
+	/**
+	 * If you'd like to specify an API version manually it can be done here.
+	 * Format looks like '30.0'
+	 */
+	'version' => '',
 
 	/**
 	 * Langauge

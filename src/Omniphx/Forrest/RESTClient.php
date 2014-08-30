@@ -67,14 +67,14 @@ class RESTClient {
      * the Web Server OAuth Authentication Flow.
      * @return void
      */
-    public function authenticate()
+    public function authenticate($loginURL = null)
     {
-        return $this->authentication->authenticate();
+        return $this->authentication->authenticate($loginURL);
     }
 
     /**
      * When settings up your callback route, you will need to call this method to acquire an authorization token. This token will be used for the API requests.
-     * @return mixed
+     * @return void
      */
     public function callback()
     {
@@ -89,9 +89,6 @@ class RESTClient {
 
         // Store resources into the session.
         $this->storeResources();
-
-        //Redirect to user's homepage. Can change this in Oauth settings config.
-        return $this->redirect->to($this->settings['authRedirect']);
     }
 
     /**
@@ -106,9 +103,7 @@ class RESTClient {
 
         $jsonResponse = $response->json();
 
-        $this->session->putToken($jsonResponse);
-
-        return $this->session->getToken();
+        return $this->session->putToken($jsonResponse);
     }
 
     /**
@@ -461,7 +456,7 @@ class RESTClient {
      * @param  array $options
      * @return mixed
      */
-    private function request($url, $options)
+    public function request($url, $options)
     {
         try {
             return $this->resource->request($url, $options);
@@ -485,7 +480,7 @@ class RESTClient {
     {
         $configVersion = $this->settings['version'];
 
-        if (isset($configVersion)){
+        if ($configVersion != null){
             $versions = $this->versions();
             foreach ($versions as $version) {
                 if ($version['version'] == $configVersion){
