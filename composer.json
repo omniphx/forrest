@@ -15,8 +15,7 @@
         "guzzlehttp/guzzle": "~4"
     },
     "require-dev": {
-        "phpspec/phpspec": "2.0.*@dev",
-        "php-vcr/php-vcr": "dev-master"
+        "phpspec/phpspec": "2.0.*@dev"
     },
     "autoload": {
         "classmap": [
