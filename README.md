@@ -1,24 +1,20 @@
 # Omniphx/Forrest, Force.com REST API Client for Laravel 4
 [![Latest Stable Version](https://poser.pugx.org/omniphx/forrest/v/stable.svg)](https://packagist.org/packages/omniphx/forrest) [![Total Downloads](https://poser.pugx.org/omniphx/forrest/downloads.svg)](https://packagist.org/packages/omniphx/forrest) [![Latest Unstable Version](https://poser.pugx.org/omniphx/forrest/v/unstable.svg)](https://packagist.org/packages/omniphx/forrest) [![License](https://poser.pugx.org/omniphx/forrest/license.svg)](https://packagist.org/packages/omniphx/forrest) [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
-Forrest is a Force.com REST API client for Laravel 4. It provides access to restricted Salesforce information via the Web Server OAuth Authentication Flow. While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
+Forrest is a Force.com REST API client for Laravel 4. It provides access to restricted Salesforce information via the Web Server OAuth authentication flow. While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
 ## Installation
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
 
     "omniphx/forrest": "1.*"
 
-After adding the key, run composer update from the command line to install the package:
+After adding the key, run `composer update` from the command line to install the package.
 
-```bash
-composer update
-```
-
-Add the service provider to the `providers` array in your `app/config/app.php` file.
+Add the service provider in your `app/config/app.php` file:
 
     'Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider'
 
-Add the alias to the `aliases` array
+Add the alias:
 
     'Forrest' => 'Omniphx\Forrest\Providers\Laravel\Facades\Forrest'
 
@@ -31,38 +27,16 @@ php artisan config:publish omniphx/forrest
 
 The config file is published in: `app/config/omniphx/forrest/config.php`
 
-Update your config file with your `clientId`, `clientSecret`, `loginURL` and `callbackURI`.
+Update your config file with your `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
 
-Additionally, you can specify a `authRedirect` that will redirect the user once the callback is complete.
+Additionally, you can specify a redirect after the callback is complete with the `authRedirect` key.
 
-#### Debug
-Sometimes exception handling makes it is difficult to debug API requests. Forrest provides an easy way to output a failed request. Setting `'debug' => true` will help you understand why a request failed. A sample output will look like:
-```
-PATCH /services/data/v30.0/sobjects/Account/001i000000xxxxxx HTTP/1.1
-Host: na15.salesforce.com
-User-Agent: Guzzle/4.1.6 curl/7.30.0 PHP/5.4.24
-Authorization: Bearer 00Di000000xxxxxx
-Accept: application/json
-Content-Type: application/json
-Content-Length: 24
-
-{"Phone":"555-555-5555"}
-HTTP/1.1 404 Not Found
-Date: Mon, 25 Aug 2014 18:10:39 GMT
-Set-Cookie: BrowserId=xxxxxxxx;Path=/;Domain=.salesforce.com;Expires=Fri, 24-Oct-2014 18:10:39 GMT
-Expires: Thu, 01 Jan 1970 00:00:00 GMT
-Sforce-Limit-Info: api-usage=264/15000
-Content-Type: application/json;charset=UTF-8
-Transfer-Encoding: chunked
-
-[{"errorCode":"NOT_FOUND","message":"Provided external ID field does not exist or is not accessible: 001i000000xxxxxx"}]
-```
 ## Getting Started
 ### Setting up a Connected App
 1. Log into to your Salesforce org
 2. Click on Setup in the upper right-hand menu
-3. Under Build click Create > Apps
-4. Scroll to the bottom and click New under Connected Apps.
+3. Under Build click `Create > Apps`
+4. Scroll to the bottom and click `New` under Connected Apps.
 5. Enter the following details for the remote application:
     * Connected App Name
     * API Name
@@ -70,7 +44,7 @@ Transfer-Encoding: chunked
     * Enable OAuth Settings under the API dropdown
     * Callback URL
     * Select access scope (If you need a refresh token, specify it here)
-6. Click Save
+6. Click `Save`
 
 After saving, you will now be given a Consumer Key and Consumer Secret.
 
@@ -86,20 +60,20 @@ Route::get('/callback', function()
 {
     Forrest::callback();
 
-    $url = Config::get('forrest::config')['authRedirect'];
+    $url = Config::get('forrest::authRedirect');
 
     return Redirect::to($url);
 });
 ```
 
->Note: These routes can be overwritten in your `route.php` file, if you would like to customize the authentication process. Feel free to call the routes anything you like, but the callback must match what is configured in your Connected App settings and config file.
+>Note: If you would like to customize the authentication process, these routes can be overwritten in your `route.php` file. Feel free to call the routes anything you like, but the callback must match what is configured in your Connected App settings and config file.
 
 #### Custom login urls
-Sometimes users will need to connect to a sandbox or use a custom login. To do this, simply pass the url as an argument for the authenticatation method:
+Sometimes users will need to connect to a sandbox or through a custom url. To do this, simply pass the url as an argument for the authenticatation method:
 ```php
 Route::get('/authenticate', function()
 {
-    $loginURL = 'https://login.salesforce.com';
+    $loginURL = 'https://test.salesforce.com';
 
     return Forrest::authenticate($loginURL);
 });
@@ -174,7 +148,7 @@ Change the request/response format to XML with the `format` key.
 Forrest::describe('Account',['format'=>'xml']);
 ```
 
-### API Requests
+## API Requests
 
 With the exception of the `search` and `query` resources, all requests are made dynamically using method overloading. The available resources are stored in the user's session when they are authenticated.
 
@@ -340,5 +314,27 @@ Returns a list of suggested searches based on a search text query. Matches searc
 ```php
 Forrest::suggestedQueries('app&language=en_US');
 ```
-
 For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
+
+## Debug
+Sometimes exception handling makes it is difficult to debug API requests. Forrest provides an easy way to output a failed request. Setting `'debug' => true` in your configuration file will help you understand why a request failed. A sample output will look like:
+```
+PATCH /services/data/v30.0/sobjects/Account/001i000000xxxxxx HTTP/1.1
+Host: na15.salesforce.com
+User-Agent: Guzzle/4.1.6 curl/7.30.0 PHP/5.4.24
+Authorization: Bearer 00Di000000xxxxxx
+Accept: application/json
+Content-Type: application/json
+Content-Length: 24
+
+{"Phone":"555-555-5555"}
+HTTP/1.1 404 Not Found
+Date: Mon, 25 Aug 2014 18:10:39 GMT
+Set-Cookie: BrowserId=xxxxxxxx;Path=/;Domain=.salesforce.com;Expires=Fri, 24-Oct-2014 18:10:39 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Sforce-Limit-Info: api-usage=264/15000
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+
+[{"errorCode":"NOT_FOUND","message":"Provided external ID field does not exist or is not accessible: 001i000000xxxxxx"}]
+```
