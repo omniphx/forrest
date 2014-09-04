@@ -148,6 +148,7 @@ class Resource implements ResourceInterface {
         try {
             return $this->client->send($request);
         } catch (RequestException $e) {
+            echo "<pre>";
             echo "Request\n";
             echo "-------\n";
             echo $e->getRequest() . "\n";
@@ -156,6 +157,7 @@ class Resource implements ResourceInterface {
                 echo "--------\n";
                 echo $e->getResponse() . "\n";
             }
+            echo "</pre>";
         }
     }
 

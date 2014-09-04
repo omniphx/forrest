@@ -136,9 +136,7 @@ Forrest::sobjects('Account/001i000000xxxxxxx',[
 Delete a record with the DELETE method.
 
 ```php
-Forrest::sobjects('Account/001i000000xxxxxxx',[
-    'method' => 'delete',
-    'body'   => $body]);
+Forrest::sobjects('Account/001i000000xxxxxxx', ['method' => 'delete');
 ```
 
 ### XML format
@@ -319,20 +317,24 @@ For a complete listing of API resources, refer to the [Force.com REST API Develo
 ## Debug
 Sometimes exception handling makes it is difficult to debug API requests. Forrest provides an easy way to output a failed request. Setting `'debug' => true` in your configuration file will help you understand why a request failed. A sample output will look like:
 ```
-PATCH /services/data/v30.0/sobjects/Account/001i000000xxxxxx HTTP/1.1
+Request
+-------
+GET /services/data/v31.0/sobjects/Account/001i000000xxxxxx HTTP/1.1
 Host: na15.salesforce.com
-User-Agent: Guzzle/4.1.6 curl/7.30.0 PHP/5.4.24
-Authorization: Bearer 00Di000000xxxxxx
+Authorization: Bearer 00Di0000000YD23!ARYAQMpMTos.4_xcLiFCRiuwBueuDDkRY4RunhShi6aE8EGRoaPuscUIsOoU60rhZTFjSCl1JoVEcrnetFFyDWskBNGV2mWr
 Accept: application/json
 Content-Type: application/json
-Content-Length: 24
+User-Agent: Guzzle/4.2.1 curl/7.30.0 PHP/5.4.24
 
-{"Phone":"555-555-5555"}
+
+
+Response
+--------
 HTTP/1.1 404 Not Found
-Date: Mon, 25 Aug 2014 18:10:39 GMT
-Set-Cookie: BrowserId=xxxxxxxx;Path=/;Domain=.salesforce.com;Expires=Fri, 24-Oct-2014 18:10:39 GMT
+Date: Thu, 04 Sep 2014 12:19:29 GMT
+Set-Cookie: BrowserId=PceVhB-UTTilUZYVvkMVMw;Path=/;Domain=.salesforce.com;Expires=Mon, 03-Nov-2014 12:19:29 GMT
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
-Sforce-Limit-Info: api-usage=264/15000
+Sforce-Limit-Info: api-usage=4/15000
 Content-Type: application/json;charset=UTF-8
 Transfer-Encoding: chunked
 
