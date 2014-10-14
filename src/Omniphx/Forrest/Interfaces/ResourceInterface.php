@@ -8,7 +8,7 @@ interface ResourceInterface {
      * @param  array  $pOptions
      * @return mixed
      */
-	public function request($pURI, array $pOptions);
+	public function requestResource($pURI, array $pOptions);
 
     /**
      * Set the headers for the request

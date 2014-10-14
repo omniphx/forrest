@@ -1,18 +1,21 @@
 <?php namespace Omniphx\Forrest;
 
 use Omniphx\Forrest\Interfaces\ResourceInterface;
-use GuzzleHttp\ClientInterface;
-use Omniphx\Forrest\Interfaces\SessionInterface;
-use Omniphx\Forrest\Exceptions\MissingTokenException;
 use GuzzleHttp\Exception\RequestException;
 
-class Resource implements ResourceInterface {
+abstract class Resource implements ResourceInterface {
 
-	/**
-     * HTTP Client
+    /**
+     * HTTP request client
      * @var Client
      */
     protected $client;
+
+    /**
+     * Config options
+     * @var array
+     */
+    protected $settings;
 
     /**
      * Session handler
@@ -21,33 +24,14 @@ class Resource implements ResourceInterface {
     protected $session;
 
     /**
-     * Config options
-     * @var array
-     */
-    protected $defaults;
-
-    /**
-     * Constructor
-     * @param ClientInterface  $client   HTTP Request client
-     * @param SessionInterface $session  Session handler
-     * @param array            $defaults Config defaults
-     */
-    public function __construct(ClientInterface $client, SessionInterface $session, array $defaults)
-    {
-		$this->client   = $client;
-		$this->session  = $session;
-        $this->defaults = $defaults;
-	}
-
-    /**
      * Method returns the response for the requested resource
      * @param  string $pURI 
      * @param  array  $pOptions
      * @return mixed
      */
-    public function request($pURL, array $pOptions)
+    public function requestResource($pURL, array $pOptions)
     {
-        $options = array_replace_recursive($this->defaults, $pOptions);
+        $options = array_replace_recursive($this->settings['defaults'], $pOptions);
 
         $format = $options['format'];
         $method = $options['method'];

@@ -1,129 +1,10 @@
 <?php namespace Omniphx\Forrest;
 
-use GuzzleHttp\ClientInterface;
-use Omniphx\Forrest\Interfaces\SessionInterface;
-use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Omniphx\Forrest\Interfaces\ResourceInterface;
-use Omniphx\Forrest\Interfaces\AuthenticationInterface;
+use Omniphx\Forrest\Resource;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
 use GuzzleHttp\Exception\ClientException;
 
-class RESTClient {
-
-    /**
-     * @var Resource
-     */
-    protected $resource;
-
-    /**
-     * HTTP request client
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * Session handler
-     * @var Session
-     */
-    protected $session;
-
-
-    /**
-     * Redirect handler
-     * @var Redirect
-     */
-    protected $redirect;
-
-    /**
-     * Config options
-     * @var array
-     */
-    protected $settings;
-
-    /**
-     * Authentication flow
-     * @var Authentication
-     */
-    protected $authentication;
-
-    public function __construct(
-        ResourceInterface $resource,
-        ClientInterface $client,
-        SessionInterface $session,
-        RedirectInterface $redirect,
-        AuthenticationInterface $authentication,
-        $settings)
-    {
-        $this->resource       = $resource;
-        $this->client         = $client;
-        $this->session        = $session;
-        $this->redirect       = $redirect;
-        $this->authentication = $authentication;
-        $this->settings       = $settings;
-    }
-
-    /**
-     * Call this method to redirect user to login page and initiate
-     * the Web Server OAuth Authentication Flow.
-     * @return void
-     */
-    public function authenticate($loginURL = null)
-    {
-        return $this->authentication->authenticate($loginURL);
-    }
-
-    /**
-     * When settings up your callback route, you will need to call this method to acquire an authorization token. This token will be used for the API requests.
-     * @return void
-     */
-    public function callback()
-    {
-        $response = $this->authentication->callback();
-
-        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
-
-        // Encypt token and store token and in session.
-        $this->session->putToken($jsonResponse);
-        $this->session->putRefreshToken($jsonResponse['refresh_token']);
-
-        // Store resources into the session.
-        $this->storeResources();
-    }
-
-    /**
-     * Refresh the access token
-     * @return void
-     */
-    public function refresh()
-    {
-        $refreshToken = $this->session->getRefreshToken();
-
-        $response = $this->authentication->refresh($refreshToken);
-
-        $jsonResponse = $response->json();
-
-        return $this->session->putToken($jsonResponse);
-    }
-
-    /**
-     * Revokes access token from Salesforce. Will not flush token from Session.
-     * @return mixed
-     */
-    public function revoke()
-    {
-        $accessToken = $this->getToken()['access_token'];
-        $url         = $this->settings['oauth']['loginURL'] . '/services/oauth2/revoke';
-
-        $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
-        $options['body']['token']           = $accessToken;
-
-        $this->client->post($url, $options);
-
-        $redirectURL = $this->settings['authRedirect'];
-
-        return $this->redirect->to($redirectURL);
-    }
+abstract class Client extends Resource {
 
     /**
      * Request that returns all currently supported versions.
@@ -438,19 +319,6 @@ class RESTClient {
     }
 
     /**
-     * Try retrieving token, if expired fire refresh method.
-     * @return array
-     */
-    private function getToken()
-    {
-        try {
-            return $this->session->getToken();
-        } catch (MissingTokenException $e) {
-            return $this->refresh();
-        }
-    }
-
-    /**
      * Try requesting token, if 401 error try refreshing token
      * @param  string $url
      * @param  array $options
@@ -459,13 +327,13 @@ class RESTClient {
     public function request($url, $options)
     {
         try {
-            return $this->resource->request($url, $options);
+            return $this->requestResource($url, $options);
         } catch (ClientException $e) {
             if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
                 $this->refresh();
-                return $this->resource->request($url, $options);
+                return $this->requestResource($url, $options);
             }
-            return $this->resource->request($url, $options);
+            return $this->requestResource($url, $options);
         }
     }
 
@@ -476,7 +344,7 @@ class RESTClient {
      * session with the 'version' key.
      * @return void
      */
-    private function storeVersion()
+    protected function storeVersion()
     {
         $configVersion = $this->settings['version'];
 
@@ -501,7 +369,7 @@ class RESTClient {
      * user has access to and store them in teh user's sesion.
      * @return void
      */
-    private function storeResources()
+    protected function storeResources()
     {
         try {
             $version = $this->session->get('version');

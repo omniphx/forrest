@@ -6,3 +6,4 @@ composer.lock
 mm.log
 /vin
 /bin
+/tests

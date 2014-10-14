@@ -1,22 +1,17 @@
-<?php namespace Omniphx\Forrest;
+<?php namespace Omniphx\Forrest\Authentications;
 
+use Omniphx\Forrest\Client;
 use GuzzleHttp\ClientInterface;
+use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
-use GuzzleHttp\Exception\RequestException;
 
-class Authentication implements AuthenticationInterface {
-
-    /**
-     * Interface for HTTP Client
-     * @var GuzzleHttp\ClientInterface
-     */
-    protected $client;
+class WebServer extends Client implements AuthenticationInterface {
 
     /**
-     * Interface for Redirect calls
-     * @var Omniphx\Forrest\Interfaces\RedirectInterface
+     * Redirect handler
+     * @var Redirect
      */
     protected $redirect;
 
@@ -26,19 +21,15 @@ class Authentication implements AuthenticationInterface {
      */
     protected $input;
 
-    /**
-     * Array of OAuth settings: client Id, client secret, callback URI, login URL, and redirect URL after authenticaiton.
-     * @var array
-     */
-    protected $settings;
-
     public function __construct(
         ClientInterface $client,
+        SessionInterface $session,
         RedirectInterface $redirect,
         InputInterface $input,
         $settings)
     {
         $this->client   = $client;
+        $this->session  = $session;
         $this->redirect = $redirect;
         $this->input    = $input;
         $this->settings = $settings;
@@ -89,7 +80,15 @@ class Authentication implements AuthenticationInterface {
             ]
         ]);
 
-        return $response;
+        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
+        $jsonResponse = $response->json();
+
+        // Encypt token and store token and in session.
+        $this->session->putToken($jsonResponse);
+        $this->session->putRefreshToken($jsonResponse['refresh_token']);
+
+        // Store resources into the session.
+        $this->storeResources();
     }
 
     /**
@@ -110,6 +109,38 @@ class Authentication implements AuthenticationInterface {
         ]);
 
         return $response;
+    }
+
+    /**
+     * Revokes access token from Salesforce. Will not flush token from Session.
+     * @return mixed
+     */
+    public function revoke()
+    {
+        $accessToken = $this->getToken()['access_token'];
+        $url         = $this->settings['oauth']['loginURL'] . '/services/oauth2/revoke';
+
+        $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
+        $options['body']['token']           = $accessToken;
+
+        $this->client->post($url, $options);
+
+        $redirectURL = $this->settings['authRedirect'];
+
+        return $this->redirect->to($redirectURL);
+    }
+
+    /**
+     * Try retrieving token, if expired fire refresh method.
+     * @return array
+     */
+    protected function getToken()
+    {
+        try {
+            return $this->session->getToken();
+        } catch (MissingTokenException $e) {
+            return $this->refresh();
+        }
     }
 
 }
