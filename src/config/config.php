@@ -6,6 +6,11 @@
 return array(
 
 	/**
+	 * Options include WebServer or UserPassword
+	 */
+	'authentication' => 'WebServer',
+
+	/**
 	 * Enter your OAuth creditials:
 	 */
 	'oauth' => array(

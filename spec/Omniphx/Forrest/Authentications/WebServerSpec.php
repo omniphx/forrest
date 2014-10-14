@@ -46,9 +46,10 @@ class WebServerSpec extends ObjectBehavior
 
                 'method' => 'get',
                 'format' => 'json',
+                'debug' => false,
     
             ),
-            'language' => 'en_US',
+            'language' => 'en_US'
         );
 
         $mockedSession->get('resources')->willReturn([
@@ -77,6 +78,9 @@ class WebServerSpec extends ObjectBehavior
             'instance_url' => 'https://na00.salesforce.com',
             'token_type'   => 'Oauth']);
 
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
 
         $this->beConstructedWith(
             $mockedClient,
@@ -110,7 +114,7 @@ class WebServerSpec extends ObjectBehavior
 
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token',Argument::type('array'))->shouldBeCalled(1)->willReturn($mockedResponse1);
 
-        $mockedClient->createRequest("get", "https://na00.salesforce.com/services/data/", Argument::type('array'))->shouldBeCalled(1)->willReturn($mockedRequest);
+        $mockedClient->createRequest('get', 'https://na00.salesforce.comresourceURLs', Argument::type('array'))->shouldBeCalled(1)->willReturn($mockedRequest);
 
         $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($mockedResponse2);
 
@@ -118,12 +122,13 @@ class WebServerSpec extends ObjectBehavior
             'access_token'  => 'value1',
             'refresh_token' => 'value2'));
 
-        $mockedResponse2->json()->shouldBeCalled()->willReturn(array('version'=>'29.0','version'=>'30.0'));
+        $mockedResponse2->json()->shouldBeCalled()->willReturn([['version'=>'30.0'],['version'=>'31.0']]);
 
         $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
         $mockedSession->putRefreshToken(Argument::exact('value2'))->shouldBeCalled();
+        $mockedSession->put(Argument::type('string'), Argument::type('array'))->shouldBeCalled();
 
-        $this->callback()->shouldBeCalled()->shouldReturn(null);
+        $this->callback()->shouldReturn(null);
     }
 
     function it_should_refresh(
@@ -141,51 +146,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     //Client abstraction
-
-    // function it_should_callback(
-    //     AuthenticationInterface $mockedAuthentication,
-    //     SessionInterface $mockedSession,
-    //     ResponseInterface $mockedResponse,
-    //     ResourceInterface $mockedResource)
-    // {
-
-    //     $mockedAuthentication->callback()->shouldBeCalled()->willReturn($mockedResponse);
-
-    //     $mockedResponse->json()->shouldBeCalled()->willReturn(array(
-    //         'access_token'  => 'value1',
-    //         'refresh_token' => 'value2'));
-
-    //     $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
-    //     $mockedSession->putRefreshToken(Argument::exact('value2'))->shouldBeCalled();
-
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn(array(
-    //             '1'=> array('version'=>'29.0'),
-    //             '2'=> array('version'=>'30.0')));
-
-    //     $mockedSession->put(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
-
-    //     $this->callback()->shouldReturn(null);
-    // }
-
-    // function it_should_refresh(
-    //     SessionInterface $mockedSession,
-    //     AuthenticationInterface $mockedAuthentication,
-    //     ResponseInterface $mockedResponse)
-    // {
-    //     $mockedSession->getRefreshToken()
-    //         ->shouldBeCalled()
-    //         ->willReturn('token');
-
-    //     $mockedAuthentication->refresh('token')
-    //         ->shouldBeCalled()
-    //         ->willReturn($mockedResponse);
-
-    //     $mockedSession->putToken(Argument::any())
-    //         ->shouldBeCalled();
-
-    //     $this->refresh()->shouldReturn(null);
-
-    // }
 
     function it_should_revoke_the_authentication_token(
         ClientInterface $mockedClient,
@@ -206,170 +166,168 @@ class WebServerSpec extends ObjectBehavior
     {
         $mockedSession->getToken()->shouldBeCalled();
 
-        $mockedClient->send(Argument::any())->shouldBeCalled()->willReturn($mockedResponse);
-        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->shouldBeCalled()->willReturn($mockedRequest);
-
         $mockedResponse->json()->shouldBeCalled()->willReturn(array('version'=>'29.0','version'=>'30.0'));
 
         $this->versions()->shouldReturn(array('version'=>'29.0','version'=>'30.0'));
     }
 
-    // function it_should_return_resources(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->getToken()->shouldBeCalled();
-    //     $mockedSession->get('version')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('versionURLs');
+    function it_should_return_resources(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
+        $mockedSession->get('version')->shouldBeCalled();
 
-    //     $this->resources()->shouldReturn('versionURLs');
-    // }
+        $mockedResponse->json()->shouldBeCalled()->willReturn('versionURLs');
 
-    // function it_should_return_identity (
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->getToken()->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->willReturn('Identity');
+        $this->resources()->shouldReturn('versionURLs');
+    }
 
-    //     $this->identity()->shouldReturn('Identity');
-    // }
+    function it_should_return_identity (
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
+        $mockedResponse->json()->willReturn('Identity');
 
-    // function it_should_return_limits(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('limits');
+        $this->identity()->shouldReturn('Identity');
+    }
 
-    //     $this->limits()->shouldReturn('limits');
-    // }
+    function it_should_return_limits(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedResponse->json()->shouldBeCalled()->willReturn('limits');
 
-    // function it_should_return_describe(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('describe');
+        $this->limits()->shouldReturn('limits');
+    }
 
-    //     $this->describe()->shouldReturn('describe');        
-    // }
+    function it_should_return_describe(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedResponse->json()->shouldBeCalled()->willReturn('describe');
 
-    // function it_should_return_query(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('query');
+        $this->describe()->shouldReturn('describe');        
+    }
 
-    //     $this->query('query')->shouldReturn('query');
-    // }
+    function it_should_return_query(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('query');
 
-    // function it_should_return_queryExplain(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('queryExplain');
+        $this->query('query')->shouldReturn('query');
+    }
 
-    //     $this->queryExplain('query')->shouldReturn('queryExplain');
-    // }
+    function it_should_return_queryExplain(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('queryExplain');
 
-    // function it_should_return_queryAll(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('queryAll');
+        $this->queryExplain('query')->shouldReturn('queryExplain');
+    }
 
-    //     $this->queryAll('query')->shouldReturn('queryAll');
-    // }
+    function it_should_return_queryAll(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('queryAll');
 
-    // function it_should_return_quickActions(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('quickActions');
+        $this->queryAll('query')->shouldReturn('queryAll');
+    }
 
-    //     $this->quickActions()->shouldReturn('quickActions');
-    // }
+    function it_should_return_quickActions(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('quickActions');
 
-    // function it_should_return_search(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('search');
+        $this->quickActions()->shouldReturn('quickActions');
+    }
 
-    //     $this->search('query')->shouldReturn('search');
-    // }
+    function it_should_return_search(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('search');
 
-    // function it_should_return_ScopeOrder(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->getToken()->shouldBeCalled();
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('searchScopeOrder');
+        $this->search('query')->shouldReturn('search');
+    }
 
-    //     $this->scopeOrder()->shouldReturn('searchScopeOrder');
-    // }
+    function it_should_return_ScopeOrder(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('searchScopeOrder');
 
-    // function it_should_return_searchLayouts(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->getToken()->shouldBeCalled();
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('searchLayouts');
+        $this->scopeOrder()->shouldReturn('searchScopeOrder');
+    }
 
-    //     $this->searchLayouts('objectList')->shouldReturn('searchLayouts');
-    // }
+    function it_should_return_searchLayouts(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('searchLayouts');
 
-    // function it_should_return_suggestedArticles(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->getToken()->shouldBeCalled();
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('suggestedArticles');
+        $this->searchLayouts('objectList')->shouldReturn('searchLayouts');
+    }
 
-    //     $this->suggestedArticles('query')->shouldReturn('suggestedArticles');
-    // }
+    function it_should_return_suggestedArticles(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('suggestedArticles');
 
-    // function it_should_return_suggestedQueries(
-    //     SessionInterface $mockedSession,
-    //     ResourceInterface $mockedResource)
-    // {
-    //     $mockedSession->getToken()->shouldBeCalled();
-    //     $mockedSession->get('resources')->shouldBeCalled();
-    //     $mockedResource->request(Argument::type('string'),Argument::type('array'))->shouldBeCalled()->willReturn('searchSuggestedQueries');
+        $this->suggestedArticles('query')->shouldReturn('suggestedArticles');
+    }
 
-    //     $this->suggestedQueries('query')->shouldReturn('searchSuggestedQueries');
-    // }
+    function it_should_return_suggestedQueries(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->getToken()->shouldBeCalled();
+        $mockedSession->get('resources')->shouldBeCalled();
+        $mockedResponse->json()->shouldBeCalled()->willReturn('searchSuggestedQueries');
+
+        $this->suggestedQueries('query')->shouldReturn('searchSuggestedQueries');
+    }
 
     //Resource
-    // function it_returns_a_resource(
-    //     ClientInterface $mockedClient,
-    //     SessionInterface $mockedSession,
-    //     RequestInterface $mockedRequest,
-    //     ResponseInterface $mockedResponse)
-    // {
-    //     $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
-    //     $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+    function it_returns_a_resource(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
 
-    //     $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
-    //     $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
+        $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
+        $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
 
-    //     $mockedSession->getToken()->willReturn(array(
-    //         'access_token' =>'abc',
-    //         'instance_url' =>'def',
-    //         'token_type'   =>'bearer'));
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'abc',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
 
-    //     $this->request('uri',[])->shouldReturn('jsonResource');
-    //     $this->request('uri',['format'=>'xml'])->shouldReturn('xmlResource');
-    // }
+        $this->request('uri',[])->shouldReturn('jsonResource');
+        $this->request('uri',['format'=>'xml'])->shouldReturn('xmlResource');
+    }
 
 }
 
