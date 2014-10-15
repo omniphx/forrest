@@ -85,7 +85,6 @@ abstract class Resource implements ResourceInterface {
             $headers['Accept'] = 'application/x-www-form-urlencoded';
             $headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
-
         return $headers;
     }
 

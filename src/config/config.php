@@ -11,14 +11,16 @@ return array(
 	'authentication' => 'WebServer',
 
 	/**
-	 * Enter your OAuth creditials:
+	 * Enter your OAuth creditials
+	 * Grant type, Username and password are only neccessary for UserPassword flow. Likewise, callbackURI is only necessary for WebServer flow.
 	 */
 	'oauth' => array(
-
-			'consumerKey' => '',
-			'consumerSecret' => '',
-			'callbackURI' => '',
-			'loginURL' => 'https://login.salesforce.com',
+		'consumerKey' => '',
+		'consumerSecret' => '',
+		'callbackURI' => '',
+		'loginURL' => 'https://login.salesforce.com',
+		'username' => '',
+		'password' => '',
 	),
 
 	/**

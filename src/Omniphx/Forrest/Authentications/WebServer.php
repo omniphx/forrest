@@ -5,10 +5,10 @@ use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
-use Omniphx\Forrest\Interfaces\AuthenticationInterface;
+use Omniphx\Forrest\Interfaces\WebServerInterface;
 
-class WebServer extends Client implements AuthenticationInterface {
-
+class WebServer extends Client implements WebServerInterface
+{
     /**
      * Redirect handler
      * @var Redirect

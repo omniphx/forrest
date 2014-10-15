@@ -11,14 +11,14 @@
 
 Route::get('/authenticate', function()
 {
-	return Forrest::authenticate();
+    return Forrest::authenticate();
 });
 
 Route::get('/callback', function()
 {
-	Forrest::callback();
+    Forrest::callback();
 
-	$url = Config::get('forrest::authRedirect');
+    $url = Config::get('forrest::authRedirect');
 
-	return Redirect::to($url);
+    return Redirect::to($url);
 });

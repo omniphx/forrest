@@ -2,7 +2,6 @@
 
 use Config;
 use Illuminate\Support\ServiceProvider;
-use Omniphx\Forrest\RESTClient;
 
 class ForrestServiceProvider extends ServiceProvider {
 
@@ -22,7 +21,9 @@ class ForrestServiceProvider extends ServiceProvider {
 	{
 		$this->package('omniphx/forrest', null, __DIR__.'/../../../..');
 
-		include __DIR__ . '/routes.php';
+		$authentication  = Config::get('forrest::authentication');
+
+		include __DIR__ . "/routes/$authentication.php";
 	}
 
 	/**

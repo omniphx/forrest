@@ -70,7 +70,7 @@ class WebServerSpec extends ObjectBehavior
             'appMenu'      => '/services/data/v30.0/appMenu']);
 
         $mockedSession->get('version')->willReturn([
-            'url' => 'resourceURLs']);
+            'url' => '/resourceURL']);
 
         $mockedSession->getToken()->willReturn([
             'access_token' => 'accessToken',
@@ -104,25 +104,19 @@ class WebServerSpec extends ObjectBehavior
     function it_should_callback(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse1,
-        ResponseInterface $mockedResponse2,
-        InputInterface $mockedInput,
+        ResponseInterface $tokenResponse,
+        ResponseInterface $versionResponse,
         SessionInterface $mockedSession)
     {
-        $mockedInput->get('code')->shouldBeCalled(1)->willReturn('this code');
-        $mockedInput->get('state')->shouldBeCalled(1)->willReturn('this state');
+        $mockedClient->post('https://login.salesforce.com/services/oauth2/token',Argument::type('array'))->shouldBeCalled(1)->willReturn($tokenResponse);
 
-        $mockedClient->post('https://login.salesforce.com/services/oauth2/token',Argument::type('array'))->shouldBeCalled(1)->willReturn($mockedResponse1);
+        $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
 
-        $mockedClient->createRequest('get', 'https://na00.salesforce.comresourceURLs', Argument::type('array'))->shouldBeCalled(1)->willReturn($mockedRequest);
-
-        $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($mockedResponse2);
-
-        $mockedResponse1->json()->shouldBeCalled(1)->willReturn(array(
+        $tokenResponse->json()->shouldBeCalled(1)->willReturn(array(
             'access_token'  => 'value1',
             'refresh_token' => 'value2'));
 
-        $mockedResponse2->json()->shouldBeCalled()->willReturn([['version'=>'30.0'],['version'=>'31.0']]);
+        $versionResponse->json()->shouldBeCalled()->willReturn([['version'=>'30.0'],['version'=>'31.0']]);
 
         $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
         $mockedSession->putRefreshToken(Argument::exact('value2'))->shouldBeCalled();
@@ -136,7 +130,6 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
     {
-
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
