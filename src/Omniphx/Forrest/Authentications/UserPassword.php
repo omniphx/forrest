@@ -45,7 +45,6 @@ class UserPassword extends Client implements UserPasswordInterface
             'username'      => $this->settings['oauth']['username'],
             'password'      => $this->settings['oauth']['password'],
         ];
-
         $response = $this->client->post($tokenURL, $parameters);
         
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
@@ -59,8 +58,7 @@ class UserPassword extends Client implements UserPasswordInterface
     }
 
     /**
-     * Refresh authentication token
-     * @param  Array $refreshToken
+     * Refresh authentication token by re-authenticating
      * @return mixed $response
      */
     public function refresh()
@@ -76,23 +74,27 @@ class UserPassword extends Client implements UserPasswordInterface
             ]
         ]);
 
-        // Not sure if the below is correct. Used to only return the standard response
+        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
-        $this->session->putToken($jsonResponse);
 
-        return $jsonResponse;
+        // Encypt token and store token and in session.
+        $this->session->putToken($jsonResponse);
     }
 
     /**
-     * Try retrieving token, if expired fire refresh method.
-     * @return array
+     * Try requesting token, if token expired try refreshing token
+     * @param  string $url
+     * @param  array $options
+     * @return mixed
      */
-    protected function getToken()
+    public function request($url, $options)
     {
         try {
-            return $this->session->getToken();
-        } catch (MissingTokenException $e) {
-            return $this->refresh();
+            return $this->requestResource($url, $options);
+        } catch (TokenExpiredException $e) {
+            $this->refresh();
+            return $this->requestResource($url, $options);
         }
     }
+
 }

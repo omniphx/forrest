@@ -1,11 +1,14 @@
 <?php namespace Omniphx\Forrest\Authentications;
 
-use Omniphx\Forrest\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ClientException;
+use Omniphx\Forrest\Client;
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\WebServerInterface;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
+
 
 class WebServer extends Client implements WebServerInterface
 {
@@ -108,7 +111,11 @@ class WebServer extends Client implements WebServerInterface
             ]
         ]);
 
-        return $response;
+        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
+        $jsonResponse = $response->json();
+
+        // Encypt token and store token and in session.
+        $this->session->putToken($jsonResponse);
     }
 
     /**
@@ -131,15 +138,19 @@ class WebServer extends Client implements WebServerInterface
     }
 
     /**
-     * Try retrieving token, if expired fire refresh method.
-     * @return array
+     * Try requesting token, if token expired try refreshing token
+     * @param  string $url
+     * @param  array $options
+     * @return mixed
      */
-    protected function getToken()
+    public function request($url, $options)
     {
         try {
-            return $this->session->getToken();
-        } catch (MissingTokenException $e) {
-            return $this->refresh();
+            return $this->requestResource($url, $options);
+        } catch (TokenExpiredException $e) {
+            $refreshToken = $this->session->getRefreshToken();
+            $this->refresh($refreshToken);
+            return $this->requestResource($url, $options);
         }
     }
 

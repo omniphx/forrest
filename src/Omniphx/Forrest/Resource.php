@@ -1,7 +1,9 @@
 <?php namespace Omniphx\Forrest;
 
-use Omniphx\Forrest\Interfaces\ResourceInterface;
 use GuzzleHttp\Exception\RequestException;
+use Omniphx\Forrest\Interfaces\ResourceInterface;
+use Omniphx\Forrest\Exceptions\SalesforceException;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
 abstract class Resource implements ResourceInterface {
 
@@ -44,17 +46,24 @@ abstract class Resource implements ResourceInterface {
 
         $request = $this->client->createRequest($method,$pURL,$parameters);
 
-        if($options['debug'] == true){
-            $response = $this->debug($request);
-            if(is_object($response))
-            {
-                return $this->responseFormat($response,$format);
-            }
-        } else {
+        try {
             $response = $this->client->send($request);
+        } catch(RequestException $e) {
 
-            return $this->responseFormat($response,$format);
+            if($options['debug']){
+                $this->debug($e);
+            } else if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
+                throw new TokenExpiredException(sprintf("Salesforce token has expired"));
+            } else if($e->hasResponse()){
+                throw new SalesforceException(sprintf("Request failed: %s",$e->getResponse()));
+            } else {
+                throw new SalesforceException(sprintf("Invalid request: %s",$e->getRequest()));
+            }
+
         }
+
+        return $this->responseFormat($response,$format);
+        
     }
 
     /**
@@ -126,22 +135,23 @@ abstract class Resource implements ResourceInterface {
         return $response;
     }
 
-    private function debug($request)
+    /**
+     * If users has debug = true in config, this will output the failed request.
+     * @param  RequestException $request
+     * @return void
+     */
+    private function debug($error)
     {
-        try {
-            return $this->client->send($request);
-        } catch (RequestException $e) {
-            echo "<pre>";
-            echo "Request\n";
-            echo "-------\n";
-            echo $e->getRequest() . "\n";
-            if ($e->hasResponse()) {
-                echo "\nResponse\n";
-                echo "--------\n";
-                echo $e->getResponse() . "\n";
-            }
-            echo "</pre>";
+        echo "<pre>";
+        echo "Request\n";
+        echo "-------\n";
+        echo $e->getRequest() . "\n";
+        if ($e->hasResponse()) {
+            echo "\nResponse\n";
+            echo "--------\n";
+            echo $e->getResponse() . "\n";
         }
+        echo "</pre>";
     }
 
 }

@@ -2,6 +2,7 @@
 
 use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
+use Omniphx\Forrest\Exceptions\MissingRefreshTokenException;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Session;
 use Crypt;
@@ -55,7 +56,7 @@ class LaravelSession implements SessionInterface {
 			return Crypt::decrypt($token);
 		}
 
-		throw new MissingTokenException(sprintf('No token available in current Session'));
+		throw new MissingTokenException(sprintf('No token available in current session'));
 	}
 
 	/**
@@ -80,6 +81,6 @@ class LaravelSession implements SessionInterface {
 			return Crypt::decrypt($token);
 		}
 
-		throw new MissingTokenException(sprintf('No refresh token available in current Session'));
+		throw new MissingRefreshTokenException(sprintf('No refresh token stored in current session. Verify you have added refresh_token to your scope items on your connected app settings in Salesforce.'));
 	}
 }

@@ -2,7 +2,6 @@
 
 use Omniphx\Forrest\Resource;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
-use GuzzleHttp\Exception\ClientException;
 
 abstract class Client extends Resource {
 
@@ -319,22 +318,12 @@ abstract class Client extends Resource {
     }
 
     /**
-     * Try requesting token, if 401 error try refreshing token
-     * @param  string $url
-     * @param  array $options
-     * @return mixed
+     * Get token
+     * @return array
      */
-    public function request($url, $options)
+    protected function getToken()
     {
-        try {
-            return $this->requestResource($url, $options);
-        } catch (ClientException $e) {
-            if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
-                $this->refresh();
-                return $this->requestResource($url, $options);
-            }
-            return $this->requestResource($url, $options);
-        }
+        return $this->session->getToken();
     }
 
     /**

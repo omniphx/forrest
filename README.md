@@ -217,7 +217,7 @@ Forrest::revoke();
 Returns all currently supported versions. Includes the verison, label and link to each version's root:
 
 ```php
-Forrest::verions();
+Forrest::versions();
 ```
 
 #### Resources
@@ -268,7 +268,7 @@ Forrest::queryExplain('SELECT Id FROM Account');
 Returns results for a specified SOQL query, but will also inlcude deleted records.
 
 ```php
-Forrest::queryExplain('SELECT Id FROM Account');
+Forrest::queryAll('SELECT Id FROM Account');
 ```
 
 #### Search
