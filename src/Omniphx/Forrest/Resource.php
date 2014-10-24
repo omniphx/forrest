@@ -49,7 +49,6 @@ abstract class Resource implements ResourceInterface {
         try {
             $response = $this->client->send($request);
         } catch(RequestException $e) {
-
             if($options['debug']){
                 $this->debug($e);
             } else if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {

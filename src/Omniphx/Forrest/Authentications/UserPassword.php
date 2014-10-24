@@ -82,6 +82,25 @@ class UserPassword extends Client implements UserPasswordInterface
     }
 
     /**
+     * Revokes access token from Salesforce. Will not flush token from Session.
+     * @return mixed
+     */
+    public function revoke()
+    {
+        $accessToken = $this->getToken()['access_token'];
+        $url         = $this->settings['oauth']['loginURL'] . '/services/oauth2/revoke';
+
+        $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
+        $options['body']['token']           = $accessToken;
+
+        $this->client->post($url, $options);
+
+        $redirectURL = $this->settings['authRedirect'];
+
+        return $this->redirect->to($redirectURL);
+    }
+
+    /**
      * Try requesting token, if token expired try refreshing token
      * @param  string $url
      * @param  array $options

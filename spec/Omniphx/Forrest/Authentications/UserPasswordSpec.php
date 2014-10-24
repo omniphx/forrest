@@ -105,9 +105,205 @@ class UserPasswordSpec extends ObjectBehavior
         $this->authenticate('url')->shouldReturn(null);
     }
 
-    function it_should_refresh(ResponseInterface $mockedResponse)
+    function it_should_refresh(
+        ResponseInterface $mockedResponse,
+        SessionInterface $mockedSession)
     {
-        $mockedResponse->json()->willReturn('json_response');
-        $this->refresh()->shouldReturn('json_response');
+        $mockedResponse->json()->shouldBeCalled()->willReturn(['key'=>'value']);
+        $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
+
+        $this->refresh()->shouldReturn(null);
     }
+
+    function it_should_return_the_request(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
+
+        $mockedResponse->json()->shouldBeCalled()->willReturn('worked');
+
+        $this->request('url',['key'=>'value'])->shouldReturn('worked');
+    }
+
+    function it_should_refresh_the_token_if_response_throws_error(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+
+        $mockedClient->send($mockedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
+
+        //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it. Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual behavior would never throw the exception, it would return a response.
+        $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url',['key'=>'value']);
+    }
+
+    function it_should_revoke_the_authentication_token(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RedirectInterface $mockedRedirect)
+    {
+        $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
+        $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
+        $this->revoke()->shouldReturn('redirectURL');
+    }
+
+    //Client
+
+    function it_should_return_the_versions(
+        SessionInterface $mockedSession,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn(array('version'=>'29.0','version'=>'30.0'));
+
+        $this->versions()->shouldReturn(array('version'=>'29.0','version'=>'30.0'));
+    }
+
+    function it_should_return_resources(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('versionURLs');
+
+        $this->resources()->shouldReturn('versionURLs');
+    }
+
+    function it_should_return_identity (
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->willReturn('Identity');
+
+        $this->identity()->shouldReturn('Identity');
+    }
+
+    function it_should_return_limits(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedResponse->json()->shouldBeCalled()->willReturn('limits');
+
+        $this->limits()->shouldReturn('limits');
+    }
+
+    function it_should_return_describe(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedResponse->json()->shouldBeCalled()->willReturn('describe');
+
+        $this->describe()->shouldReturn('describe');        
+    }
+
+    function it_should_return_query(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('query');
+
+        $this->query('query')->shouldReturn('query');
+    }
+
+    function it_should_return_queryExplain(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('queryExplain');
+
+        $this->queryExplain('query')->shouldReturn('queryExplain');
+    }
+
+    function it_should_return_queryAll(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('queryAll');
+
+        $this->queryAll('query')->shouldReturn('queryAll');
+    }
+
+    function it_should_return_quickActions(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('quickActions');
+
+        $this->quickActions()->shouldReturn('quickActions');
+    }
+
+    function it_should_return_search(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('search');
+
+        $this->search('query')->shouldReturn('search');
+    }
+
+    function it_should_return_ScopeOrder(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('searchScopeOrder');
+
+        $this->scopeOrder()->shouldReturn('searchScopeOrder');
+    }
+
+    function it_should_return_searchLayouts(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('searchLayouts');
+
+        $this->searchLayouts('objectList')->shouldReturn('searchLayouts');
+    }
+
+    function it_should_return_suggestedArticles(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('suggestedArticles');
+
+        $this->suggestedArticles('query')->shouldReturn('suggestedArticles');
+    }
+
+    function it_should_return_suggestedQueries(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('searchSuggestedQueries');
+
+        $this->suggestedQueries('query')->shouldReturn('searchSuggestedQueries');
+    }
+
+    //Resource class
+
+    function it_returns_a_resource(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest(Argument::type('string'),Argument::type('string'),Argument::type('array'))->willReturn($mockedRequest);
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
+        $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
+
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'abc',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
+
+        $this->request('uri',[])->shouldReturn('jsonResource');
+        $this->request('uri',['format'=>'xml'])->shouldReturn('xmlResource');
+    }
+
 }
