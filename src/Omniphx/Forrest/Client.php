@@ -228,13 +228,7 @@ abstract class Client extends Resource {
 
         if (isset($options['parameters'])) {
             $parameters = array_replace_recursive($parameters, $options['parameters']);
-        }
-
-        foreach ($parameters as $key => $value) {
-            $url .= '&';
-            $url .= $key;
-            $url .= '=';
-            $url .= $value;
+            $url .= '&' . http_build_query($parameters);
         }
 
         $suggestedArticles = $this->request($url, $options);
@@ -250,7 +244,6 @@ abstract class Client extends Resource {
      * Tested this and can't get it to work. I think the request is set up correctly.
      *
      * @param  string $query
-     * @param  array $searchParameters
      * @param  array $options
      * @return array
      */
@@ -265,18 +258,34 @@ abstract class Client extends Resource {
 
         if (isset($options['parameters'])) {
             $parameters = array_replace_recursive($parameters, $options['parameters']);
-        }
-
-        foreach ($parameters as $key => $value) {
-            $url .= '&';
-            $url .= $key;
-            $url .= '=';
-            $url .= $value;
+            $url .= '&' . http_build_query($parameters);
         }
 
         $suggestedQueries = $this->request($url, $options);
 
         return $suggestedQueries;
+    }
+
+    /**
+     * Request to a custom Apex REST endpoint
+     * @param  String $customURI
+     * @param  Array $option
+     * @return mixed
+     */
+    public function custom($customURI, $options = [])
+    {
+        $url  = $this->getToken()['instance_url'];
+        $url .= '/services/apexrest';
+        $url .= $customURI;
+
+        $parameters = [];
+
+        if (isset($options['parameters'])) {
+            $parameters = array_replace_recursive($parameters, $options['parameters']);
+            $url .= '?' . http_build_query($parameters);
+        }
+        
+        return $this->request($url, $options);
     }
 
     /**
@@ -370,6 +379,24 @@ abstract class Client extends Resource {
             $resources = $this->resources();
             $this->session->put('resources', $resources);
         }
+    }
+
+    /**
+     * Encodes array of key values into encoded url.
+     * @param  [type] $parameters [description]
+     * @return [type]             [description]
+     */
+    private function encodeParameters($parameters){
+        $url = '';
+
+        foreach ($parameters as $key => $value) {
+            $url .= '&';
+            $url .= $key;
+            $url .= '=';
+            $url .= $value;
+        }
+
+        return $url;
     }
 
 }

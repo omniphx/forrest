@@ -2,10 +2,4 @@
 
 interface UserPasswordInterface extends AuthenticationInterface{
 
-    /**
-     * Refresh authentication token
-     * @return mixed $response
-     */
-    public function refresh();
-
 }

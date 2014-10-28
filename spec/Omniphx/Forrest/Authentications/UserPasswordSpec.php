@@ -24,7 +24,7 @@ class UserPasswordSpec extends ObjectBehavior
 
         $settings  = array(
             'authenticationFlow' => 'UserPassword',
-            'oauth' => array(
+            'creditials' => array(
                 'consumerKey'    => 'testingClientId',
                 'consumerSecret' => 'testingClientSecret',
                 'callbackURI'    => 'callbackURL',
@@ -33,7 +33,7 @@ class UserPasswordSpec extends ObjectBehavior
                 'password' => '',
 
             ),
-            'optional' => array(
+            'parameters' => array(
                 'display'   => 'popup',
                 'immediate' => 'false',
                 'state'     => '',
@@ -42,9 +42,10 @@ class UserPasswordSpec extends ObjectBehavior
             'authRedirect' => 'redirectURL',
             'version' => '30.0',
             'defaults' => array(
-                'method' => 'get',
-                'format' => 'json',
-                'debug'  => false,
+                'method'          => 'get',
+                'format'          => 'json',
+                'compression'     => false,
+                'compressionType' => 'gzip',
             ),
             'language' => 'en_US'
         );
@@ -147,8 +148,7 @@ class UserPasswordSpec extends ObjectBehavior
         RedirectInterface $mockedRedirect)
     {
         $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
-        $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
-        $this->revoke()->shouldReturn('redirectURL');
+        $this->revoke()->shouldReturn(null);
     }
 
     //Client

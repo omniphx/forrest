@@ -3,6 +3,7 @@ composer.phar
 composer.lock
 .DS_Store
 /src/config/local
+/src/config/production
 mm.log
 /vin
 /bin

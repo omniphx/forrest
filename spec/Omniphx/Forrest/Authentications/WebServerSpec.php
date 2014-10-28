@@ -23,40 +23,36 @@ class WebServerSpec extends ObjectBehavior
         InputInterface $mockedInput)
     {
         $settings  = array(
-            'oauth' => array(
-
+            'creditials' => array(
                 'consumerKey'     => 'testingClientId',
                 'consumerSecret' => 'testingClientSecret',
                 'callbackURI'  => 'callbackURL',
                 'loginURL'     => 'https://login.salesforce.com',
-
             ),
             'authenticationFlow' => 'WebServer',
-            'optional'     => array(
-
+            'parameters'     => array(
                 'display'   => 'popup',
                 'immediate' => 'false',
                 'state'     => '',
                 'scope'     => '',
-
+                'prompt'    => '',
             ),
             'authRedirect' => 'redirectURL',
             'version' => '30.0',
             'defaults' => array(
-
-                'method' => 'get',
-                'format' => 'json',
-                'debug' => false,
-    
+                'method'          => 'get',
+                'format'          => 'json',
+                'compression'     => false,
+                'compressionType' => 'gzip',
             ),
             'language' => 'en_US'
         );
 
         $token = [
-            'access_token' => 'xxxxaccess.tokenxxxx',
-            'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
-            'instance_url' => 'https://na##.salesforce.com',
-            'token_type'   => 'Bearer',
+            'access_token'  => 'xxxxaccess.tokenxxxx',
+            'id'            => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
+            'instance_url'  => 'https://na##.salesforce.com',
+            'token_type'    => 'Bearer',
             'refresh_token' => 'xxxxrefresh.tokenxxxx'];
 
         $resources = [
@@ -85,7 +81,6 @@ class WebServerSpec extends ObjectBehavior
 
         //Client stubs
         $mockedClient->send(Argument::any())->willReturn($mockedResponse);
-        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
 
         $this->beConstructedWith(
             $mockedClient,
@@ -114,8 +109,8 @@ class WebServerSpec extends ObjectBehavior
         SessionInterface $mockedSession)
     {
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token',Argument::type('array'))->shouldBeCalled(1)->willReturn($tokenResponse);
-
         $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
 
         $tokenResponse->json()->shouldBeCalled(1)->willReturn(array(
             'access_token'  => 'value1',
@@ -136,6 +131,8 @@ class WebServerSpec extends ObjectBehavior
         ResponseInterface $mockedResponse,
         SessionInterface $mockedSession)
     {
+        $mockedSession->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
+
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
@@ -155,6 +152,7 @@ class WebServerSpec extends ObjectBehavior
         ResponseInterface $mockedResponse)
     {
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
 
         $mockedResponse->json()->shouldBeCalled()->willReturn('worked');
 
@@ -167,7 +165,7 @@ class WebServerSpec extends ObjectBehavior
         SessionInterface $mockedSession,
         ResponseInterface $mockedResponse)
     {
-
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedClient->send($mockedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
 
         $mockedSession->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
@@ -192,9 +190,11 @@ class WebServerSpec extends ObjectBehavior
     {
         $mockedClient->send($failedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
 
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($failedRequest);
+
         $mockedSession->getRefreshToken()->willThrow('\Omniphx\Forrest\Exceptions\MissingRefreshTokenException');
 
-        $this->request('url',['key'=>'value'])->shouldThrow('Omniphx\Forrest\Exceptions\MissingRefreshTokenException');
+        $this->shouldThrow('Omniphx\Forrest\Exceptions\MissingRefreshTokenException')->duringRequest('url',['key'=>'value']);
     }
 
     //Client class
@@ -202,11 +202,11 @@ class WebServerSpec extends ObjectBehavior
     function it_should_revoke_the_authentication_token(
         ClientInterface $mockedClient,
         SessionInterface $mockedSession,
-        RedirectInterface $mockedRedirect)
+        RedirectInterface $mockedRedirect,
+        RequestInterface $mockedRequest)
     {
         $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
-        $mockedRedirect->to(Argument::type('string'))->shouldBeCalled()->willReturn('redirectURL');
-        $this->revoke()->shouldReturn('redirectURL');
+        $this->revoke()->shouldReturn(null);
     }
 
     function it_should_return_the_versions(
@@ -215,6 +215,7 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn(array('version'=>'29.0','version'=>'30.0'));
 
         $this->versions()->shouldReturn(array('version'=>'29.0','version'=>'30.0'));
@@ -222,8 +223,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_resources(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('versionURLs');
 
         $this->resources()->shouldReturn('versionURLs');
@@ -231,8 +235,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_identity (
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->willReturn('Identity');
 
         $this->identity()->shouldReturn('Identity');
@@ -240,8 +247,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_limits(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
         $mockedResponse->json()->shouldBeCalled()->willReturn('limits');
 
@@ -250,8 +260,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_describe(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
         $mockedResponse->json()->shouldBeCalled()->willReturn('describe');
 
@@ -260,8 +273,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_query(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('query');
 
         $this->query('query')->shouldReturn('query');
@@ -269,8 +285,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_queryExplain(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('queryExplain');
 
         $this->queryExplain('query')->shouldReturn('queryExplain');
@@ -278,8 +297,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_queryAll(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('queryAll');
 
         $this->queryAll('query')->shouldReturn('queryAll');
@@ -287,8 +309,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_quickActions(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('quickActions');
 
         $this->quickActions()->shouldReturn('quickActions');
@@ -296,8 +321,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_search(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('search');
 
         $this->search('query')->shouldReturn('search');
@@ -305,8 +333,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_ScopeOrder(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchScopeOrder');
 
         $this->scopeOrder()->shouldReturn('searchScopeOrder');
@@ -314,8 +345,11 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_searchLayouts(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchLayouts');
 
         $this->searchLayouts('objectList')->shouldReturn('searchLayouts');
@@ -323,20 +357,37 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_return_suggestedArticles(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest('get','https://na##.salesforce.com/services/data/v30.0/search/suggestTitleMatches?q=query&language=en_US&publishStatus=Online&foo=bar&flim=flam',Argument::type('Array'))->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('suggestedArticles');
 
-        $this->suggestedArticles('query')->shouldReturn('suggestedArticles');
+        $this->suggestedArticles('query', ['parameters'=>['foo'=>'bar','flim'=>'flam']])->shouldReturn('suggestedArticles');
     }
 
     function it_should_return_suggestedQueries(
         SessionInterface $mockedSession,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
     {
+        $mockedClient->createRequest('get','https://na##.salesforce.com/services/data/v30.0/search/suggestSearchQueries?q=query&language=en_US&foo=bar&flim=flam',Argument::type('array'))->willReturn($mockedRequest);
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchSuggestedQueries');
 
-        $this->suggestedQueries('query')->shouldReturn('searchSuggestedQueries');
+        $this->suggestedQueries('query', ['parameters'=>['foo'=>'bar','flim'=>'flam']])->shouldReturn('searchSuggestedQueries');
+    }
+
+    function it_should_return_custom_request(
+        SessionInterface $mockedSession,
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
+    {
+        $mockedClient->createRequest('get','https://na##.salesforce.com/services/apexrest/FieldCase?foo=bar',Argument::type('array'))->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn('customRequest');
+        $this->custom('/FieldCase',['parameters'=>['foo'=>'bar']])->shouldReturn('customRequest');
     }
 
     //Resource class
@@ -360,6 +411,123 @@ class WebServerSpec extends ObjectBehavior
 
         $this->request('uri',[])->shouldReturn('jsonResource');
         $this->request('uri',['format'=>'xml'])->shouldReturn('xmlResource');
+    }
+
+    function it_should_format_header_in_json(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse){
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'accesstoken',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
+
+        $mockedClient->createRequest(
+            "get",
+            "uri",
+            ['headers'=>['Authorization' => 'bearer accesstoken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])
+            ->willReturn($mockedRequest);
+
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
+
+        $this->request('uri',[])->shouldReturn('jsonResource');
+    }
+
+    function it_should_format_header_in_xml(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse){
+
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'accesstoken',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
+
+        $mockedClient->createRequest(
+            "get",
+            "uri",
+            ['headers'=>['Authorization' => 'bearer accesstoken', 'Accept' => 'application/xml', 'Content-Type' => 'application/xml']])
+            ->shouldBeCalled()->willReturn($mockedRequest);
+
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
+
+        $this->request('uri',['format'=>'xml'])->shouldReturn('xmlResource');
+    }
+
+    function it_should_format_header_in_urlencoding(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse){
+
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'accesstoken',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
+
+        $mockedClient->createRequest(
+            "get",
+            "uri",
+            ['headers'=>['Authorization' => 'bearer accesstoken', 'Accept' => 'application/x-www-form-urlencoded', 'Content-Type' => 'application/x-www-form-urlencoded']])
+            ->shouldBeCalled()->willReturn($mockedRequest);
+
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $this->request('uri',['format'=>'urlencoded'])->shouldReturn($mockedResponse);
+    }
+
+    function it_should_format_header_with_gzip(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse){
+
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'accesstoken',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
+
+        $mockedClient->createRequest(
+            "get",
+            "uri",
+            ['headers'=>["Authorization" => "bearer accesstoken", "Accept" => "application/json", "Content-Type" => "application/json", "Accept-Encoding" => "gzip", "Content-Encoding" => "gzip"]])
+            ->shouldBeCalled()->willReturn($mockedRequest);
+
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
+
+        $this->request('uri',['compression'=>true, 'compressionType'=>'gzip'])->shouldReturn('jsonResource');
+    }
+
+    function it_should_format_header_with_deflate(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse){
+
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'accesstoken',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
+
+        $mockedClient->createRequest(
+            "get",
+            "uri",
+            ['headers'=>["Authorization" => "bearer accesstoken", "Accept" => "application/json", "Content-Type" => "application/json", "Accept-Encoding" => "deflate", "Content-Encoding" => "deflate"]])
+            ->shouldBeCalled()->willReturn($mockedRequest);
+
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
+
+        $this->request('uri',['compression'=>true, 'compressionType'=>'deflate'])->shouldReturn('jsonResource');
     }
 
 }

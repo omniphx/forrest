@@ -9,4 +9,16 @@ interface AuthenticationInterface {
 	 */
 	public function authenticate($url);
 
+    /**
+     * Refresh authentication token
+     * @return mixed $response
+     */
+    public function refresh();
+
+    /**
+     * Revokes authentication token
+     * @return mixed $response
+     */
+    public function revoke();
+
 }

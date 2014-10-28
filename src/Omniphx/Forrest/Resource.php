@@ -1,11 +1,10 @@
 <?php namespace Omniphx\Forrest;
 
 use GuzzleHttp\Exception\RequestException;
-use Omniphx\Forrest\Interfaces\ResourceInterface;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
-abstract class Resource implements ResourceInterface {
+abstract class Resource {
 
     /**
      * HTTP request client
@@ -26,19 +25,27 @@ abstract class Resource implements ResourceInterface {
     protected $session;
 
     /**
+     * Reqeust headers
+     * @var Array
+     */
+    private $headers;
+
+    /**
      * Method returns the response for the requested resource
      * @param  string $pURI 
      * @param  array  $pOptions
      * @return mixed
      */
-    public function requestResource($pURL, array $pOptions)
+    protected function requestResource($pURL, array $pOptions)
     {
         $options = array_replace_recursive($this->settings['defaults'], $pOptions);
 
         $format = $options['format'];
         $method = $options['method'];
 
-        $parameters['headers'] = $this->setHeaders($options);
+        $this->setHeaders($options);
+        
+        $parameters['headers'] = $this->headers;
 
         if (isset($options['body'])) {
             $parameters['body'] = $this->setBody($options);
@@ -49,16 +56,7 @@ abstract class Resource implements ResourceInterface {
         try {
             $response = $this->client->send($request);
         } catch(RequestException $e) {
-            if($options['debug']){
-                $this->debug($e);
-            } else if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
-                throw new TokenExpiredException(sprintf("Salesforce token has expired"));
-            } else if($e->hasResponse()){
-                throw new SalesforceException(sprintf("Request failed: %s",$e->getResponse()));
-            } else {
-                throw new SalesforceException(sprintf("Invalid request: %s",$e->getRequest()));
-            }
-
+            $this->assignExceptions($e);
         }
 
         return $this->responseFormat($response,$format);
@@ -70,7 +68,7 @@ abstract class Resource implements ResourceInterface {
      * @param array $options
      * @return array $headers
      */
-    public function setHeaders(array $options)
+    private function setHeaders(array $options)
     {
         $format = $options['format'];
 
@@ -79,21 +77,10 @@ abstract class Resource implements ResourceInterface {
         $accessToken = $authToken['access_token'];
         $tokenType   = $authToken['token_type'];
 
-        $headers['Authorization'] = "$tokenType $accessToken";
+        $this->headers['Authorization'] = "$tokenType $accessToken";
 
-        if ($format == 'json') {
-            $headers['Accept'] = 'application/json';
-            $headers['Content-Type'] = 'application/json';
-        }
-        else if ($format == 'xml') {
-            $headers['Accept'] = 'application/xml';
-            $headers['Content-Type'] = 'application/xml';
-        }
-        else if ($format == 'urlencoded') {
-            $headers['Accept'] = 'application/x-www-form-urlencoded';
-            $headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        }
-        return $headers;
+        $this->setRequestFormat($options['format']);
+        $this->setCompression($options);
     }
 
     /**
@@ -101,7 +88,7 @@ abstract class Resource implements ResourceInterface {
      * @param array $options
      * @return array $body
      */
-    public function setBody(array $options)
+    private function setBody(array $options)
     {
         $format = $options['format'];
         $data   = $options['body'];
@@ -116,13 +103,38 @@ abstract class Resource implements ResourceInterface {
         return $body;
     }
 
+    //Need to think through this for it to work
+    private function setRequestFormat($format)
+    {
+        if ($format == 'json') {
+            $this->headers['Accept'] = 'application/json';
+            $this->headers['Content-Type'] = 'application/json';
+        }
+        else if ($format == 'xml') {
+            $this->headers['Accept'] = 'application/xml';
+            $this->headers['Content-Type'] = 'application/xml';
+        }
+        else if ($format == 'urlencoded') {
+            $this->headers['Accept'] = 'application/x-www-form-urlencoded';
+            $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        }
+    }
+
+    private function setCompression($options)
+    {
+        if ($options['compression'] == true) {
+            $this->headers['Accept-Encoding'] = $options['compressionType'];
+            $this->headers['Content-Encoding'] = $options['compressionType'];
+        }
+    }
+
     /**
      * Returns the response in the configured  format
      * @param  Response $response
      * @param  string $format
      * @return mixed $response
      */
-    public function responseFormat($response,$format)
+    private function responseFormat($response,$format)
     {
         if ($format == 'json') {
             return $response->json();
@@ -135,22 +147,18 @@ abstract class Resource implements ResourceInterface {
     }
 
     /**
-     * If users has debug = true in config, this will output the failed request.
-     * @param  RequestException $request
-     * @return void
+     * Method will elaborate on RequestException
+     * @param  GuzzleHttp\Exception\ClientException $e
+     * @return mixed
      */
-    private function debug($error)
+    private function assignExceptions($e)
     {
-        echo "<pre>";
-        echo "Request\n";
-        echo "-------\n";
-        echo $e->getRequest() . "\n";
-        if ($e->hasResponse()) {
-            echo "\nResponse\n";
-            echo "--------\n";
-            echo $e->getResponse() . "\n";
+        if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
+            throw new TokenExpiredException(sprintf("Salesforce token has expired"));
+        } else if($e->hasResponse()){
+            throw new SalesforceException(sprintf("Salesforce response error: %s",$e->getResponse()));
+        } else {
+            throw new SalesforceException(sprintf("Invalid request: %s",$e->getRequest()));
         }
-        echo "</pre>";
     }
-
 }
