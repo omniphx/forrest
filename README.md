@@ -1,18 +1,20 @@
 # Omniphx/Forrest, Force.com REST API Client for Laravel 4
 [![Latest Stable Version](https://poser.pugx.org/omniphx/forrest/v/stable.svg)](https://packagist.org/packages/omniphx/forrest) [![Total Downloads](https://poser.pugx.org/omniphx/forrest/downloads.svg)](https://packagist.org/packages/omniphx/forrest) [![Latest Unstable Version](https://poser.pugx.org/omniphx/forrest/v/unstable.svg)](https://packagist.org/packages/omniphx/forrest) [![License](https://poser.pugx.org/omniphx/forrest/license.svg)](https://packagist.org/packages/omniphx/forrest) [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
-Forrest is a Force.com REST API client for Laravel 4. It provides access to restricted Salesforce information via the Web Server OAuth authentication flow. While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
+Forrest is a Force.com REST API client for Laravel 4. It provides access to restricted Salesforce information via Oauth 2.0. REST is a lightweight alternative to the SOAP API and is useful for mobile users.
+
+ While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
 ## Installation
->Note: If you are upgrading to Version 1.0, be sure to re-publish your config file with `php artisan config:publish omniphx/forrest`.
+>If you are upgrading to Version 1.0, be sure to re-publish your config file.
 
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
 
     "omniphx/forrest": "1.*"
 
-After adding the key, run `composer update` from the command line to install the package.
+Next run `composer update` from the command line to install the package.
 
-If you are using Laravel, add the service provider in your `app/config/app.php` file:
+If you are using Laravel, add the service provider to your `app/config/app.php` file:
 
     'Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider'
 
@@ -27,9 +29,7 @@ php artisan config:publish omniphx/forrest
 ```
 You can find the config file in: `app/config/omniphx/forrest/config.php`
 
-Update your config file with your `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
-
-Optionally, you can specify a redirect after the callback is complete with the `authRedirect` key. If you plan to overide the routes included in this package, you can ignore the redirect option.
+After you have set up am connected app (see below), update your config file with a `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
 
 ## Getting Started
 ### Setting up a Connected App
@@ -51,7 +51,7 @@ After saving, you will now be given a Consumer Key and Consumer Secret. Add thos
 ### Setup
 Forrest will come with the following routes included in it's package:
 
-##### WebServer routes
+##### Web Server authentication flow
 ```php
 Route::get('/authenticate', function()
 {
@@ -67,7 +67,7 @@ Route::get('/callback', function()
     return Redirect::to($url);
 });
 ```
-##### User Password routes
+##### Username-Password authentication flow
 ```php
 Route::get('/authenticate', function()
 {
@@ -98,7 +98,7 @@ The callback function will store an encrypted authentication token in the user's
 ```php
 Forrest::query('SELECT Id FROM Account');
 ```
-
+Result:
 ```JavaScript
 {
     "totalSize": 2,
@@ -121,11 +121,10 @@ Forrest::query('SELECT Id FROM Account');
     ]
 }
 ```
->The default format is JSON, but it can be changed to [XML](#xml-format):
+>The default format is JSON, but it can be changed to [XML](#xml-format)
 
 ### Create a new record
-Create records with the POST method by passing it to the `method` key. Likewise, the body of the request should be passed to `body` key.
-
+Records can be created using the following format.
 ```php
 $body = ['Name' => 'New Account'];
 Forrest::sobjects('Account',[
@@ -134,10 +133,22 @@ Forrest::sobjects('Account',[
 ```
 
 ### Update a record
-Update a record with the PATCH method.
+Update a record with the PUT method.
 
 ```php
 $body = ['Phone' => '555-555-5555'];
+Forrest::sobjects('Account/001i000000xxxxxxx',[
+    'method' => 'put',
+    'body'   => $body]);
+```
+
+### Upsert a record
+Update a record with the PATCH method and if the external Id doesn't exist, it will insert a new record.
+
+```php
+$body = [
+    'Phone' => '555-555-5555',
+    'ExternalId__c' => '1234'];
 Forrest::sobjects('Account/001i000000xxxxxxx',[
     'method' => 'patch',
     'body'   => $body]);
@@ -151,7 +162,7 @@ Forrest::sobjects('Account/001i000000xxxxxxx', ['method' => 'delete');
 ```
 
 ### XML format
-Change the request/response format to XML with the `format` key.
+Change the request/response format to XML with the `format` key or make it default in your config file.
 
 ```php
 Forrest::describe('Account',['format'=>'xml']);
@@ -199,12 +210,12 @@ or
 Forrest::appMenu();
 ```
 
-Resources can be extended by passing the additional parameters into the first argument:
+Resource urls can be extended by passing additional parameters into the first argument:
 ```php
 Forrest::sobjects('Account/describe/approvalLayouts/');
 ```
 
-You can also add option methods and formats to calls:
+You can also add optional parameters to requests:
 ```php
 Forrest::theme(['format'=>'xml']);
 ```
@@ -212,14 +223,14 @@ Forrest::theme(['format'=>'xml']);
 ### Additional API Requests
 
 #### Refresh
-If a refresh token is set, the server can refresh the access token on the user's behalf. Refresh tokens are only provided in the Web Server flows.
+If a refresh token is set, the server can refresh the access token on the user's behalf. Refresh tokens are only provided if you use the Web Server flow.
 ```php
 Forrest::refresh();
 ```
 >If you need a refresh token, be sure to specify this under `access scope` in your [Connected App](#setting-up-connected-app). You can also specify this in your configuration file by adding `'scope' => 'full refresh_token'`. Setting scope access in the config file is optional, the default scope access is determined by your Salesforce org.
 
 #### Revoke
-This will revoke the authorization token. The session will store a token, but it will become invalid.
+This will revoke the authorization token. The session will continue to store a token, but it will become invalid.
 ```php
 Forrest::revoke();
 ```
@@ -298,8 +309,8 @@ Returns a list of Salesforce Knowledge articles based on the a search query. Pas
 
 ```php
 Forrest::suggestedArticles('foo', [
-    'parameters'=>[
-        'channel'=>'App',
+    'parameters' => [
+        'channel' => 'App',
         'publishStatus' => 'Draft']]);
 ```
 
@@ -308,7 +319,7 @@ Returns a list of suggested searches based on a search text query. Matches searc
 
 ```php
 Forrest::suggestedQueries('app, [
-    'parameters'=>['foo'=>'bar']]);
+    'parameters' => ['foo' => 'bar']]);
 ```
 For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
 
@@ -320,8 +331,8 @@ Forrest::custom('/myEndpoint');
 Additional options and parameters can be passed in like this:
 ```php
 Forrest::custom('/myEndpoint', [
-    'method'=>'post',
-    'body'=>['foo'=>'bar'],
-    'parameters'=>['flim'=>'flam']]);
+    'method' => 'post',
+    'body' => ['foo' => 'bar'],
+    'parameters' => ['flim' => 'flam']]);
 ```
 > Read [Creating REST APIs using Apex REST](https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST) for more information.
