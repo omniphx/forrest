@@ -2,7 +2,6 @@
 
 use Config;
 use Illuminate\Support\ServiceProvider;
-use Omniphx\Forrest\RESTClient;
 
 class ForrestServiceProvider extends ServiceProvider {
 
@@ -21,6 +20,10 @@ class ForrestServiceProvider extends ServiceProvider {
 	public function boot()
 	{
 		$this->package('omniphx/forrest', null, __DIR__.'/../../../..');
+
+		$authentication  = Config::get('forrest::authentication');
+
+		include __DIR__ . "/routes/$authentication.php";
 	}
 
 	/**
@@ -40,21 +43,10 @@ class ForrestServiceProvider extends ServiceProvider {
 			$session  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession();
 			$input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
 
-			$resource = new \Omniphx\Forrest\Resource($client, $session, $settings['defaults']);
+			$authentication = '\\Omniphx\\Forrest\\Authentications\\';
+			$authentication .= $settings['authentication'];
 
-			switch ($settings['authenticationFlow']) {
-			    case 'WebServer':
-			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\WebServer($client, $redirect, $input, $settings);
-			        break;
-			    case 'UserAgent':
-			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\UserAgent();
-			        break;
-			    case 'UsernamePassword':
-			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\UsernamePassword();
-			        break;
-			}
-
-			return new RESTClient($resource, $client, $session, $redirect, $authentication, $settings);
+			return new $authentication($client, $session, $redirect, $input, $settings);
 		});
 	}
 

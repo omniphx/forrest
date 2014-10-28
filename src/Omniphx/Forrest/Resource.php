@@ -1,18 +1,22 @@
 <?php namespace Omniphx\Forrest;
 
-use Omniphx\Forrest\Interfaces\ResourceInterface;
-use GuzzleHttp\ClientInterface;
-use Omniphx\Forrest\Interfaces\SessionInterface;
-use Omniphx\Forrest\Exceptions\MissingTokenException;
 use GuzzleHttp\Exception\RequestException;
+use Omniphx\Forrest\Exceptions\SalesforceException;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
-class Resource implements ResourceInterface {
+abstract class Resource {
 
-	/**
-     * HTTP Client
+    /**
+     * HTTP request client
      * @var Client
      */
     protected $client;
+
+    /**
+     * Config options
+     * @var array
+     */
+    protected $settings;
 
     /**
      * Session handler
@@ -21,23 +25,10 @@ class Resource implements ResourceInterface {
     protected $session;
 
     /**
-     * Config options
-     * @var array
+     * Reqeust headers
+     * @var Array
      */
-    protected $defaults;
-
-    /**
-     * Constructor
-     * @param ClientInterface  $client   HTTP Request client
-     * @param SessionInterface $session  Session handler
-     * @param array            $defaults Config defaults
-     */
-    public function __construct(ClientInterface $client, SessionInterface $session, array $defaults)
-    {
-		$this->client   = $client;
-		$this->session  = $session;
-        $this->defaults = $defaults;
-	}
+    private $headers;
 
     /**
      * Method returns the response for the requested resource
@@ -45,14 +36,16 @@ class Resource implements ResourceInterface {
      * @param  array  $pOptions
      * @return mixed
      */
-    public function request($pURL, array $pOptions)
+    protected function requestResource($pURL, array $pOptions)
     {
-        $options = array_replace_recursive($this->defaults, $pOptions);
+        $options = array_replace_recursive($this->settings['defaults'], $pOptions);
 
         $format = $options['format'];
         $method = $options['method'];
 
-        $parameters['headers'] = $this->setHeaders($options);
+        $this->setHeaders($options);
+        
+        $parameters['headers'] = $this->headers;
 
         if (isset($options['body'])) {
             $parameters['body'] = $this->setBody($options);
@@ -60,17 +53,14 @@ class Resource implements ResourceInterface {
 
         $request = $this->client->createRequest($method,$pURL,$parameters);
 
-        if($options['debug'] == true){
-            $response = $this->debug($request);
-            if(is_object($response))
-            {
-                return $this->responseFormat($response,$format);
-            }
-        } else {
+        try {
             $response = $this->client->send($request);
-
-            return $this->responseFormat($response,$format);
+        } catch(RequestException $e) {
+            $this->assignExceptions($e);
         }
+
+        return $this->responseFormat($response,$format);
+        
     }
 
     /**
@@ -78,7 +68,7 @@ class Resource implements ResourceInterface {
      * @param array $options
      * @return array $headers
      */
-    public function setHeaders(array $options)
+    private function setHeaders(array $options)
     {
         $format = $options['format'];
 
@@ -87,22 +77,10 @@ class Resource implements ResourceInterface {
         $accessToken = $authToken['access_token'];
         $tokenType   = $authToken['token_type'];
 
-        $headers['Authorization'] = "$tokenType $accessToken";
+        $this->headers['Authorization'] = "$tokenType $accessToken";
 
-        if ($format == 'json') {
-            $headers['Accept'] = 'application/json';
-            $headers['Content-Type'] = 'application/json';
-        }
-        else if ($format == 'xml') {
-            $headers['Accept'] = 'application/xml';
-            $headers['Content-Type'] = 'application/xml';
-        }
-        else if ($format == 'urlencoded') {
-            $headers['Accept'] = 'application/x-www-form-urlencoded';
-            $headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        }
-
-        return $headers;
+        $this->setRequestFormat($options['format']);
+        $this->setCompression($options);
     }
 
     /**
@@ -110,7 +88,7 @@ class Resource implements ResourceInterface {
      * @param array $options
      * @return array $body
      */
-    public function setBody(array $options)
+    private function setBody(array $options)
     {
         $format = $options['format'];
         $data   = $options['body'];
@@ -125,13 +103,38 @@ class Resource implements ResourceInterface {
         return $body;
     }
 
+    //Need to think through this for it to work
+    private function setRequestFormat($format)
+    {
+        if ($format == 'json') {
+            $this->headers['Accept'] = 'application/json';
+            $this->headers['Content-Type'] = 'application/json';
+        }
+        else if ($format == 'xml') {
+            $this->headers['Accept'] = 'application/xml';
+            $this->headers['Content-Type'] = 'application/xml';
+        }
+        else if ($format == 'urlencoded') {
+            $this->headers['Accept'] = 'application/x-www-form-urlencoded';
+            $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        }
+    }
+
+    private function setCompression($options)
+    {
+        if ($options['compression'] == true) {
+            $this->headers['Accept-Encoding'] = $options['compressionType'];
+            $this->headers['Content-Encoding'] = $options['compressionType'];
+        }
+    }
+
     /**
      * Returns the response in the configured  format
      * @param  Response $response
      * @param  string $format
      * @return mixed $response
      */
-    public function responseFormat($response,$format)
+    private function responseFormat($response,$format)
     {
         if ($format == 'json') {
             return $response->json();
@@ -143,20 +146,19 @@ class Resource implements ResourceInterface {
         return $response;
     }
 
-    private function debug($request)
+    /**
+     * Method will elaborate on RequestException
+     * @param  GuzzleHttp\Exception\ClientException $e
+     * @return mixed
+     */
+    private function assignExceptions($e)
     {
-        try {
-            return $this->client->send($request);
-        } catch (RequestException $e) {
-            echo "Request\n";
-            echo "-------\n";
-            echo $e->getRequest() . "\n";
-            if ($e->hasResponse()) {
-                echo "\nResponse\n";
-                echo "--------\n";
-                echo $e->getResponse() . "\n";
-            }
+        if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
+            throw new TokenExpiredException(sprintf("Salesforce token has expired"));
+        } else if($e->hasResponse()){
+            throw new SalesforceException(sprintf("Salesforce response error: %s",$e->getResponse()));
+        } else {
+            throw new SalesforceException(sprintf("Invalid request: %s",$e->getRequest()));
         }
     }
-
 }
