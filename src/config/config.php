@@ -32,7 +32,7 @@ return array(
 	 */
 	'parameters' => array(
 		'display'   => '',
-		'immediate' => 'false',
+		'immediate' => false,
 		'state'     => '',
 		'scope'     => '',
 		'prompt'	=> '',
