@@ -530,4 +530,28 @@ class WebServerSpec extends ObjectBehavior
         $this->request('uri',['compression'=>true, 'compressionType'=>'deflate'])->shouldReturn('jsonResource');
     }
 
+    function it_should_format_header_without_compression(
+        ClientInterface $mockedClient,
+        SessionInterface $mockedSession,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse){
+
+        $mockedSession->getToken()->willReturn(array(
+            'access_token' =>'accesstoken',
+            'instance_url' =>'def',
+            'token_type'   =>'bearer'));
+
+        $mockedClient->createRequest(
+            "get",
+            "uri",
+            ['headers'=>["Authorization" => "bearer accesstoken", "Accept" => "application/json", "Content-Type" => "application/json"]])
+            ->shouldBeCalled()->willReturn($mockedRequest);
+
+        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+
+        $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
+
+        $this->request('uri',['compression'=>false])->shouldReturn('jsonResource');
+    }
+
 }

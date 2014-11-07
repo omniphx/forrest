@@ -107,16 +107,16 @@ Result:
         {
             "attributes": {
                 "type": "Account",
-                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxxxxxx"
+                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxx"
             },
-            "Id": "001i000000xxxxxx"
+            "Id": "001i000000xxx"
         },
         {
             "attributes": {
                 "type": "Account",
-                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxxxxxx"
+                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxx"
             },
-            "Id": "001i000000xxxxxx"
+            "Id": "001i000000xxx"
         }
     ]
 }
@@ -136,8 +136,11 @@ Forrest::sobjects('Account',[
 Update a record with the PUT method.
 
 ```php
-$body = ['Phone' => '555-555-5555'];
-Forrest::sobjects('Account/001i000000xxxxxxx',[
+$body = [
+    'Name'  => 'Acme'
+    'Phone' => '555-555-5555'];
+
+Forrest::sobjects('Account/001i000000xxx',[
     'method' => 'put',
     'body'   => $body]);
 ```
@@ -148,8 +151,9 @@ Update a record with the PATCH method and if the external Id doesn't exist, it w
 ```php
 $body = [
     'Phone' => '555-555-5555',
-    'ExternalId__c' => '1234'];
-Forrest::sobjects('Account/001i000000xxxxxxx',[
+    'External_Id__c' => 'XYZ1234'];
+
+Forrest::sobjects('Account',[
     'method' => 'patch',
     'body'   => $body]);
 ```
@@ -158,7 +162,7 @@ Forrest::sobjects('Account/001i000000xxxxxxx',[
 Delete a record with the DELETE method.
 
 ```php
-Forrest::sobjects('Account/001i000000xxxxxxx', ['method' => 'delete');
+Forrest::sobjects('Account/001i000000xxx', ['method' => 'delete']);
 ```
 
 ### XML format
