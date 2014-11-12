@@ -340,3 +340,6 @@ Forrest::custom('/myEndpoint', [
     'parameters' => ['flim' => 'flam']]);
 ```
 > Read [Creating REST APIs using Apex REST](https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST) for more information.
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/omniphx/forrest/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
