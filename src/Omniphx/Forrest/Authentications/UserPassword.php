@@ -6,6 +6,7 @@ use Omniphx\Forrest\Interfaces\SessionInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\UserPasswordInterface;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
 class UserPassword extends Client implements UserPasswordInterface
 {
