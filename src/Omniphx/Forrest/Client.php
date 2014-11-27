@@ -13,7 +13,7 @@ abstract class Client extends Resource {
      * @param  array  $options
      * @return array $versions
      */
-    public function versions($options = ['debug'=>false])
+    public function versions($options = [])
     {
         $url  = $this->getToken()['instance_url'];
         $url .= '/services/data/';
@@ -347,7 +347,7 @@ abstract class Client extends Resource {
         $configVersion = $this->settings['version'];
 
         if ($configVersion != null){
-            $versions = $this->versions();
+            $versions = $this->versions(['format'=>'json']);
             foreach ($versions as $version) {
                 if ($version['version'] == $configVersion){
                     $this->session->put('version',$version);
@@ -355,7 +355,7 @@ abstract class Client extends Resource {
             }
         }
         else {
-            $versions = $this->versions();
+            $versions = $this->versions(['format'=>'json']);
             $lastestVersion = end($versions);
             $this->session->put('version', $lastestVersion);
         }
@@ -371,12 +371,12 @@ abstract class Client extends Resource {
     {
         try {
             $version = $this->session->get('version');
-            $resources = $this->resources();
+            $resources = $this->resources(['format'=>'json']);
             $this->session->put('resources', $resources);
         }
         catch (\Exception $e) {
             $this->storeVersion();
-            $resources = $this->resources();
+            $resources = $this->resources(['format'=>'json']);
             $this->session->put('resources', $resources);
         }
     }
