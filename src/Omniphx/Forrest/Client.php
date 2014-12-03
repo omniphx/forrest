@@ -109,6 +109,24 @@ abstract class Client extends Resource {
 
         return $queryResults;
     }
+    
+    /**
+     * Calls next query
+     * @param       $nextUrl
+     * @param array $options
+     *
+     * @return mixed
+     */
+    public function next($nextUrl, $options = [])
+    {
+        $url  = $this->getToken()['instance_url'];
+        $url .= $this->session->get('resources')['query'];
+        $url .= '/'.$nextUrl;
+
+        $queryResults = $this->request($url, $options);
+
+        return $queryResults;
+    }
 
     /**
      * Details how Salesforce will process your query.
