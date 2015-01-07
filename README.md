@@ -69,14 +69,7 @@ Route::get('/callback', function()
 ```
 ##### Username-Password authentication flow
 ```php
-Route::get('/authenticate', function()
-{
-    Forrest::authenticate();
-
-    $url = Config::get('forrest::authRedirect');
-
-    return Redirect::to($url);
-});
+Forrest::authenticate();
 ```
 
 >Note: If you would like to customize the authentication process, these routes can be overwritten in your `route.php` file. Feel free to call the routes anything you like, but the callback must match what is configured in your Connected App settings and config file.
