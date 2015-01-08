@@ -63,6 +63,11 @@ return array(
 	'authRedirect' => '/',
 
 	/**
+	 * Optional (and not recomended) if you need to override the instance_url returned from Saleforce
+	 */
+	'instanceURL' => '',
+
+	/**
 	 * Langauge
 	 */
 	'language' => 'en_US'

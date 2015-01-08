@@ -48,7 +48,7 @@ abstract class Resource {
         $parameters['headers'] = $this->headers;
 
         if (isset($options['body'])) {
-            $parameters['body'] = $this->setBody($options);
+            $parameters['body'] = $this->formatBody($options);
         }
 
         $request = $this->client->createRequest($method,$pURL,$parameters);
@@ -84,11 +84,11 @@ abstract class Resource {
     }
 
     /**
-     * Set the body for the request
+     * Format the body for the request
      * @param array $options
      * @return array $body
      */
-    private function setBody(array $options)
+    private function formatBody(array $options)
     {
         $format = $options['format'];
         $data   = $options['body'];
