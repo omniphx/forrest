@@ -49,7 +49,9 @@ After you have set up am connected app (see below), update your config file with
 After saving, you will now be given a Consumer Key and Consumer Secret. Add those to your config file.
 
 ### Setup
-Forrest will come with the following routes included in it's package:
+Forrest will come with the following routes included in it's package.
+
+>Feel free to overwrite these routes in `routes.php`. They can be called anything you like, but the callback must match what is configured in your config file and Connected App settings for your Salesforce org.
 
 ##### Web Server authentication flow
 ```php
@@ -69,10 +71,16 @@ Route::get('/callback', function()
 ```
 ##### Username-Password authentication flow
 ```php
-Forrest::authenticate();
-```
+Route::get('/authenticate', function()
+{
+    Forrest::authenticate();
 
->Note: If you would like to customize the authentication process, these routes can be overwritten in your `route.php` file. Feel free to call the routes anything you like, but the callback must match what is configured in your Connected App settings and config file.
+    $url = Config::get('forrest::authRedirect');
+
+    return Redirect::to($url);
+});
+```
+>With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method. The routing provides backwards compatability with the Web Server flow if you switch between the two.
 
 #### Custom login urls
 Sometimes users will need to connect to a sandbox or custom url. To do this, simply pass the url as an argument for the authenticatation method:
@@ -115,6 +123,13 @@ Result:
 }
 ```
 >The default format is JSON, but it can be changed to [XML](#xml-format)
+
+If you are querying more than 2000 records, you response will include:
+```
+"nextRecordsUrl" : "/services/data/v20.0/query/01gD0000002HU6KIAW-2000"
+```
+
+Simply, call `Forrest::next($nextRecordsUrl)` to return the next 2000 records.
 
 ### Create a new record
 Records can be created using the following format.
