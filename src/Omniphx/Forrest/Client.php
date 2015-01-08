@@ -341,7 +341,7 @@ abstract class Client extends Resource {
      */
     protected function getInstanceUrl()
     {
-        $url = \Config::get('forrest::instanceURL');
+        $url = $this->settings['instanceURL'];
 
         if (empty($url)){
             $url  = $this->getToken()['instance_url'];
