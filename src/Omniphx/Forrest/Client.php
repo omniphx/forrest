@@ -11,7 +11,7 @@ abstract class Client extends Resource {
      */
     public function get($path) {
         $url = $this->getInstanceUrl();
-        $url .= '/services/data/v31.0/'.trim($path, "/\t\n\r\0\x0B");
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = 'GET';
 

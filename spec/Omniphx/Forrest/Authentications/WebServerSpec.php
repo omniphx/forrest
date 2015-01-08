@@ -555,4 +555,76 @@ class WebServerSpec extends ObjectBehavior
         $this->request('uri',['compression'=>false])->shouldReturn('jsonResource');
     }
 
+    function it_should_allow_a_get_request(
+        SessionInterface $mockedSession,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest('GET',Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn($mockedResponse);
+
+        $this->get('uri')->shouldReturn($mockedResponse);
+    }
+
+    function it_should_allow_a_post_request(
+        SessionInterface $mockedSession,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest('POST',Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn($mockedResponse);
+
+        $this->post('uri', array('test'=>'param'))->shouldReturn($mockedResponse);
+    }
+
+    function it_should_allow_a_put_request(
+        SessionInterface $mockedSession,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest('PUT',Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn($mockedResponse);
+
+        $this->put('uri', array('test'=>'param'))->shouldReturn($mockedResponse);
+    }
+
+    function it_should_allow_a_patch_request(
+        SessionInterface $mockedSession,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest('PATCH',Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn($mockedResponse);
+
+        $this->patch('uri', array('test'=>'param'))->shouldReturn($mockedResponse);
+    }
+
+    function it_should_allow_a_head_request(
+        SessionInterface $mockedSession,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest('HEAD',Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn($mockedResponse);
+
+        $this->head('uri')->shouldReturn($mockedResponse);
+    }
+
+    function it_should_allow_a_delete_request(
+        SessionInterface $mockedSession,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest('DELETE',Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn($mockedResponse);
+
+        $this->delete('delete')->shouldReturn($mockedResponse);
+    }
+
 }
