@@ -39,6 +39,7 @@ class UserPasswordSpec extends ObjectBehavior
                 'state'     => '',
                 'scope'     => '',
             ),
+            'instanceURL' => '',
             'authRedirect' => 'redirectURL',
             'version' => '30.0',
             'defaults' => array(
