@@ -37,6 +37,7 @@ class WebServerSpec extends ObjectBehavior
                 'scope'     => '',
                 'prompt'    => '',
             ),
+            'instanceURL' => '',
             'authRedirect' => 'redirectURL',
             'version' => '30.0',
             'defaults' => array(
