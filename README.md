@@ -49,7 +49,9 @@ After you have set up am connected app (see below), update your config file with
 After saving, you will now be given a Consumer Key and Consumer Secret. Add those to your config file.
 
 ### Setup
-Forrest will come with the following routes included in it's package:
+Forrest will come with the following routes included in it's package.
+
+>Feel free to overwrite these routes in `routes.php`. They can be called anything you like, but the callback must match what is configured in your config file and Connected App settings for your Salesforce org.
 
 ##### Web Server authentication flow
 ```php
@@ -78,8 +80,7 @@ Route::get('/authenticate', function()
     return Redirect::to($url);
 });
 ```
-
->Note: If you would like to customize the authentication process, these routes can be overwritten in your `route.php` file. Feel free to call the routes anything you like, but the callback must match what is configured in your Connected App settings and config file.
+>With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method. The routing provides backwards compatability with the Web Server flow if you switch between the two.
 
 #### Custom login urls
 Sometimes users will need to connect to a sandbox or custom url. To do this, simply pass the url as an argument for the authenticatation method:
