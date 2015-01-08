@@ -124,6 +124,13 @@ Result:
 ```
 >The default format is JSON, but it can be changed to [XML](#xml-format)
 
+If you are querying more than 2000 records, you response will include:
+```
+"nextRecordsUrl" : "/services/data/v20.0/query/01gD0000002HU6KIAW-2000"
+```
+
+Simply, call `Forrest::next($nextRecordsUrl)` to return the next 2000 records.
+
 ### Create a new record
 Records can be created using the following format.
 ```php
