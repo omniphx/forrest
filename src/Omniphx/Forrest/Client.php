@@ -15,7 +15,7 @@ abstract class Client extends Resource {
      */
     public function versions($options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= '/services/data/';
 
         $versions = $this->request($url, $options);
@@ -33,7 +33,7 @@ abstract class Client extends Resource {
      */
     public function resources($options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('version')['url'];
 
         $resources = $this->request($url, $options);
@@ -68,7 +68,7 @@ abstract class Client extends Resource {
      */
     public function limits($options =[])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('version')['url'];
         $url .= '/limits';
 
@@ -83,7 +83,7 @@ abstract class Client extends Resource {
      */
     public function describe($options =[])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('version')['url'];
         $url .= '/sobjects';
 
@@ -100,7 +100,7 @@ abstract class Client extends Resource {
      */
     public function query($query, $options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['query'];
         $url .= '?q=';
         $url .= urlencode($query);
@@ -119,7 +119,7 @@ abstract class Client extends Resource {
      */
     public function queryExplain($query, $options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['query'];
         $url .= '?explain=';
         $url .= urlencode($query);
@@ -139,7 +139,7 @@ abstract class Client extends Resource {
      */
     public function queryAll($query,$options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['queryAll'];
         $url .= '?q=';
         $url .= urlencode($query);
@@ -157,7 +157,7 @@ abstract class Client extends Resource {
      */
     public function search($query,$options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['search'];
         $url .= '?q=';
         $url .= urlencode($query);
@@ -178,7 +178,7 @@ abstract class Client extends Resource {
      */
     public function scopeOrder($options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['search'];
         $url .= '/scopeOrder';
 
@@ -195,7 +195,7 @@ abstract class Client extends Resource {
      */
     public function searchLayouts($objectList,$options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['search'];
         $url .= '/layout/?q=';
         $url .= urlencode($objectList);
@@ -217,7 +217,7 @@ abstract class Client extends Resource {
      */
     public function suggestedArticles($query,$options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['search'];
         $url .= '/suggestTitleMatches?q=';
         $url .= urlencode($query);
@@ -249,7 +249,7 @@ abstract class Client extends Resource {
      */
     public function suggestedQueries($query,$options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')['search'];
         $url .= '/suggestSearchQueries?q=';
         $url .= urlencode($query);
@@ -274,7 +274,7 @@ abstract class Client extends Resource {
      */
     public function custom($customURI, $options = [])
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= '/services/apexrest';
         $url .= $customURI;
 
@@ -299,7 +299,7 @@ abstract class Client extends Resource {
      */
     public function __call($name,$arguments)
     {
-        $url  = $this->getToken()['instance_url'];
+        $url = $this->getInstanceUrl();
         $url .= $this->session->get('resources')[$name];
 
         $options = [];
@@ -333,6 +333,21 @@ abstract class Client extends Resource {
     protected function getToken()
     {
         return $this->session->getToken();
+    }
+
+    /**
+     * Get the instance URL
+     * @return string
+     */
+    protected function getInstanceUrl()
+    {
+        $url = $this->settings['instanceURL'];
+
+        if (empty($url)){
+            $url  = $this->getToken()['instance_url'];
+        }
+
+        return $url;
     }
 
     /**
