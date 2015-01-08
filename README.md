@@ -71,14 +71,7 @@ Route::get('/callback', function()
 ```
 ##### Username-Password authentication flow
 ```php
-Route::get('/authenticate', function()
-{
-    Forrest::authenticate();
-
-    $url = Config::get('forrest::authRedirect');
-
-    return Redirect::to($url);
-});
+Forrest::authenticate();
 ```
 >With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method. The routing provides backwards compatability with the Web Server flow if you switch between the two.
 
