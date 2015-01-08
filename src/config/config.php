@@ -63,7 +63,7 @@ return array(
 	'authRedirect' => '/',
 
 	/**
-	 * Optional (and not recomended) useful if you need to override the instance_url returned from Saleforce
+	 * Optional (and not recomended) if you need to override the instance_url returned from Saleforce
 	 */
 	'instanceURL' => '',
 
