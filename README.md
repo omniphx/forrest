@@ -334,5 +334,16 @@ Forrest::custom('/myEndpoint', [
 ```
 > Read [Creating REST APIs using Apex REST](https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST) for more information.
 
+### Raw Requests
+You can always make raw requests if one of the above methods doesn't meet your needs (which is unlikely)
+```php
+Forrest::get('/services/data/v20.0/endpoint');
+Forrest::head('/services/data/v20.0/endpoint');
+Forrest::post('/services/data/v20.0/endpoint', ['my'=>'param']);
+Forrest::put('/services/data/v20.0/endpoint', ['my'=>'param']);
+Forrest::patch('/services/data/v20.0/endpoint', ['my'=>'param']);
+Forrest::delete('/services/data/v20.0/endpoint');
+```
+
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/omniphx/forrest/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
