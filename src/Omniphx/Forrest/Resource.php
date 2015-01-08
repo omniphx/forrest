@@ -156,7 +156,7 @@ abstract class Resource {
         if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
             throw new TokenExpiredException(sprintf("Salesforce token has expired"));
         } else if($e->hasResponse()){
-            throw new SalesforceException(sprintf("Salesforce response error: %s",$e->getResponse()));
+            throw new SalesforceException(sprintf("Salesforce response error: %s", $e->getMessage()));
         } else {
             throw new SalesforceException(sprintf("Invalid request: %s",$e->getRequest()));
         }
