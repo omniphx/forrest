@@ -6,6 +6,90 @@ use Omniphx\Forrest\Exceptions\MissingTokenException;
 abstract class Client extends Resource {
 
     /**
+     * GET method call using any custom path
+     * @param string $path
+     */
+    public function get($path) {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = 'GET';
+
+        return $this->request($url, $options);
+    }
+
+    /**
+     * POST method call using any custom path
+     * @param string $path
+     * @param array $requestBody
+     */
+    public function post($path, $requestBody = array()) {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = 'POST';
+        $options['body'] = $requestBody;
+
+        return $this->request($url, $options);
+    }
+
+    /**
+     * PUT method call using any custom path
+     * @param string $path
+     * @param array $requestBody
+     */
+    public function put($path, $requestBody = array()) {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = 'PUT';
+        $options['body'] = $requestBody;
+
+        return $this->request($url, $options);
+    }
+
+    /**
+     * DELETE method call using any custom path
+     * @param string $path
+     */
+    public function delete($path) {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = 'DELETE';
+
+        return $this->request($url, $options);
+    }
+
+    /**
+     * HEAD method call using any custom path
+     * @param string $path
+     */
+    public function head($path) {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = 'HEAD';
+
+        return $this->request($url, $options);
+    }
+
+    /**
+     * PATCH method call using any custom path
+     * @param string $path
+     * @param array $requestBody
+     */
+    public function patch($path, $requestBody = array()) {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = 'PATCH';
+        $options['body'] = $requestBody;
+
+        return $this->request($url, $options);
+    }
+
+    /**
      * Request that returns all currently supported versions.
      * Includes the verison, label and link to each version's root.
      * Formats: json, xml
@@ -302,7 +386,7 @@ abstract class Client extends Resource {
             $parameters = array_replace_recursive($parameters, $options['parameters']);
             $url .= '?' . http_build_query($parameters);
         }
-        
+
         return $this->request($url, $options);
     }
 
