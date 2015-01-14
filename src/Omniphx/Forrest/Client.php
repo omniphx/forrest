@@ -8,12 +8,17 @@ abstract class Client extends Resource {
     /**
      * GET method call using any custom path
      * @param string $path
+     * @param array $requestBody
+     * @param array $options
      */
-    public function get($path) {
+    public function get($path, $requestBody = array(), $options = array()) {
         $url = $this->getInstanceUrl();
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = 'GET';
+        if($requestBody) {
+            $options['body'] = $requestBody;
+        }
 
         return $this->request($url, $options);
     }
@@ -22,13 +27,16 @@ abstract class Client extends Resource {
      * POST method call using any custom path
      * @param string $path
      * @param array $requestBody
+     * @param array $options
      */
-    public function post($path, $requestBody = array()) {
+    public function post($path, $requestBody = array(), $options = array()) {
         $url = $this->getInstanceUrl();
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = 'POST';
-        $options['body'] = $requestBody;
+        if($requestBody) {
+            $options['body'] = $requestBody;
+        }
 
         return $this->request($url, $options);
     }
@@ -37,13 +45,16 @@ abstract class Client extends Resource {
      * PUT method call using any custom path
      * @param string $path
      * @param array $requestBody
+     * @param array $options
      */
-    public function put($path, $requestBody = array()) {
+    public function put($path, $requestBody = array(), $options = array()) {
         $url = $this->getInstanceUrl();
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = 'PUT';
-        $options['body'] = $requestBody;
+        if($requestBody) {
+            $options['body'] = $requestBody;
+        }
 
         return $this->request($url, $options);
     }
@@ -51,12 +62,17 @@ abstract class Client extends Resource {
     /**
      * DELETE method call using any custom path
      * @param string $path
+     * @param array $requestBody
+     * @param array $options
      */
-    public function delete($path) {
+    public function delete($path, $requestBody = array(), $options = array()) {
         $url = $this->getInstanceUrl();
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = 'DELETE';
+        if($requestBody) {
+            $options['body'] = $requestBody;
+        }
 
         return $this->request($url, $options);
     }
@@ -64,12 +80,17 @@ abstract class Client extends Resource {
     /**
      * HEAD method call using any custom path
      * @param string $path
+     * @param array $requestBody
+     * @param array $options
      */
-    public function head($path) {
+    public function head($path, $requestBody = array(), $options = array()) {
         $url = $this->getInstanceUrl();
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = 'HEAD';
+        if($requestBody) {
+            $options['body'] = $requestBody;
+        }
 
         return $this->request($url, $options);
     }
@@ -78,13 +99,16 @@ abstract class Client extends Resource {
      * PATCH method call using any custom path
      * @param string $path
      * @param array $requestBody
+     * @param array $options
      */
-    public function patch($path, $requestBody = array()) {
+    public function patch($path, $requestBody = array(), $options = array()) {
         $url = $this->getInstanceUrl();
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = 'PATCH';
-        $options['body'] = $requestBody;
+        if($requestBody) {
+            $options['body'] = $requestBody;
+        }
 
         return $this->request($url, $options);
     }
