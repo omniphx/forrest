@@ -2,7 +2,7 @@
 
 use Omniphx\Forrest\Client;
 use GuzzleHttp\ClientInterface;
-use Omniphx\Forrest\Interfaces\SessionInterface;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\UserPasswordInterface;
@@ -30,13 +30,13 @@ class UserPassword extends Client implements UserPasswordInterface
 
     public function __construct(
         ClientInterface $client,
-        SessionInterface $session,
+        StorageInterface $storage,
         RedirectInterface $redirect,
         InputInterface $input,
         $settings)
     {
         $this->client     = $client;
-        $this->session    = $session;
+        $this->storage    = $storage;
         $this->redirect   = $redirect;
         $this->input      = $input;
         $this->settings   = $settings;
@@ -58,10 +58,10 @@ class UserPassword extends Client implements UserPasswordInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in session.
-        $this->session->putToken($jsonResponse);
+        // Encypt token and store token and in storage.
+        $this->storage->putToken($jsonResponse);
 
-        // Store resources into the session.
+        // Store resources into the storage.
         $this->storeResources();
     }
 
@@ -85,12 +85,12 @@ class UserPassword extends Client implements UserPasswordInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in session.
-        $this->session->putToken($jsonResponse);
+        // Encypt token and store token and in storage.
+        $this->storage->putToken($jsonResponse);
     }
 
     /**
-     * Revokes access token from Salesforce. Will not flush token from Session.
+     * Revokes access token from Salesforce. Will not flush token from storage.
      * @return mixed
      */
     public function revoke()

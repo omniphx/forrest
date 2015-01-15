@@ -1,6 +1,6 @@
 <?php namespace Omniphx\Forrest\Interfaces;
 
-interface SessionInterface {
+interface StorageInterface {
 	
 	/**
 	 * Store into session.

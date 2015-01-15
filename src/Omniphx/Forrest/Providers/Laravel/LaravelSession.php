@@ -1,13 +1,13 @@
 <?php namespace Omniphx\Forrest\Providers\Laravel;
 
-use Omniphx\Forrest\Interfaces\SessionInterface;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
 use Omniphx\Forrest\Exceptions\MissingRefreshTokenException;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Session;
 use Crypt;
 
-class LaravelSession implements SessionInterface {
+class LaravelSession implements StorageInterface {
 
 	/**
 	 * Store into session.

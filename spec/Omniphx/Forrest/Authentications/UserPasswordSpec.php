@@ -8,7 +8,7 @@ use Prophecy\Argument;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Message\RequestInterface;
-use Omniphx\Forrest\Interfaces\SessionInterface;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 
@@ -18,7 +18,7 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         ResponseInterface $mockedResponse,
         RequestInterface $mockedRequest,
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         RedirectInterface $mockedRedirect,
         InputInterface $mockedInput) {
 
@@ -51,7 +51,7 @@ class UserPasswordSpec extends ObjectBehavior
             'language' => 'en_US'
         );
 
-        $mockedSession->get('resources')->willReturn([
+        $mockedStorage->get('resources')->willReturn([
             'sobjects'     => '/services/data/v30.0/sobjects', 
             'connect'      => '/services/data/v30.0/connect',
             'query'        => '/services/data/v30.0/query',
@@ -67,15 +67,15 @@ class UserPasswordSpec extends ObjectBehavior
             'search'       => '/services/data/v30.0/search',
             'quickActions' => '/services/data/v30.0/quickActions',
             'appMenu'      => '/services/data/v30.0/appMenu']);
-        $mockedSession->get('version')->willReturn([
+        $mockedStorage->get('version')->willReturn([
             'url' => 'resourceURLs']);
-        $mockedSession->getToken()->willReturn([
+        $mockedStorage->getToken()->willReturn([
             'access_token' => 'accessToken',
             'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
             'instance_url' => 'https://na00.salesforce.com',
             'token_type'   => 'Oauth']);
-        $mockedSession->putToken(Argument::any())->willReturn(null);
-        $mockedSession->put(Argument::any(),Argument::any())->willReturn(null);
+        $mockedStorage->putToken(Argument::any())->willReturn(null);
+        $mockedStorage->put(Argument::any(),Argument::any())->willReturn(null);
 
         $mockedClient->send(Argument::any())->willReturn($mockedResponse);
         $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
@@ -83,7 +83,7 @@ class UserPasswordSpec extends ObjectBehavior
 
         $this->beConstructedWith(
             $mockedClient,
-            $mockedSession,
+            $mockedStorage,
             $mockedRedirect,
             $mockedInput,
             $settings);
@@ -109,10 +109,10 @@ class UserPasswordSpec extends ObjectBehavior
 
     function it_should_refresh(
         ResponseInterface $mockedResponse,
-        SessionInterface $mockedSession)
+        StorageInterface $mockedStorage)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn(['key'=>'value']);
-        $mockedSession->putToken(Argument::type('array'))->shouldBeCalled();
+        $mockedStorage->putToken(Argument::type('array'))->shouldBeCalled();
 
         $this->refresh()->shouldReturn(null);
     }
@@ -120,7 +120,7 @@ class UserPasswordSpec extends ObjectBehavior
     function it_should_return_the_request(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
@@ -133,7 +133,7 @@ class UserPasswordSpec extends ObjectBehavior
     function it_should_refresh_the_token_if_response_throws_error(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
 
@@ -145,7 +145,7 @@ class UserPasswordSpec extends ObjectBehavior
 
     function it_should_revoke_the_authentication_token(
         ClientInterface $mockedClient,
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         RedirectInterface $mockedRedirect)
     {
         $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
@@ -155,7 +155,7 @@ class UserPasswordSpec extends ObjectBehavior
     //Client
 
     function it_should_return_the_versions(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
@@ -166,7 +166,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_resources(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('versionURLs');
@@ -175,7 +175,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_identity (
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->willReturn('Identity');
@@ -184,27 +184,27 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_limits(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
-        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedStorage->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
         $mockedResponse->json()->shouldBeCalled()->willReturn('limits');
 
         $this->limits()->shouldReturn('limits');
     }
 
     function it_should_return_describe(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
-        $mockedSession->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
+        $mockedStorage->get('version')->shouldBeCalled()->willReturn(array('url'=>'versionURL'));
         $mockedResponse->json()->shouldBeCalled()->willReturn('describe');
 
         $this->describe()->shouldReturn('describe');        
     }
 
     function it_should_return_query(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('query');
@@ -213,7 +213,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_queryExplain(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('queryExplain');
@@ -222,7 +222,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_queryAll(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('queryAll');
@@ -231,7 +231,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_quickActions(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('quickActions');
@@ -240,7 +240,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_search(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('search');
@@ -249,7 +249,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_ScopeOrder(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchScopeOrder');
@@ -258,7 +258,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_searchLayouts(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchLayouts');
@@ -267,7 +267,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_suggestedArticles(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('suggestedArticles');
@@ -276,7 +276,7 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     function it_should_return_suggestedQueries(
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchSuggestedQueries');
@@ -288,7 +288,7 @@ class UserPasswordSpec extends ObjectBehavior
 
     function it_returns_a_resource(
         ClientInterface $mockedClient,
-        SessionInterface $mockedSession,
+        StorageInterface $mockedStorage,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
     {
@@ -298,7 +298,7 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
         $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
 
-        $mockedSession->getToken()->willReturn(array(
+        $mockedStorage->getToken()->willReturn(array(
             'access_token' =>'abc',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));
