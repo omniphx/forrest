@@ -3,7 +3,7 @@
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use Omniphx\Forrest\Client;
-use Omniphx\Forrest\Interfaces\SessionInterface;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\WebServerInterface;
@@ -38,13 +38,13 @@ class WebServer extends Client implements WebServerInterface
 
     public function __construct(
         ClientInterface $client,
-        SessionInterface $session,
+        StorageInterface $storage,
         RedirectInterface $redirect,
         InputInterface $input,
         $settings)
     {
         $this->client   = $client;
-        $this->session  = $session;
+        $this->storage  = $storage;
         $this->redirect = $redirect;
         $this->input    = $input;
         $this->settings = $settings;
@@ -114,11 +114,11 @@ class WebServer extends Client implements WebServerInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in session.
-        $this->session->putToken($jsonResponse);
-        $this->session->putRefreshToken($jsonResponse['refresh_token']);
+        // Encypt token and store token and in storage.
+        $this->storage->putToken($jsonResponse);
+        $this->storage->putRefreshToken($jsonResponse['refresh_token']);
 
-        // Store resources into the session.
+        // Store resources into the storage.
         $this->storeResources();
     }
 
@@ -129,7 +129,7 @@ class WebServer extends Client implements WebServerInterface
      */
     public function refresh()
     {
-        $refreshToken = $this->session->getRefreshToken();
+        $refreshToken = $this->storage->getRefreshToken();
 
         $tokenURL = $this->creditials['loginURL'] . '/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
@@ -144,12 +144,12 @@ class WebServer extends Client implements WebServerInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in session.
-        $this->session->putToken($jsonResponse);
+        // Encypt token and store token and in storage.
+        $this->storage->putToken($jsonResponse);
     }
 
     /**
-     * Revokes access token from Salesforce. Will not flush token from Session.
+     * Revokes access token from Salesforce. Will not flush token from storage.
      * @return mixed
      */
     public function revoke()

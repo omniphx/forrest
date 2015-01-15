@@ -142,7 +142,7 @@ abstract class Client extends Resource {
     public function resources($options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('version')['url'];
+        $url .= $this->storage->get('version')['url'];
 
         $resources = $this->request($url, $options);
 
@@ -177,7 +177,7 @@ abstract class Client extends Resource {
     public function limits($options =[])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('version')['url'];
+        $url .= $this->storage->get('version')['url'];
         $url .= '/limits';
 
         $limits = $this->request($url, $options);
@@ -192,7 +192,7 @@ abstract class Client extends Resource {
     public function describe($options =[])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('version')['url'];
+        $url .= $this->storage->get('version')['url'];
         $url .= '/sobjects';
 
         $describe = $this->request($url, $options);
@@ -209,7 +209,7 @@ abstract class Client extends Resource {
     public function query($query, $options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['query'];
+        $url .= $this->storage->get('resources')['query'];
         $url .= '?q=';
         $url .= urlencode($query);
 
@@ -228,7 +228,7 @@ abstract class Client extends Resource {
     public function next($nextUrl, $options = [])
     {
         $url  = $this->getToken()['instance_url'];
-        $url .= $this->session->get('resources')['query'];
+        $url .= $this->storage->get('resources')['query'];
         $url .= '/'.$nextUrl;
 
         $queryResults = $this->request($url, $options);
@@ -246,7 +246,7 @@ abstract class Client extends Resource {
     public function queryExplain($query, $options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['query'];
+        $url .= $this->storage->get('resources')['query'];
         $url .= '?explain=';
         $url .= urlencode($query);
 
@@ -266,7 +266,7 @@ abstract class Client extends Resource {
     public function queryAll($query,$options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['queryAll'];
+        $url .= $this->storage->get('resources')['queryAll'];
         $url .= '?q=';
         $url .= urlencode($query);
 
@@ -284,7 +284,7 @@ abstract class Client extends Resource {
     public function search($query,$options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['search'];
+        $url .= $this->storage->get('resources')['search'];
         $url .= '?q=';
         $url .= urlencode($query);
 
@@ -305,7 +305,7 @@ abstract class Client extends Resource {
     public function scopeOrder($options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['search'];
+        $url .= $this->storage->get('resources')['search'];
         $url .= '/scopeOrder';
 
         $scopeOrder = $this->request($url, $options);
@@ -322,7 +322,7 @@ abstract class Client extends Resource {
     public function searchLayouts($objectList,$options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['search'];
+        $url .= $this->storage->get('resources')['search'];
         $url .= '/layout/?q=';
         $url .= urlencode($objectList);
 
@@ -344,7 +344,7 @@ abstract class Client extends Resource {
     public function suggestedArticles($query,$options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['search'];
+        $url .= $this->storage->get('resources')['search'];
         $url .= '/suggestTitleMatches?q=';
         $url .= urlencode($query);
 
@@ -376,7 +376,7 @@ abstract class Client extends Resource {
     public function suggestedQueries($query,$options = [])
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')['search'];
+        $url .= $this->storage->get('resources')['search'];
         $url .= '/suggestSearchQueries?q=';
         $url .= urlencode($query);
 
@@ -426,7 +426,7 @@ abstract class Client extends Resource {
     public function __call($name,$arguments)
     {
         $url = $this->getInstanceUrl();
-        $url .= $this->session->get('resources')[$name];
+        $url .= $this->storage->get('resources')[$name];
 
         $options = [];
 
@@ -458,7 +458,7 @@ abstract class Client extends Resource {
      */
     protected function getToken()
     {
-        return $this->session->getToken();
+        return $this->storage->getToken();
     }
 
     /**
@@ -480,7 +480,7 @@ abstract class Client extends Resource {
      * Checks to see if version is specified in configuration and if not then
      * assign the latest version number availabe to the user's instance.
      * Once a version number is determined, it will be stored in the user's
-     * session with the 'version' key.
+     * storage with the 'version' key.
      * @return void
      */
     protected function storeVersion()
@@ -491,14 +491,14 @@ abstract class Client extends Resource {
             $versions = $this->versions(['format'=>'json']);
             foreach ($versions as $version) {
                 if ($version['version'] == $configVersion){
-                    $this->session->put('version',$version);
+                    $this->storage->put('version',$version);
                 }
             }
         }
         else {
             $versions = $this->versions(['format'=>'json']);
             $lastestVersion = end($versions);
-            $this->session->put('version', $lastestVersion);
+            $this->storage->put('version', $lastestVersion);
         }
     }
 
@@ -511,14 +511,14 @@ abstract class Client extends Resource {
     protected function storeResources()
     {
         try {
-            $version = $this->session->get('version');
+            $version = $this->storage->get('version');
             $resources = $this->resources(['format'=>'json']);
-            $this->session->put('resources', $resources);
+            $this->storage->put('resources', $resources);
         }
         catch (\Exception $e) {
             $this->storeVersion();
             $resources = $this->resources(['format'=>'json']);
-            $this->session->put('resources', $resources);
+            $this->storage->put('resources', $resources);
         }
     }
 

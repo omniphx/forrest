@@ -19,10 +19,10 @@ abstract class Resource {
     protected $settings;
 
     /**
-     * Session handler
-     * @var Session
+     * Storage handler
+     * @var storage
      */
-    protected $session;
+    protected $storage;
 
     /**
      * Reqeust headers
@@ -72,7 +72,7 @@ abstract class Resource {
     {
         $format = $options['format'];
 
-        $authToken = $this->session->getToken();
+        $authToken = $this->storage->getToken();
 
         $accessToken = $authToken['access_token'];
         $tokenType   = $authToken['token_type'];

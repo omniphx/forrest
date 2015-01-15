@@ -40,13 +40,13 @@ class ForrestServiceProvider extends ServiceProvider {
 
 			$client   = new \GuzzleHttp\Client();
 			$redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
-			$session  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession();
+			$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession();
 			$input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
 
 			$authentication = '\\Omniphx\\Forrest\\Authentications\\';
 			$authentication .= $settings['authentication'];
 
-			return new $authentication($client, $session, $redirect, $input, $settings);
+			return new $authentication($client, $storage, $redirect, $input, $settings);
 		});
 	}
 
