@@ -40,7 +40,7 @@ return array(
 
 	/**
 	 * Default settings for resource requests.
-	 * Format can be 'json' or 'xml'
+	 * Format can be 'json', 'xml' or 'none'
 	 * Compression can be set to 'gzip' or 'deflate'
 	 */
 	'defaults' => array(

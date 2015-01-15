@@ -360,5 +360,18 @@ Forrest::patch('/services/data/v20.0/endpoint', ['my'=>'param']);
 Forrest::delete('/services/data/v20.0/endpoint');
 ```
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/omniphx/forrest/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+### Raw response output
+By default, this package will return the body of a response as either a deserialized JSON object or a SimpleXMLElement object.
 
+There might be times, when you would rather handle this differently. To do this, simply use any format other than 'json' or 'xml' and the code will return a Guzzle response object.
+
+For example:
+```php
+$response = Forrest::sobjects($resource,[
+    'method'    => $method,
+    'body'      => $params,
+    'format'    => 'none',
+]);
+$content = (string) $response->getBody();
+```
+For more information about Guzzle responses, see their (documentation)[http://guzzle.readthedocs.org/en/latest/http-messages.html#responses].
