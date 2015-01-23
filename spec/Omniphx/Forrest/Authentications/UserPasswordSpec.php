@@ -307,4 +307,10 @@ class UserPasswordSpec extends ObjectBehavior
         $this->request('uri',['format'=>'xml'])->shouldReturn('xmlResource');
     }
 
+    function it_allows_access_to_the_guzzle_client(
+        ClientInterface $mockedClient)
+    {
+        $this->getClient()->shouldReturn($mockedClient);
+    }
+
 }
