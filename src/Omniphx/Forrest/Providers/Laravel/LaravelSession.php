@@ -42,8 +42,8 @@ class LaravelSession implements StorageInterface {
 	 */
 	public function putToken($token)
 	{
-		$encyptedToken = Crypt::encrypt($token);
-		return Session::put('token', $encyptedToken);
+		$encryptedToken = Crypt::encrypt($token);
+		return Session::put('token', $encryptedToken);
 	}
 
 	/**
@@ -66,8 +66,8 @@ class LaravelSession implements StorageInterface {
 	 */
 	public function putRefreshToken($token)
 	{
-		$encyptedToken = Crypt::encrypt($token);
-		return Session::put('refresh_token', $encyptedToken);
+		$encryptedToken = Crypt::encrypt($token);
+		return Session::put('refresh_token', $encryptedToken);
 	}
 
 	/**
