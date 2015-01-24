@@ -31,6 +31,16 @@ abstract class Resource {
     private $headers;
 
     /**
+     * Public accessor to the Guzzle Client Object
+     *
+     * @return GuzzleHttp\ClientInterface
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    /**
      * Method returns the response for the requested resource
      * @param  string $pURI 
      * @param  array  $pOptions

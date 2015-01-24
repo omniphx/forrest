@@ -627,4 +627,10 @@ class WebServerSpec extends ObjectBehavior
         $this->delete('delete')->shouldReturn($mockedResponse);
     }
 
+    function it_allows_access_to_the_guzzle_client(
+        ClientInterface $mockedClient)
+    {
+        $this->getClient()->shouldReturn($mockedClient);
+    }
+
 }
