@@ -42,11 +42,12 @@ class ForrestServiceProvider extends ServiceProvider {
 			$redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
 			$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession();
 			$input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
+			$event    = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
 
 			$authentication = '\\Omniphx\\Forrest\\Authentications\\';
 			$authentication .= $settings['authentication'];
 
-			return new $authentication($client, $storage, $redirect, $input, $settings);
+			return new $authentication($client, $storage, $redirect, $input, $event, $settings);
 		});
 	}
 
