@@ -11,6 +11,7 @@ use GuzzleHttp\Message\RequestInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
+use Omniphx\Forrest\Interfaces\EventInterface;
 
 class UserPasswordSpec extends ObjectBehavior
 {
@@ -20,7 +21,8 @@ class UserPasswordSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         StorageInterface $mockedStorage,
         RedirectInterface $mockedRedirect,
-        InputInterface $mockedInput) {
+        InputInterface $mockedInput,
+        EventInterface $mockedEvent) {
 
         $settings  = array(
             'authenticationFlow' => 'UserPassword',
@@ -86,6 +88,7 @@ class UserPasswordSpec extends ObjectBehavior
             $mockedStorage,
             $mockedRedirect,
             $mockedInput,
+            $mockedEvent,
             $settings);
 
     }

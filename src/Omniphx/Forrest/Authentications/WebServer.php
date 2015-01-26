@@ -6,6 +6,7 @@ use Omniphx\Forrest\Client;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
+use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\WebServerInterface;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
@@ -41,12 +42,14 @@ class WebServer extends Client implements WebServerInterface
         StorageInterface $storage,
         RedirectInterface $redirect,
         InputInterface $input,
+        EventInterface $event,
         $settings)
     {
         $this->client   = $client;
         $this->storage  = $storage;
         $this->redirect = $redirect;
         $this->input    = $input;
+        $this->event    = $event;
         $this->settings = $settings;
         $this->creditials = $settings['creditials'];
         $this->parameters = $settings['parameters'];

@@ -65,12 +65,16 @@ abstract class Resource {
 
         try {
             $response = $this->client->send($request);
+
+            $this->event->fire('forrest.response', array($request));
+
+            return $this->responseFormat($response,$format);
+
         } catch(RequestException $e) {
             $this->assignExceptions($e);
         }
 
-        return $this->responseFormat($response,$format);
-        
+
     }
 
     /**
