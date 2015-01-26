@@ -11,6 +11,7 @@ use GuzzleHttp\Message\RequestInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
+use Omniphx\Forrest\Interfaces\EventInterface;
 
 class WebServerSpec extends ObjectBehavior
 {
@@ -20,7 +21,8 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         StorageInterface $mockedStorage,
         RedirectInterface $mockedRedirect,
-        InputInterface $mockedInput)
+        InputInterface $mockedInput,
+        EventInterface $mockedEvent)
     {
         $settings  = array(
             'creditials' => array(
@@ -88,6 +90,7 @@ class WebServerSpec extends ObjectBehavior
             $mockedStorage,
             $mockedRedirect,
             $mockedInput,
+            $mockedEvent,
             $settings);
     }
 
@@ -631,6 +634,19 @@ class WebServerSpec extends ObjectBehavior
         ClientInterface $mockedClient)
     {
         $this->getClient()->shouldReturn($mockedClient);
+    }
+
+    function it_should_fire_a_response_event (
+        ClientInterface $mockedClient,
+        EventInterface $mockedEvent,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedClient->send(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedResponse);
+        $mockedEvent->fire('forrest.response', Argument::any())->shouldBeCalled();
+
+        $this->versions();
     }
 
 }

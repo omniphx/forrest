@@ -5,6 +5,7 @@ use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
+use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\UserPasswordInterface;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
@@ -33,12 +34,14 @@ class UserPassword extends Client implements UserPasswordInterface
         StorageInterface $storage,
         RedirectInterface $redirect,
         InputInterface $input,
+        EventInterface $event,
         $settings)
     {
         $this->client     = $client;
         $this->storage    = $storage;
         $this->redirect   = $redirect;
         $this->input      = $input;
+        $this->event      = $event;
         $this->settings   = $settings;
         $this->creditials = $settings['creditials'];
     }
