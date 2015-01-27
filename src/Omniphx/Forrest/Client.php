@@ -531,8 +531,8 @@ abstract class Client {
         }
         else {
             $versions = $this->versions(['format'=>'json']);
-            $lastestVersion = end($versions);
-            $this->storage->put('version', $lastestVersion);
+            $latestVersion = end($versions);
+            $this->storage->put('version', $latestVersion);
         }
     }
 
