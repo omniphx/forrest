@@ -1,8 +1,5 @@
 <?php namespace Omniphx\Forrest;
 
-use Omniphx\Forrest\Resource;
-use Omniphx\Forrest\Exceptions\MissingTokenException;
-
 abstract class Client {
 
     /**
