@@ -522,22 +522,4 @@ abstract class Client extends Resource {
         }
     }
 
-    /**
-     * Encodes array of key values into encoded url.
-     * @param  [type] $parameters [description]
-     * @return [type]             [description]
-     */
-    private function encodeParameters($parameters){
-        $url = '';
-
-        foreach ($parameters as $key => $value) {
-            $url .= '&';
-            $url .= $key;
-            $url .= '=';
-            $url .= $value;
-        }
-
-        return $url;
-    }
-
 }
