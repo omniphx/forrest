@@ -12,7 +12,7 @@ return array(
 
 	/**
 	 * Enter your creditials
-	 * Username and Password are only neccessary for UserPassword flow. Likewise, callbackURI is only necessary for WebServer flow.
+	 * Username and Password are only necessary for UserPassword flow. Likewise, callbackURI is only necessary for WebServer flow.
 	 */
 	'creditials' => array(
 		//Required:
@@ -49,6 +49,14 @@ return array(
 		'compression'     => false,
 		'compressionType' => 'gzip',
 	),
+
+	/**
+	 * Where do you want to store access tokens fetched from Salesforce
+	 */
+	'storage' => array(
+		'type'      => 'session', // 'session' or 'cache' are the two options
+		'path'      => 'forrest_', // unique storage path to avoid collisions
+ 	),
 
 	/**
 	 * If you'd like to specify an API version manually it can be done here.

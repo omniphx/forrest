@@ -3,19 +3,21 @@
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Session\Store as Session;
+use Illuminate\Cache\Repository as Cache;
 
-class LaravelSession extends Storage implements StorageInterface {
+class LaravelCache extends Storage implements StorageInterface {
+
+	public $minutes = 60;
 
 	public $path;
 
-	protected $session;
+	protected $cache;
 
-	public function __construct(Config $config, Session $session)
+	public function __construct(Config $config, Cache $cache)
 	{
 		$this->path = $config->get('forrest::config.storage.path');
 
-		$this->session = $session;
+		$this->cache = $cache;
 	}
 
 	/**
@@ -26,7 +28,7 @@ class LaravelSession extends Storage implements StorageInterface {
 	 */
 	public function put($key, $value)
 	{
-		return $this->session->put($this->path.$key, $value);
+		return $this->cache->put($this->path.$key, $value, $this->minutes);
 	}
 
 	/**
@@ -36,8 +38,8 @@ class LaravelSession extends Storage implements StorageInterface {
 	 */
 	public function get($key)
 	{
-		if ($this->session->has($this->path.$key)) {
-			return $this->session->get($this->path.$key);
+		if ($this->cache->has($this->path.$key)) {
+			return $this->cache->get($this->path.$key);
 		}
 
 		throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
@@ -50,7 +52,7 @@ class LaravelSession extends Storage implements StorageInterface {
 	 */
 	public function has($key)
 	{
-		return $this->session->has($this->path.$key);
+		return $this->cache->has($this->path.$key);
 	}
 
 }
