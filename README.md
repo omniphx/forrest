@@ -1,7 +1,7 @@
-# Omniphx/Forrest, Force.com REST API Client for Laravel 4
+# Omniphx/Forrest, Force.com REST API Client for Laravel
 [![Latest Stable Version](https://poser.pugx.org/omniphx/forrest/v/stable.svg)](https://packagist.org/packages/omniphx/forrest) [![Total Downloads](https://poser.pugx.org/omniphx/forrest/downloads.svg)](https://packagist.org/packages/omniphx/forrest) [![Latest Unstable Version](https://poser.pugx.org/omniphx/forrest/v/unstable.svg)](https://packagist.org/packages/omniphx/forrest) [![License](https://poser.pugx.org/omniphx/forrest/license.svg)](https://packagist.org/packages/omniphx/forrest) [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
-Forrest is a Force.com REST API client for Laravel 4. It provides access to restricted Salesforce information via Oauth 2.0. REST is a lightweight alternative to the SOAP API and is useful for mobile users.
+Salesforce/Force.com REST API client for Laravel. It provides access to restricted Salesforce information via Oauth 2.0. REST is a lightweight alternative to the SOAP API and is useful for mobile users.
 
  While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
@@ -23,7 +23,7 @@ Followed by the alias:
     'Forrest' => 'Omniphx\Forrest\Providers\Laravel\Facades\Forrest'
 
 ### Configuration
-You will need a configuation file to add your creditials. Publish a config file using the `artisan` command:
+You will need a configuration file to add your credentials. Publish a config file using the `artisan` command:
 ```bash
 php artisan config:publish omniphx/forrest
 ```
