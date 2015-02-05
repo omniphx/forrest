@@ -40,7 +40,11 @@ class ForrestServiceProvider extends ServiceProvider {
 
 			$client   = new \GuzzleHttp\Client();
 			$redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
-			$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession();
+			if($settings['storage']['type'] == 'cache') {
+				$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelCache(app('config'), app('cache'));
+			} else {
+				$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession(app('config'), app('session'));
+			}
 			$input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
 			$event    = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
 

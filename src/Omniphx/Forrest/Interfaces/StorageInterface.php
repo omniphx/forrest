@@ -3,7 +3,7 @@
 interface StorageInterface {
 	
 	/**
-	 * Store into session.
+	 * Store into storage.
 	 * @param $key
 	 * @param $value
 	 * @return void
@@ -11,34 +11,41 @@ interface StorageInterface {
 	public function put($key, $value);
 
 	/**
-	 * Get from session
+	 * Get from storage
 	 * @param $key
 	 * @return mixed
 	 */
 	public function get($key);
 
 	/**
-	 * Encrypt authentication token and store it in session.
+	 * Check if storage has a key stored
+	 * @param $key
+	 * @return boolean
+	 */
+	public function has($key);
+
+	/**
+	 * Encrypt authentication token and store it in storage.
 	 * @param array $token
 	 * @return void
 	 */
 	public function putToken($token);
 
 	/**
-	 * Get token from the session and decrypt it.
+	 * Get token from the storage and decrypt it.
 	 * @return mixed
 	 */
 	public function getToken();
 
 	/**
-	 * Encrypt refresh token and pass into session.
+	 * Encrypt refresh token and pass into storage.
 	 * @param  Array $token
 	 * @return void
 	 */
 	public function putRefreshToken($token);
 
 	/**
-	 * Get refresh token from session and decrypt it.
+	 * Get refresh token from storage and decrypt it.
 	 * @return mixed
 	 */
 	public function getRefreshToken();
