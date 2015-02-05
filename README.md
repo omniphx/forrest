@@ -186,13 +186,9 @@ With the exception of the `search` and `query` resources, all requests are made 
 
 First, determine which resources you have access to by calling:
 ```php
-Session::get('resources');
-```
-or
-```php
 Forrest::resources();
 ```
-Either will return the following array:
+This is a sample returned array:
 ```php
 Array
 (
