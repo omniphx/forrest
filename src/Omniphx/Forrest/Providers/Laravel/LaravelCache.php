@@ -3,7 +3,7 @@
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Cache\Repository as Cache;
+use Illuminate\Cache\CacheManager as Cache;
 
 class LaravelCache extends Storage implements StorageInterface {
 
