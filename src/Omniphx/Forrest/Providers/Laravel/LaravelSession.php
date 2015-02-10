@@ -3,7 +3,7 @@
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Session\Store as Session;
+use Illuminate\Session\SessionManager as Session;
 
 class LaravelSession extends Storage implements StorageInterface {
 

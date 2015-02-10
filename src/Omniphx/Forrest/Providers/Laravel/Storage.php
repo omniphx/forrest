@@ -29,7 +29,7 @@ abstract class Storage implements StorageInterface {
             return Crypt::decrypt($token);
         }
 
-        throw new MissingTokenException(sprintf('No token available in current session'));
+        throw new MissingTokenException(sprintf('No token available in \''.\Config::get('forrest::config.storage.type').'\' storage'));
     }
 
     /**
