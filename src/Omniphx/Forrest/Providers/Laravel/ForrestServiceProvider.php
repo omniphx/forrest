@@ -1,6 +1,5 @@
 <?php namespace Omniphx\Forrest\Providers\Laravel;
 
-use Config;
 use Illuminate\Support\ServiceProvider;
 
 class ForrestServiceProvider extends ServiceProvider {
@@ -19,9 +18,11 @@ class ForrestServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('omniphx/forrest', null, __DIR__.'/../../../..');
+		$this->publishes([
+		    __DIR__.'/../../../../config/config.php' => config_path('forrest.php'),
+		]);
 
-		$authentication  = Config::get('forrest::authentication');
+		$authentication = config('forrest.authentication');
 
 		include __DIR__ . "/Routes/$authentication.php";
 	}
@@ -36,7 +37,7 @@ class ForrestServiceProvider extends ServiceProvider {
 
 		$this->app['forrest'] = $this->app->share(function($app)
 		{
-			$settings  = Config::get('forrest::config');
+			$settings = config('forrest');
 
 			$client   = new \GuzzleHttp\Client();
 			$redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
