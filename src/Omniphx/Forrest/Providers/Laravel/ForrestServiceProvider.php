@@ -9,7 +9,7 @@ class ForrestServiceProvider extends ServiceProvider {
 	 *
 	 * @var bool
 	 */
-	protected $defer = false;
+	protected $defer = true;
 
 	/**
 	 * Bootstrap the application events.
@@ -24,7 +24,9 @@ class ForrestServiceProvider extends ServiceProvider {
 
 		$authentication = config('forrest.authentication');
 
-		include __DIR__ . "/Routes/$authentication.php";
+		if(!is_null($authentication)){
+			include __DIR__ . "/Routes/$authentication.php";
+		}
 	}
 
 	/**

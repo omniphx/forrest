@@ -1,4 +1,4 @@
-# Omniphx/Forrest, Force.com REST API Client for Laravel
+# Omniphx/Forrest, Force.com REST API Client for Laravel 5
 [![Latest Stable Version](https://poser.pugx.org/omniphx/forrest/v/stable.svg)](https://packagist.org/packages/omniphx/forrest) [![Total Downloads](https://poser.pugx.org/omniphx/forrest/downloads.svg)](https://packagist.org/packages/omniphx/forrest) [![Latest Unstable Version](https://poser.pugx.org/omniphx/forrest/v/unstable.svg)](https://packagist.org/packages/omniphx/forrest) [![License](https://poser.pugx.org/omniphx/forrest/license.svg)](https://packagist.org/packages/omniphx/forrest) [![Build Status](https://travis-ci.org/omniphx/forrest.svg?branch=master)](https://travis-ci.org/omniphx/forrest)
 
 Salesforce/Force.com REST API client for Laravel. It provides access to restricted Salesforce information via Oauth 2.0. REST is a lightweight alternative to the SOAP API and is useful for mobile users.
@@ -6,15 +6,15 @@ Salesforce/Force.com REST API client for Laravel. It provides access to restrict
  While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
 ## Installation
->If you are upgrading to Version 1.0, be sure to re-publish your config file.
+>If you are upgrading to Version 2.0, be sure to re-publish your config file.
 
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
 
-    "omniphx/forrest": "1.*"
+    "omniphx/forrest": "2.*"
 
 Next run `composer update` from the command line to install the package.
 
-If you are using Laravel, add the service provider to your `app/config/app.php` file:
+If you are using Laravel, add the service provider to your `bootstrap/app.php` file:
 
     'Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider'
 
@@ -25,9 +25,9 @@ Followed by the alias:
 ### Configuration
 You will need a configuration file to add your credentials. Publish a config file using the `artisan` command:
 ```bash
-php artisan config:publish omniphx/forrest
+php artisan vendor:publish
 ```
-You can find the config file in: `app/config/omniphx/forrest/config.php`
+You can find the config file in: `config/forrest.php`
 
 After you have set up am connected app (see below), update your config file with a `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
 
@@ -370,4 +370,4 @@ $response = Forrest::sobjects($resource,[
 ]);
 $content = (string) $response->getBody();
 ```
-For more information about Guzzle responses, see their (documentation)[http://guzzle.readthedocs.org/en/latest/http-messages.html#responses].
+For more information about Guzzle responses, see their [documentation](http://guzzle.readthedocs.org/en/latest/http-messages.html#responses).
