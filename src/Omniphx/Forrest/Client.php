@@ -487,7 +487,7 @@ abstract class Client {
      * Get token
      * @return array
      */
-    protected function getToken()
+    public function getToken()
     {
         return $this->storage->getToken();
     }
