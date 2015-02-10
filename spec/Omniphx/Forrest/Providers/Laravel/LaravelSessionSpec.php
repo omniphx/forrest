@@ -15,7 +15,7 @@ class LaravelSessionSpec extends ObjectBehavior
         $this->beConstructedWith($config, $session);
     }
 
-    function it_is_initializable(Config $config, Session $session)
+    function it_is_initializable(Config $config)
     {
         $config->get(Argument::any())->shouldBeCalled();
         $this->shouldHaveType('Omniphx\Forrest\Providers\Laravel\LaravelSession');
