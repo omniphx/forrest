@@ -46,7 +46,8 @@ class UserPassword extends Client implements UserPasswordInterface
         $this->creditials = $settings['creditials'];
     }
 
-    public function authenticate($loginURL = null){
+    public function authenticate($loginURL = null)
+    {
         $tokenURL = $this->creditials['loginURL'];
         $tokenURL .= '/services/oauth2/token';
         $parameters['body'] = [

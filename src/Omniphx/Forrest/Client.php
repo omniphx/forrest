@@ -579,9 +579,9 @@ abstract class Client {
         try {
             $response = $this->client->send($request);
 
-            $this->event->fire('forrest.response', array($request));
+            $this->event->fire('forrest.response', array('request'=>$request, 'response'=>$response));
 
-            return $this->responseFormat($response,$format);
+            return $this->responseFormat($response, $format);
 
         } catch(RequestException $e) {
             $this->assignExceptions($e);
