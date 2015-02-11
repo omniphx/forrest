@@ -579,7 +579,7 @@ abstract class Client {
         try {
             $response = $this->client->send($request);
 
-            $this->event->fire('forrest.response', array('request'=>$request, 'response'=>$response));
+            $this->event->fire('forrest.response', array($request, $response));
 
             return $this->responseFormat($response, $format);
 

@@ -361,13 +361,16 @@ By default, this package will return the body of a response as either a deserial
 
 There might be times, when you would rather handle this differently. To do this, simply use any format other than 'json' or 'xml' and the code will return a Guzzle response object.
 
-For example:
 ```php
-$response = Forrest::sobjects($resource,[
-    'method'    => $method,
-    'body'      => $params,
-    'format'    => 'none',
-]);
-$content = (string) $response->getBody();
+$response = Forrest::sobjects($resource, ['format'=> 'none']);
+$content = (string) $response->getBody(); // Guzzle response
 ```
 For more information about Guzzle responses, see their (documentation)[http://guzzle.readthedocs.org/en/latest/http-messages.html#responses].
+
+### Event Listener
+
+```php
+Event::listen('forrest.response', function($request, $response) {
+    dd((string) $response);
+});
+```
