@@ -36,25 +36,31 @@ class ForrestServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
+		$this->app->bindShared('forrest', function($app){
 
-		$this->app['forrest'] = $this->app->share(function($app)
-		{
-			$settings = config('forrest');
+			//Config options:
+			$settings           = config('forrest');
+			$authenticationType = config('forrest.authentication');
+			$storageType        = config('forrest.storage.type');
 
+			//Dependencies:
 			$client   = new \GuzzleHttp\Client();
+			$input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
+			$event    = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
 			$redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
-			if($settings['storage']['type'] == 'cache') {
+
+			//Determine storage dependency:
+			if($storageType == 'cache') {
 				$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelCache(app('config'), app('cache'));
 			} else {
 				$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession(app('config'), app('session'));
 			}
-			$input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
-			$event    = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
 
-			$authentication = '\\Omniphx\\Forrest\\Authentications\\';
-			$authentication .= $settings['authentication'];
+			//Class namespace:
+			$forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
 
-			return new $authentication($client, $storage, $redirect, $input, $event, $settings);
+			return new $forrest($client, $storage, $redirect, $input, $event, $settings);
+
 		});
 	}
 
