@@ -5,7 +5,7 @@ use Omniphx\Forrest\Exceptions\MissingTokenException;
 use Omniphx\Forrest\Exceptions\MissingRefreshTokenException;
 use Crypt;
 
-abstract class Storage implements StorageInterface {
+abstract class LaravelStorageProvider implements StorageInterface {
 
     /**
      * Encrypt authentication token and store it in session.

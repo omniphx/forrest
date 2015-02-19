@@ -117,7 +117,7 @@ class WebServer extends Client implements WebServerInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in storage.
+        // Encrypt token and store token and in storage.
         $this->storage->putToken($jsonResponse);
         $this->storage->putRefreshToken($jsonResponse['refresh_token']);
 
@@ -147,7 +147,7 @@ class WebServer extends Client implements WebServerInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in storage.
+        // Encrypt token and store token and in storage.
         $this->storage->putToken($jsonResponse);
     }
 
