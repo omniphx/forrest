@@ -131,7 +131,6 @@ class WebServerSpec extends ObjectBehavior
 
     function it_should_refresh(
         ClientInterface $mockedClient,
-        RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse,
         StorageInterface $mockedStorage)
     {
@@ -152,7 +151,6 @@ class WebServerSpec extends ObjectBehavior
     function it_should_return_the_request(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
@@ -189,8 +187,7 @@ class WebServerSpec extends ObjectBehavior
     function it_should_not_call_refresh_method_if_there_is_no_token(
         ClientInterface $mockedClient,
         RequestInterface $failedRequest,
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+        StorageInterface $mockedStorage)
     {
         $mockedClient->send($failedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
 
@@ -203,18 +200,13 @@ class WebServerSpec extends ObjectBehavior
 
     //Client class
 
-    function it_should_revoke_the_authentication_token(
-        ClientInterface $mockedClient,
-        StorageInterface $mockedStorage,
-        RedirectInterface $mockedRedirect,
-        RequestInterface $mockedRequest)
+    function it_should_revoke_the_authentication_token(ClientInterface $mockedClient)
     {
         $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
         $this->revoke()->shouldReturn(null);
     }
 
     function it_should_return_the_versions(
-        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
@@ -226,7 +218,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_resources(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -238,7 +229,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_identity (
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -276,7 +266,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_query(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -287,8 +276,18 @@ class WebServerSpec extends ObjectBehavior
         $this->query('query')->shouldReturn('query');
     }
 
+    function it_should_return_next_query(
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest)
+    {
+        $mockedClient->createRequest(Argument::any(),Argument::any(),Argument::any())->willReturn($mockedRequest);
+        $mockedResponse->json()->shouldBeCalled()->willReturn('query');
+
+        $this->next('nextUrl')->shouldReturn('query');
+    }
+
     function it_should_return_queryExplain(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -300,7 +299,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_queryAll(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -312,7 +310,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_quickActions(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -324,7 +321,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_search(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -336,7 +332,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_ScopeOrder(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -348,7 +343,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_searchLayouts(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -360,7 +354,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_suggestedArticles(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -372,7 +365,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_suggestedQueries(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -384,7 +376,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_return_custom_request(
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest)
@@ -559,7 +550,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_allow_a_get_request(
-        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
@@ -571,7 +561,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_allow_a_post_request(
-        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
@@ -583,7 +572,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_allow_a_put_request(
-        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
@@ -595,7 +583,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_allow_a_patch_request(
-        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
@@ -607,7 +594,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_allow_a_head_request(
-        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
@@ -619,7 +605,6 @@ class WebServerSpec extends ObjectBehavior
     }
 
     function it_should_allow_a_delete_request(
-        StorageInterface $mockedStorage,
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)

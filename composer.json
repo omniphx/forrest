@@ -17,7 +17,9 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "laravel/framework": ">= 4.0",
+        "illuminate/cache": "~4.2",
+        "illuminate/session": "~4.2",
+        "illuminate/config": "~4.2",
         "guzzlehttp/guzzle": "~5.0"
     },
     "require-dev": {

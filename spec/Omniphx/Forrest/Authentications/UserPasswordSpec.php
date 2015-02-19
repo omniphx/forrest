@@ -100,8 +100,7 @@ class UserPasswordSpec extends ObjectBehavior
 
     function it_should_authenticate(
         ResponseInterface $versionResponse,
-        ClientInterface $mockedClient,
-        RequestInterface $mockedRequest)
+        ClientInterface $mockedClient)
     {
         $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
 
@@ -123,7 +122,6 @@ class UserPasswordSpec extends ObjectBehavior
     function it_should_return_the_request(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
-        StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse)
     {
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
@@ -135,9 +133,7 @@ class UserPasswordSpec extends ObjectBehavior
 
     function it_should_refresh_the_token_if_response_throws_error(
         ClientInterface $mockedClient,
-        RequestInterface $mockedRequest,
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+        RequestInterface $mockedRequest)
     {
 
         $mockedClient->send($mockedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
@@ -146,10 +142,7 @@ class UserPasswordSpec extends ObjectBehavior
         $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url',['key'=>'value']);
     }
 
-    function it_should_revoke_the_authentication_token(
-        ClientInterface $mockedClient,
-        StorageInterface $mockedStorage,
-        RedirectInterface $mockedRedirect)
+    function it_should_revoke_the_authentication_token(ClientInterface $mockedClient)
     {
         $mockedClient->post(Argument::type('string'),Argument::type('array'))->shouldBeCalled();
         $this->revoke()->shouldReturn(null);
@@ -157,29 +150,21 @@ class UserPasswordSpec extends ObjectBehavior
 
     //Client
 
-    function it_should_return_the_versions(
-        StorageInterface $mockedStorage,
-        ClientInterface $mockedClient,
-        RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
+    function it_should_return_the_versions(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn(array('version'=>'29.0','version'=>'30.0'));
 
         $this->versions()->shouldReturn(array('version'=>'29.0','version'=>'30.0'));
     }
 
-    function it_should_return_resources(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_resources(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('versionURLs');
 
         $this->resources()->shouldReturn('versionURLs');
     }
 
-    function it_should_return_identity (
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_identity (ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->willReturn('Identity');
 
@@ -206,81 +191,70 @@ class UserPasswordSpec extends ObjectBehavior
         $this->describe()->shouldReturn('describe');        
     }
 
-    function it_should_return_query(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_query(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('query');
 
         $this->query('query')->shouldReturn('query');
     }
 
-    function it_should_return_queryExplain(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_query_next(ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->json()->shouldBeCalled()->willReturn('query');
+
+        $this->next('nextUrl')->shouldReturn('query');
+    }
+
+    function it_should_return_queryExplain(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('queryExplain');
 
         $this->queryExplain('query')->shouldReturn('queryExplain');
     }
 
-    function it_should_return_queryAll(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_queryAll(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('queryAll');
 
         $this->queryAll('query')->shouldReturn('queryAll');
     }
 
-    function it_should_return_quickActions(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_quickActions(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('quickActions');
 
         $this->quickActions()->shouldReturn('quickActions');
     }
 
-    function it_should_return_search(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_search(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('search');
 
         $this->search('query')->shouldReturn('search');
     }
 
-    function it_should_return_ScopeOrder(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_ScopeOrder(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchScopeOrder');
 
         $this->scopeOrder()->shouldReturn('searchScopeOrder');
     }
 
-    function it_should_return_searchLayouts(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_searchLayouts(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchLayouts');
 
         $this->searchLayouts('objectList')->shouldReturn('searchLayouts');
     }
 
-    function it_should_return_suggestedArticles(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_suggestedArticles(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('suggestedArticles');
 
         $this->suggestedArticles('query')->shouldReturn('suggestedArticles');
     }
 
-    function it_should_return_suggestedQueries(
-        StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
+    function it_should_return_suggestedQueries(ResponseInterface $mockedResponse)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn('searchSuggestedQueries');
 
