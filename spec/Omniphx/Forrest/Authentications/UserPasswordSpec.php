@@ -76,7 +76,7 @@ class UserPasswordSpec extends ObjectBehavior
             'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
             'instance_url' => 'https://na00.salesforce.com',
             'token_type'   => 'Oauth']);
-        $mockedStorage->putToken(Argument::any())->willReturn(null);
+        $mockedStorage->putTokenData(Argument::any())->willReturn(null);
         $mockedStorage->put(Argument::any(),Argument::any())->willReturn(null);
 
         $mockedClient->send(Argument::any())->willReturn($mockedResponse);
@@ -114,7 +114,7 @@ class UserPasswordSpec extends ObjectBehavior
         StorageInterface $mockedStorage)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn(['key'=>'value']);
-        $mockedStorage->putToken(Argument::type('array'))->shouldBeCalled();
+        $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
         $this->refresh()->shouldReturn(null);
     }

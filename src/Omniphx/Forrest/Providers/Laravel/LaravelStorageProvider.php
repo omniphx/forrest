@@ -12,7 +12,7 @@ abstract class LaravelStorageProvider implements StorageInterface {
      * @param array $token
      * @return void
      */
-    public function putToken($token)
+    public function putTokenData($token)
     {
         $encryptedToken = Crypt::encrypt($token);
         return $this->put('token', $encryptedToken);

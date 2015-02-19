@@ -80,7 +80,7 @@ class WebServerSpec extends ObjectBehavior
         $mockedStorage->get('version')->willReturn([
             'url' => '/resourceURL']);
         $mockedStorage->getTokenData()->willReturn($token);
-        $mockedStorage->putToken(Argument::type('array'));
+        $mockedStorage->putTokenData(Argument::type('array'));
 
         //Client stubs
         $mockedClient->send(Argument::any())->willReturn($mockedResponse);
@@ -122,7 +122,7 @@ class WebServerSpec extends ObjectBehavior
 
         $versionResponse->json()->shouldBeCalled()->willReturn([['version'=>'30.0'],['version'=>'31.0']]);
 
-        $mockedStorage->putToken(Argument::type('array'))->shouldBeCalled();
+        $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
         $mockedStorage->putRefreshToken(Argument::exact('value2'))->shouldBeCalled();
         $mockedStorage->put(Argument::type('string'), Argument::type('array'))->shouldBeCalled();
 
@@ -142,7 +142,7 @@ class WebServerSpec extends ObjectBehavior
 
         $mockedResponse->json()->shouldBeCalled()->willReturn(['key'=>'value']);
 
-        $mockedStorage->putToken(Argument::type('array'))->shouldBeCalled();
+        $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
         $this->refresh('token')->shouldReturn(null);
 
@@ -178,7 +178,7 @@ class WebServerSpec extends ObjectBehavior
 
         $mockedResponse->json()->shouldBeCalled(1)->willReturn(['key'=>'value']);
 
-        $mockedStorage->putToken(Argument::type('array'))->shouldBeCalled();
+        $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
         //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it. Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual behavior would never throw the exception, it would return a response.
         $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url',['key'=>'value']);
