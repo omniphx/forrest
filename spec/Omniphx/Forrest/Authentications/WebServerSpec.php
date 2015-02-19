@@ -79,7 +79,7 @@ class WebServerSpec extends ObjectBehavior
         $mockedStorage->get('resources')->willReturn($resources);
         $mockedStorage->get('version')->willReturn([
             'url' => '/resourceURL']);
-        $mockedStorage->getToken()->willReturn($token);
+        $mockedStorage->getTokenData()->willReturn($token);
         $mockedStorage->putToken(Argument::type('array'));
 
         //Client stubs
@@ -399,7 +399,7 @@ class WebServerSpec extends ObjectBehavior
         $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
         $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'abc',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));
@@ -413,7 +413,7 @@ class WebServerSpec extends ObjectBehavior
         StorageInterface $mockedStorage,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse){
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'accesstoken',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));
@@ -437,7 +437,7 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse){
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'accesstoken',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));
@@ -461,7 +461,7 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse){
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'accesstoken',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));
@@ -483,7 +483,7 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse){
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'accesstoken',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));
@@ -507,7 +507,7 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse){
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'accesstoken',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));
@@ -531,7 +531,7 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse){
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'accesstoken',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));

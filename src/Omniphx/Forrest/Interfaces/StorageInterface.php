@@ -35,7 +35,7 @@ interface StorageInterface {
 	 * Get token from the storage and decrypt it.
 	 * @return mixed
 	 */
-	public function getToken();
+	public function getTokenData();
 
 	/**
 	 * Encrypt refresh token and pass into storage.

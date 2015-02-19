@@ -71,7 +71,7 @@ class UserPasswordSpec extends ObjectBehavior
             'appMenu'      => '/services/data/v30.0/appMenu']);
         $mockedStorage->get('version')->willReturn([
             'url' => 'resourceURLs']);
-        $mockedStorage->getToken()->willReturn([
+        $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'accessToken',
             'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
             'instance_url' => 'https://na00.salesforce.com',
@@ -275,7 +275,7 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
         $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'abc',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));

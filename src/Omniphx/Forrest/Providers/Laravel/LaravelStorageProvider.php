@@ -22,7 +22,7 @@ abstract class LaravelStorageProvider implements StorageInterface {
      * Get token from the session and decrypt it.
      * @return mixed
      */
-    public function getToken()
+    public function getTokenData()
     {
         if ($this->has('token')) {
             $token = $this->get('token');
