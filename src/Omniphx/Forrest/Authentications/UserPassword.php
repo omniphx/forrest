@@ -62,7 +62,7 @@ class UserPassword extends Client implements UserPasswordInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in storage.
+        // Encrypt token and store token and in storage.
         $this->storage->putToken($jsonResponse);
 
         // Store resources into the storage.
@@ -89,7 +89,7 @@ class UserPassword extends Client implements UserPasswordInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encypt token and store token and in storage.
+        // Encrypt token and store token and in storage.
         $this->storage->putToken($jsonResponse);
     }
 

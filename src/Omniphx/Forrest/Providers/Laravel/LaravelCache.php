@@ -5,9 +5,9 @@ use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Cache\CacheManager as Cache;
 
-class LaravelCache extends Storage implements StorageInterface {
+class LaravelCache extends LaravelStorageProvider implements StorageInterface {
 
-	public $minutes = 60;
+	public $minutes = 20;
 
 	public $path;
 
@@ -18,6 +18,8 @@ class LaravelCache extends Storage implements StorageInterface {
 		$this->path = $config->get('forrest::config.storage.path');
 
 		$this->cache = $cache;
+
+		$this->minutes = $config->get('forrest::config.storage.expire_in');
 	}
 
 	/**
