@@ -248,9 +248,8 @@ abstract class Client {
      */
     public function next($nextUrl, $options = [])
     {
-        $url  = $this->getToken()['instance_url'];
-        $url .= $this->storage->get('resources')['query'];
-        $url .= '/'.$nextUrl;
+        $url = $this->getInstanceUrl();
+        $url .= $nextUrl;
 
         $queryResults = $this->request($url, $options);
 
