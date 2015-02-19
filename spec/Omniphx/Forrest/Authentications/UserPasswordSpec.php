@@ -71,12 +71,12 @@ class UserPasswordSpec extends ObjectBehavior
             'appMenu'      => '/services/data/v30.0/appMenu']);
         $mockedStorage->get('version')->willReturn([
             'url' => 'resourceURLs']);
-        $mockedStorage->getToken()->willReturn([
+        $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'accessToken',
             'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
             'instance_url' => 'https://na00.salesforce.com',
             'token_type'   => 'Oauth']);
-        $mockedStorage->putToken(Argument::any())->willReturn(null);
+        $mockedStorage->putTokenData(Argument::any())->willReturn(null);
         $mockedStorage->put(Argument::any(),Argument::any())->willReturn(null);
 
         $mockedClient->send(Argument::any())->willReturn($mockedResponse);
@@ -114,7 +114,7 @@ class UserPasswordSpec extends ObjectBehavior
         StorageInterface $mockedStorage)
     {
         $mockedResponse->json()->shouldBeCalled()->willReturn(['key'=>'value']);
-        $mockedStorage->putToken(Argument::type('array'))->shouldBeCalled();
+        $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
         $this->refresh()->shouldReturn(null);
     }
@@ -275,7 +275,7 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
         $mockedResponse->xml()->shouldBeCalled()->willReturn('xmlResource');
 
-        $mockedStorage->getToken()->willReturn(array(
+        $mockedStorage->getTokenData()->willReturn(array(
             'access_token' =>'abc',
             'instance_url' =>'def',
             'token_type'   =>'bearer'));

@@ -29,13 +29,13 @@ interface StorageInterface {
 	 * @param array $token
 	 * @return void
 	 */
-	public function putToken($token);
+	public function putTokenData($token);
 
 	/**
 	 * Get token from the storage and decrypt it.
 	 * @return mixed
 	 */
-	public function getToken();
+	public function getTokenData();
 
 	/**
 	 * Encrypt refresh token and pass into storage.
