@@ -29,8 +29,9 @@ class LaravelCacheSpec extends ObjectBehavior
         $this->get('test');
     }
 
-    function it_should_allow_a_put(FakeCacheStore $cache)
+    function it_should_allow_a_put(FakeCacheStore $cache, Config $config)
     {
+        $config->get(Argument::any())->shouldBeCalled()->willReturn(10);
         $cache->put(Argument::any(), Argument::any(), Argument::type('integer'))->shouldBeCalled();
 
         $this->put('test', 'value');

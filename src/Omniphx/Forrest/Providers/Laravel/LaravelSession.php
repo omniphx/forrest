@@ -5,7 +5,7 @@ use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Session\SessionManager as Session;
 
-class LaravelSession extends Storage implements StorageInterface {
+class LaravelSession extends LaravelStorageProvider implements StorageInterface {
 
 	public $path;
 
