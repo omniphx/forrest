@@ -177,7 +177,7 @@ abstract class Client {
      */
     public function identity($options =[])
     {
-        $token       = $this->getToken();
+        $token       = $this->getTokenData();
         $accessToken = $token['access_token'];
         $url         = $token['id'];
 
@@ -486,9 +486,9 @@ abstract class Client {
      * Get token
      * @return array
      */
-    public function getToken()
+    public function getTokenData()
     {
-        return $this->storage->getToken();
+        return $this->storage->getTokenData();
     }
 
     /**
@@ -500,7 +500,7 @@ abstract class Client {
         $url = $this->settings['instanceURL'];
 
         if (empty($url)){
-            $url  = $this->getToken()['instance_url'];
+            $url  = $this->getTokenData()['instance_url'];
         }
 
         return $url;
@@ -598,7 +598,7 @@ abstract class Client {
     {
         $format = $options['format'];
 
-        $authToken = $this->storage->getToken();
+        $authToken = $this->storage->getTokenData();
 
         $accessToken = $authToken['access_token'];
         $tokenType   = $authToken['token_type'];

@@ -63,7 +63,7 @@ class UserPassword extends Client implements UserPasswordInterface
         $jsonResponse = $response->json();
 
         // Encrypt token and store token and in storage.
-        $this->storage->putToken($jsonResponse);
+        $this->storage->putTokenData($jsonResponse);
 
         // Store resources into the storage.
         $this->storeResources();
@@ -90,7 +90,7 @@ class UserPassword extends Client implements UserPasswordInterface
         $jsonResponse = $response->json();
 
         // Encrypt token and store token and in storage.
-        $this->storage->putToken($jsonResponse);
+        $this->storage->putTokenData($jsonResponse);
     }
 
     /**
@@ -99,7 +99,7 @@ class UserPassword extends Client implements UserPasswordInterface
      */
     public function revoke()
     {
-        $accessToken = $this->getToken()['access_token'];
+        $accessToken = $this->getTokenData()['access_token'];
         $url         = $this->creditials['loginURL'] . '/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
