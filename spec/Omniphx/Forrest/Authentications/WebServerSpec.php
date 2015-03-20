@@ -25,7 +25,7 @@ class WebServerSpec extends ObjectBehavior
         EventInterface $mockedEvent)
     {
         $settings  = array(
-            'creditials' => array(
+            'credentials' => array(
                 'consumerKey'     => 'testingClientId',
                 'consumerSecret' => 'testingClientSecret',
                 'callbackURI'  => 'callbackURL',

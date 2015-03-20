@@ -15,7 +15,7 @@ return array(
 	 * Username and Password are only necessary for UserPassword flow.
      * Likewise, callbackURI is only necessary for WebServer flow.
 	 */
-	'creditials' => array(
+	'credentials' => array(
 		//Required:
 		'consumerKey'    => '',
 		'consumerSecret' => '',
