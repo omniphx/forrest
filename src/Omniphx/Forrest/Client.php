@@ -508,7 +508,7 @@ abstract class Client {
 
     /**
      * Checks to see if version is specified in configuration and if not then
-     * assign the latest version number availabe to the user's instance.
+     * assign the latest version number available to the user's instance.
      * Once a version number is determined, it will be stored in the user's
      * storage with the 'version' key.
      * @return void
