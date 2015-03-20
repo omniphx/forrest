@@ -1,7 +1,7 @@
 <?php namespace Omniphx\Forrest\Interfaces;
 
 interface StorageInterface {
-	
+
 	/**
 	 * Store into storage.
 	 * @param $key
@@ -50,5 +50,5 @@ interface StorageInterface {
 	 */
 	public function getRefreshToken();
 
-	
+
 }
