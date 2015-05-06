@@ -22,9 +22,11 @@ return array(
 		'callbackURI'    => '',
 		'loginURL'       => 'https://login.salesforce.com',
 
-		//UserPassword flow only:
+		// Only required for UserPassword authentication:
 		'username'       => '',
+		// Password must include security token unless IP Address is whitelisted
 		'password'       => '',
+
 	),
 
 	/**

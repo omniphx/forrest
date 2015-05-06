@@ -2,19 +2,19 @@
 [![Laravel](https://img.shields.io/badge/Laravel-5.0-orange.svg?style=flat-square)](http://laravel.com)
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Total Downloads](https://img.shields.io/packagist/dt/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
-[![Build Status](https://img.shields.io/travis/omniphx/forrest.svg?style=flat-square)](https://travis-ci.org/omniphx/forrest)
 [![License](https://img.shields.io/packagist/l/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
+[![Build Status](https://img.shields.io/travis/omniphx/forrest.svg?style=flat-square)](https://travis-ci.org/omniphx/forrest)
 
 Salesforce/Force.com REST API client for Laravel. It provides access to restricted Salesforce information via Oauth 2.0. REST is a lightweight alternative to the SOAP API and is useful for mobile users.
 
- While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
+While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application.
 
 ## Installation
 >If you are upgrading to Version 2.0, be sure to re-publish your config file.
 
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
 
-    "omniphx/forrest": "2.0.*@dev"
+    "omniphx/forrest": "2.*"
 
 Next run `composer update` from the command line to install the package.
 
@@ -22,7 +22,9 @@ If you are using Laravel, add the service provider to your `bootstrap/app.php` f
 
     'Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider'
 
-Followed by the alias:
+>For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`
+
+Next add the alias:
 
     'Forrest' => 'Omniphx\Forrest\Providers\Laravel\Facades\Forrest'
 
@@ -33,7 +35,7 @@ php artisan vendor:publish
 ```
 You can find the config file in: `config/forrest.php`
 
-After you have set up am connected app (see below), update your config file with a `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
+>For Laravel 4, run `php artisan config:publish omniphx/forrest`. It will be found in `app/config/omniphx/forrest/config.php`
 
 ## Getting Started
 ### Setting up a Connected App
@@ -50,7 +52,7 @@ After you have set up am connected app (see below), update your config file with
     * Select access scope (If you need a refresh token, specify it here)
 6. Click `Save`
 
-After saving, you will now be given a Consumer Key and Consumer Secret. Add those to your config file.
+After saving, you will now be given a Consumer Key and Consumer Secret. Update your config file with values for `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
 
 ### Setup
 Forrest will come with the following routes included in it's package.
@@ -74,6 +76,10 @@ Route::get('/callback', function()
 });
 ```
 ##### Username-Password authentication flow
+With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method.
+
+>To use this autenticate you must add your username, and password to the confirg file.
+
 ```php
 Route::get('/authenticate', function()
 {
@@ -84,7 +90,6 @@ Route::get('/authenticate', function()
     return Redirect::to($url);
 });
 ```
->With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method. The routing provides backwards compatability with the Web Server flow if you switch between the two.
 
 #### Custom login urls
 Sometimes users will need to connect to a sandbox or custom url. To do this, simply pass the url as an argument for the authenticatation method:
@@ -97,7 +102,7 @@ Route::get('/authenticate', function()
 });
 ```
 
-## Usage
+## Basic usage
 ### Query a record
 The callback function will store an encrypted authentication token in the user's session which can now be used to make API requests such as:
 ```php
@@ -254,7 +259,7 @@ Forrest::versions();
 ```
 
 #### Resources
-Returns list of available resources for a specific API.
+Returns list of available resources based on the logged in user's permission and API version.
 ```php
 Forrest::resources();
 ```
@@ -265,74 +270,6 @@ Returns information about the logged-in user.
 Forrest::identity();
 ```
 
-#### Limits
-Lists information about organizational limits. Available for API version 29.0 and later.
->Note: this call is part of a pilot program and may not be availabe to all orgs without a request to Salesforce.
-```php
-Forrest::limits();
-```
-
-#### Describe
-Describes all global objects availabe in the organization.
-```php
-Forrest::describe();
-```
-
-#### Query
-Returns results for a specified SOQL query.
-```php
-Forrest::query('SELECT Id FROM Account');
-```
-
-#### Query Explain
-Returns details of how Salesforce will process your query. Available for API verison 30.0 or later.
-```php
-Forrest::queryExplain('SELECT Id FROM Account');
-```
-
-#### Query All
-Returns results for a specified SOQL query, but will also inlcude deleted records.
-```php
-Forrest::queryAll('SELECT Id FROM Account');
-```
-
-#### Search
-Returns the specified SOSL query
-```php
-Forrest::search('Find {foo}');
-```
-
-#### Scope Order
-Global search keeps track of which objects the user interacts with and arranges them when the user performs a global search. This call will return this ordered list of objects.
-```php
-Forrest::scopeOrder();
-```
-
-#### Search Layouts
-Returns the search results layout for the objects in the query string. List should be formatted as a string, but delimited by a comma.
-```php
-Forrest::searchLayouts('Account,Contact,Lead');
-```
-
-#### Suggested Articles
-Returns a list of Salesforce Knowledge articles based on the a search query. Pass additional parameters into the second argument. Available for API verison 30.0 or later.
-
-> Salesforce Knowledge must be enabled for this to work.
-
-```php
-Forrest::suggestedArticles('foo', [
-    'parameters' => [
-        'channel' => 'App',
-        'publishStatus' => 'Draft']]);
-```
-
-#### Suggested Queries
-Returns a list of suggested searches based on a search text query. Matches search queries that other users have performed in Salesforce Knowledge. Like Suggest Articles, additional parameters can be passed into the second argument with the `parameters` key. Available for API version 30.0 or later.
-
-```php
-Forrest::suggestedQueries('app, [
-    'parameters' => ['foo' => 'bar']]);
-```
 For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
 
 ### Custom Apex endpoints
@@ -350,7 +287,7 @@ Forrest::custom('/myEndpoint', [
 > Read [Creating REST APIs using Apex REST](https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST) for more information.
 
 ### Raw Requests
-You can always make raw requests if one of the above methods doesn't meet your needs (which is unlikely)
+If needed, you can make raw requests to an endpoint of your choice.
 ```php
 Forrest::get('/services/data/v20.0/endpoint');
 Forrest::head('/services/data/v20.0/endpoint');
@@ -370,12 +307,12 @@ $response = Forrest::sobjects($resource, ['format'=> 'none']);
 $content = (string) $response->getBody(); // Guzzle response
 ```
 
-For more information about Guzzle responses, see their [documentation](http://guzzle.readthedocs.org/en/latest/http-messages.html#responses).
-
 ### Event Listener
-
+This package makes use of Guzzle's event listers
 ```php
 Event::listen('forrest.response', function($request, $response) {
     dd((string) $response);
 });
 ```
+
+For more information about Guzzle responses and event listeners, refer to their [documentation](http://guzzle.readthedocs.org/en/latest/http-messages.html#responses).
