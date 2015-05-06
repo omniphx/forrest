@@ -1,17 +1,13 @@
 {
     "name": "omniphx/forrest",
-    "description": "Salesforce / Force.com REST API Client for Laravel",
+    "description": "Salesforce / Force.com REST API Client for Laravel 5",
     "license":"MIT",
     "keywords":["salesforce", "laravel", "rest", "force.com", "force"],
     "authors": [
         {
             "name": "Matthew Mitchener",
+            "homepage": "http://mattmitchener.com",
             "email": "mattjmitchener@gmail.com",
-            "role": "Developer"
-        },
-        {
-            "name": "Robert Conner",
-            "homepage": "http://smartersoftware.net",
             "role": "Developer"
         }
     ],
