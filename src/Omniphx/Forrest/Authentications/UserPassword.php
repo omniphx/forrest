@@ -18,16 +18,16 @@ class UserPassword extends Client implements UserPasswordInterface
     protected $redirect;
 
     /**
-     * Inteface for Input calls
+     * Interface for Input calls
      * @var Omniphx\Forrest\Interfaces\InputInterface
      */
     protected $input;
 
     /**
-     * Authentication creditials
+     * Authentication credentials
      * @var Array
      */
-    private $creditials;
+    private $credentials;
 
     public function __construct(
         ClientInterface $client,
@@ -37,25 +37,25 @@ class UserPassword extends Client implements UserPasswordInterface
         EventInterface $event,
         $settings)
     {
-        $this->client     = $client;
-        $this->storage    = $storage;
-        $this->redirect   = $redirect;
-        $this->input      = $input;
-        $this->event      = $event;
-        $this->settings   = $settings;
-        $this->creditials = $settings['creditials'];
+        $this->client      = $client;
+        $this->storage     = $storage;
+        $this->redirect    = $redirect;
+        $this->input       = $input;
+        $this->event       = $event;
+        $this->settings    = $settings;
+        $this->credentials = $settings['credentials'];
     }
 
     public function authenticate($loginURL = null)
     {
-        $tokenURL = $this->creditials['loginURL'];
+        $tokenURL = $this->credentials['loginURL'];
         $tokenURL .= '/services/oauth2/token';
         $parameters['body'] = [
             'grant_type'    => 'password',
-            'client_id'     => $this->creditials['consumerKey'],
-            'client_secret' => $this->creditials['consumerSecret'],
-            'username'      => $this->creditials['username'],
-            'password'      => $this->creditials['password'],
+            'client_id'     => $this->credentials['consumerKey'],
+            'client_secret' => $this->credentials['consumerSecret'],
+            'username'      => $this->credentials['username'],
+            'password'      => $this->credentials['password'],
         ];
         $response = $this->client->post($tokenURL, $parameters);
         
@@ -75,14 +75,14 @@ class UserPassword extends Client implements UserPasswordInterface
      */
     public function refresh()
     {
-        $tokenURL = $this->creditials['loginURL'] . '/services/oauth2/token';
+        $tokenURL = $this->credentials['loginURL'] . '/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
             'body' => [
                 'grant_type'    => 'password',
-                'client_id'     => $this->creditials['consumerKey'],
-                'client_secret' => $this->creditials['consumerSecret'],
-                'username'      => $this->creditials['username'],
-                'password'      => $this->creditials['password'],
+                'client_id'     => $this->credentials['consumerKey'],
+                'client_secret' => $this->credentials['consumerSecret'],
+                'username'      => $this->credentials['username'],
+                'password'      => $this->credentials['password'],
             ]
         ]);
 
@@ -100,7 +100,7 @@ class UserPassword extends Client implements UserPasswordInterface
     public function revoke()
     {
         $accessToken = $this->getTokenData()['access_token'];
-        $url         = $this->creditials['loginURL'] . '/services/oauth2/revoke';
+        $url         = $this->credentials['loginURL'] . '/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['body']['token']           = $accessToken;

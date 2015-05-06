@@ -11,10 +11,11 @@ return array(
 	'authentication' => 'WebServer',
 
 	/**
-	 * Enter your creditials
-	 * Username and Password are only necessary for UserPassword flow. Likewise, callbackURI is only necessary for WebServer flow.
+	 * Enter your credentials
+	 * Username and Password are only necessary for UserPassword flow.
+     * Likewise, callbackURI is only necessary for WebServer flow.
 	 */
-	'creditials' => array(
+	'credentials' => array(
 		//Required:
 		'consumerKey'    => '',
 		'consumerSecret' => '',
@@ -66,18 +67,18 @@ return array(
 	'version' => '',
 
 	/**
-	 * An optional redirect URL can be specified after the authencation is complete.
+	 * An optional redirect URL can be specified after the authentication is complete.
 	 * If you override the routes included in this package, the authentication will return void.
 	*/
 	'authRedirect' => '/',
 
 	/**
-	 * Optional (and not recomended) if you need to override the instance_url returned from Saleforce
+	 * Optional (and not recommended) if you need to override the instance_url returned from Saleforce
 	 */
 	'instanceURL' => '',
 
 	/**
-	 * Langauge
+	 * Language
 	 */
 	'language' => 'en_US'
 

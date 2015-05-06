@@ -26,7 +26,7 @@ class UserPasswordSpec extends ObjectBehavior
 
         $settings  = array(
             'authenticationFlow' => 'UserPassword',
-            'creditials' => array(
+            'credentials' => array(
                 'consumerKey'    => 'testingClientId',
                 'consumerSecret' => 'testingClientSecret',
                 'callbackURI'    => 'callbackURL',

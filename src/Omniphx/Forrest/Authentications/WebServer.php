@@ -26,10 +26,10 @@ class WebServer extends Client implements WebServerInterface
     protected $input;
 
     /**
-     * Authentication creditials
+     * Authentication credentials
      * @var Array
      */
-    private $creditials;
+    private $credentials;
 
     /**
      * Authentication parameters
@@ -51,7 +51,7 @@ class WebServer extends Client implements WebServerInterface
         $this->input    = $input;
         $this->event    = $event;
         $this->settings = $settings;
-        $this->creditials = $settings['creditials'];
+        $this->credentials = $settings['credentials'];
         $this->parameters = $settings['parameters'];
     }
 
@@ -63,13 +63,13 @@ class WebServer extends Client implements WebServerInterface
     public function authenticate($loginURL = null)
     {
         if(!isset($loginURL)){
-            $loginURL = $this->creditials['loginURL'];
+            $loginURL = $this->credentials['loginURL'];
         }
 
         $loginURL .= '/services/oauth2/authorize';
         $loginURL .= '?response_type=code';
-        $loginURL .= '&client_id=' . $this->creditials['consumerKey'];
-        $loginURL .= '&redirect_uri=' . urlencode($this->creditials['callbackURI']);
+        $loginURL .= '&client_id=' . $this->credentials['consumerKey'];
+        $loginURL .= '&redirect_uri=' . urlencode($this->credentials['callbackURI']);
         if($this->parameters['display'] != ''){
             $loginURL .= '&display=' . $this->parameters['display'];
         }
@@ -103,14 +103,14 @@ class WebServer extends Client implements WebServerInterface
         $state = $this->input->get('state');
 
         //Now we must make a request for the authorization token.
-        $tokenURL = $this->creditials['loginURL'] . '/services/oauth2/token';
+        $tokenURL = $this->credentials['loginURL'] . '/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
             'body' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
-                'client_id'     => $this->creditials['consumerKey'],
-                'client_secret' => $this->creditials['consumerSecret'],
-                'redirect_uri'  => $this->creditials['callbackURI']
+                'client_id'     => $this->credentials['consumerKey'],
+                'client_secret' => $this->credentials['consumerSecret'],
+                'redirect_uri'  => $this->credentials['callbackURI']
             ]
         ]);
 
@@ -134,13 +134,13 @@ class WebServer extends Client implements WebServerInterface
     {
         $refreshToken = $this->storage->getRefreshToken();
 
-        $tokenURL = $this->creditials['loginURL'] . '/services/oauth2/token';
+        $tokenURL = $this->credentials['loginURL'] . '/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
             'body'    => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',
-                'client_id'     => $this->creditials['consumerKey'],
-                'client_secret' => $this->creditials['consumerSecret']
+                'client_id'     => $this->credentials['consumerKey'],
+                'client_secret' => $this->credentials['consumerSecret']
             ]
         ]);
 
@@ -158,7 +158,7 @@ class WebServer extends Client implements WebServerInterface
     public function revoke()
     {
         $accessToken = $this->getTokenData()['access_token'];
-        $url         = $this->creditials['loginURL'] . '/services/oauth2/revoke';
+        $url         = $this->credentials['loginURL'] . '/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['body']['token']           = $accessToken;
