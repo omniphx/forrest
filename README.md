@@ -76,7 +76,7 @@ Route::get('/callback', function()
 ##### Username-Password authentication flow
 With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method.
 
->To use this authentication you must add your username, and password to the confirg file. Security token might need to be ammended to your password unless your IP address is whitelisted.
+>To use this authentication you must add your username, and password to the config file. Security token might need to be ammended to your password unless your IP address is whitelisted.
 
 ```php
 Route::get('/authenticate', function()
@@ -194,7 +194,7 @@ First, determine which resources you have access to by calling:
 ```php
 Forrest::resources();
 ```
-Same result:
+Result:
 ```php
 Array
 (
