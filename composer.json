@@ -9,11 +9,6 @@
             "homepage": "http://mattmitchener.com",
             "email": "mattjmitchener@gmail.com",
             "role": "Developer"
-        },
-        {
-            "name": "Robert Conner",
-            "homepage": "http://smartersoftware.net",
-            "role": "Developer"
         }
     ],
     "require": {
