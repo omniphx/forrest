@@ -23,7 +23,7 @@ class ForrestServiceProvider extends ServiceProvider {
 
         $authentication  = Config::get('forrest::authentication');
 
-        include __DIR__ . "/Routes/$authentication.php";
+        include __DIR__ . "/../Laravel/Routes/$authentication.php";
     }
 
     /**
