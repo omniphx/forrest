@@ -33,8 +33,7 @@ abstract class Client {
      * @param array $options
      */
     public function get($path, $requestBody = array(), $options = array()) {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+        $url = $this->formatURL($path);
 
         $options['method'] = 'GET';
         if($requestBody) {
@@ -51,8 +50,7 @@ abstract class Client {
      * @param array $options
      */
     public function post($path, $requestBody = array(), $options = array()) {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+        $url = $this->formatURL($path);
 
         $options['method'] = 'POST';
         if($requestBody) {
@@ -69,8 +67,7 @@ abstract class Client {
      * @param array $options
      */
     public function put($path, $requestBody = array(), $options = array()) {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+        $url = $this->formatURL($path);
 
         $options['method'] = 'PUT';
         if($requestBody) {
@@ -87,8 +84,7 @@ abstract class Client {
      * @param array $options
      */
     public function delete($path, $requestBody = array(), $options = array()) {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+        $url = $this->formatURL($path);
 
         $options['method'] = 'DELETE';
         if($requestBody) {
@@ -105,8 +101,7 @@ abstract class Client {
      * @param array $options
      */
     public function head($path, $requestBody = array(), $options = array()) {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+        $url = $this->formatURL($path);
 
         $options['method'] = 'HEAD';
         if($requestBody) {
@@ -123,8 +118,7 @@ abstract class Client {
      * @param array $options
      */
     public function patch($path, $requestBody = array(), $options = array()) {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+        $url = $this->formatURL($path);
 
         $options['method'] = 'PATCH';
         if($requestBody) {
@@ -686,6 +680,14 @@ abstract class Client {
         } else {
             throw new SalesforceException(sprintf("Invalid request: %s",$e->getRequest()));
         }
+    }
+
+    private function formatURL($path)
+    {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        return $url;
     }
 
 }
