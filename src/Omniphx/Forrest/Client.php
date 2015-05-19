@@ -642,7 +642,7 @@ abstract class Client {
 
     private function setCompression($options)
     {
-        if ($options['compression'] == true) {
+        if ($options['compression'] === true) {
             $this->headers['Accept-Encoding'] = $options['compressionType'];
             $this->headers['Content-Encoding'] = $options['compressionType'];
         }
