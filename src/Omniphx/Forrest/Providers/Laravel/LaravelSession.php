@@ -13,7 +13,7 @@ class LaravelSession extends LaravelStorageProvider implements StorageInterface 
 
 	public function __construct(Config $config, Session $session)
 	{
-		$this->path = $config->get('forrest::config.storage.path');
+		$this->path = $config->get('forrest.storage.path');
 
 		$this->session = $session;
 	}
