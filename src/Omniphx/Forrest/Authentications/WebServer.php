@@ -2,7 +2,7 @@
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
-use Omniphx\Forrest\Client;
+use Omniphx\Forrest\RequestWrapper;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
@@ -11,7 +11,7 @@ use Omniphx\Forrest\Interfaces\WebServerInterface;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
 
-class WebServer extends Client implements WebServerInterface
+class WebServer extends RequestWrapper implements WebServerInterface
 {
     /**
      * Redirect handler

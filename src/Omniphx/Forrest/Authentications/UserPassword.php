@@ -1,6 +1,6 @@
 <?php namespace Omniphx\Forrest\Authentications;
 
-use Omniphx\Forrest\Client;
+use Omniphx\Forrest\RequestWrapper;
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -9,7 +9,7 @@ use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\UserPasswordInterface;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 
-class UserPassword extends Client implements UserPasswordInterface
+class UserPassword extends RequestWrapper implements UserPasswordInterface
 {
     /**
      * Redirect handler
