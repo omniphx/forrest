@@ -12,6 +12,18 @@ use Omniphx\Forrest\Exceptions\TokenExpiredException;
 class UserPassword extends RequestWrapper implements UserPasswordInterface
 {
     /**
+     * HTTP request client
+     * @var Client
+     */
+    protected $client;
+
+    /**
+     * Storage handler
+     * @var storage
+     */
+    protected $storage;
+
+    /**
      * Redirect handler
      * @var Redirect
      */
@@ -22,6 +34,18 @@ class UserPassword extends RequestWrapper implements UserPasswordInterface
      * @var Omniphx\Forrest\Interfaces\InputInterface
      */
     protected $input;
+
+    /**
+     * Inteface for Event listener
+     * @var Omniphx\Forrest\Interfaces\EventInterface
+     */
+    protected $event;
+
+    /**
+     * Config options
+     * @var array
+     */
+    protected $settings;
 
     /**
      * Authentication credentials

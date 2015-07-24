@@ -3,28 +3,18 @@
 abstract class RequestWrapper {
 
     /**
-     * HTTP request client
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * Config options
-     * @var array
-     */
-    protected $settings;
-
-    /**
-     * Storage handler
-     * @var storage
-     */
-    protected $storage;
-
-    /**
      * Reqeust headers
      * @var Array
      */
     private $headers;
+
+    /**
+     * Request function
+     * @param  string $url
+     * @param  array $options
+     * @return mixed
+     */
+    abstract public function request($url, $options);
 
     /**
      * GET method call using any custom path
