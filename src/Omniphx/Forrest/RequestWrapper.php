@@ -341,8 +341,7 @@ abstract class RequestWrapper {
      * relevant articles, before the user performs a search.
      * Available for API version 30.0 or later
      * @param  string $query
-     * @param  array $searchParameters
-     * @param  array $option
+     * @param  array $options
      * @return array
      */
     public function suggestedArticles($query,$options = [])
@@ -399,7 +398,7 @@ abstract class RequestWrapper {
     /**
      * Request to a custom Apex REST endpoint
      * @param  String $customURI
-     * @param  Array $option
+     * @param  Array $options
      * @return mixed
      */
     public function custom($customURI, $options = [])
@@ -538,7 +537,7 @@ abstract class RequestWrapper {
 
     /**
      * Method returns the response for the requested resource
-     * @param  string $pURI
+     * @param  string $pURL
      * @param  array  $pOptions
      * @return mixed
      */
