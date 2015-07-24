@@ -1,4 +1,4 @@
-<?php namespace Omniphx\Forrest\Providers\Laravel;
+<?php namespace Omniphx\Forrest\Providers\Laravel4;
 
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Redirect;
