@@ -50,6 +50,8 @@ class UserPassword extends RequestWrapper implements UserPasswordInterface
     {
         $tokenURL = $this->credentials['loginURL'];
         $tokenURL .= '/services/oauth2/token';
+
+        $parameters = array();
         $parameters['body'] = [
             'grant_type'    => 'password',
             'client_id'     => $this->credentials['consumerKey'],
@@ -102,6 +104,7 @@ class UserPassword extends RequestWrapper implements UserPasswordInterface
         $accessToken = $this->getTokenData()['access_token'];
         $url         = $this->credentials['loginURL'] . '/services/oauth2/revoke';
 
+        $options = array();
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['body']['token']           = $accessToken;
 

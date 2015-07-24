@@ -561,6 +561,7 @@ abstract class RequestWrapper {
 
         $this->setHeaders($options);
 
+        $parameters = array();
         $parameters['headers'] = $this->headers;
 
         if (isset($options['body'])) {

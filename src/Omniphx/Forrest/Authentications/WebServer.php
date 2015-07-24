@@ -160,6 +160,7 @@ class WebServer extends RequestWrapper implements WebServerInterface
         $accessToken = $this->getTokenData()['access_token'];
         $url         = $this->credentials['loginURL'] . '/services/oauth2/revoke';
 
+        $options = array();
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['body']['token']           = $accessToken;
 
