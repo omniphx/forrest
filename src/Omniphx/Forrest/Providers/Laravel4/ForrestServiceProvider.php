@@ -23,7 +23,7 @@ class ForrestServiceProvider extends ServiceProvider {
 
         $authentication  = Config::get('forrest::authentication');
 
-        include __DIR__ . "/../Laravel/Routes/$authentication.php";
+        include __DIR__ . "/../Laravel4/Routes/$authentication.php";
     }
 
     /**
@@ -39,14 +39,14 @@ class ForrestServiceProvider extends ServiceProvider {
             $settings  = Config::get('forrest::config');
 
             $client   = new \GuzzleHttp\Client();
-            $redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
+            $redirect = new \Omniphx\Forrest\Providers\Laravel4\LaravelRedirect();
             if($settings['storage']['type'] == 'cache') {
-                $storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelCache(app('config'), app('cache'));
+                $storage  = new \Omniphx\Forrest\Providers\Laravel4\LaravelCache(app('config'), app('cache'));
             } else {
-                $storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession(app('config'), app('session'));
+                $storage  = new \Omniphx\Forrest\Providers\Laravel4\LaravelSession(app('config'), app('session'));
             }
-            $input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
-            $event    = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
+            $input    = new \Omniphx\Forrest\Providers\Laravel4\LaravelInput();
+            $event    = new \Omniphx\Forrest\Providers\Laravel4\LaravelEvent();
 
             $authentication = '\\Omniphx\\Forrest\\Authentications\\';
             $authentication .= $settings['authentication'];
