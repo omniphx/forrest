@@ -13,31 +13,31 @@ class UserPassword extends RequestWrapper implements UserPasswordInterface
 {
     /**
      * HTTP request client
-     * @var Client
+     * @var \GuzzleHttp\ClientInterface
      */
     protected $client;
 
     /**
      * Storage handler
-     * @var storage
+     * @var \Omniphx\Forrest\Interfaces\StorageInterface
      */
     protected $storage;
 
     /**
      * Redirect handler
-     * @var Redirect
+     * @var \Omniphx\Forrest\Interfaces\RedirectInterface
      */
     protected $redirect;
 
     /**
-     * Interface for Input calls
-     * @var Omniphx\Forrest\Interfaces\InputInterface
+     * Inteface for Input calls
+     * @var \Omniphx\Forrest\Interfaces\InputInterface
      */
     protected $input;
 
     /**
      * Inteface for Event listener
-     * @var Omniphx\Forrest\Interfaces\EventInterface
+     * @var \Omniphx\Forrest\Interfaces\EventInterface
      */
     protected $event;
 

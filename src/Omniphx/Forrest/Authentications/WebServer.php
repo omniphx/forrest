@@ -15,31 +15,31 @@ class WebServer extends RequestWrapper implements WebServerInterface
 {
     /**
      * HTTP request client
-     * @var Client
+     * @var \GuzzleHttp\ClientInterface
      */
     protected $client;
 
     /**
      * Storage handler
-     * @var storage
+     * @var \Omniphx\Forrest\Interfaces\StorageInterface
      */
     protected $storage;
 
     /**
      * Redirect handler
-     * @var Redirect
+     * @var \Omniphx\Forrest\Interfaces\RedirectInterface
      */
     protected $redirect;
 
     /**
      * Inteface for Input calls
-     * @var Omniphx\Forrest\Interfaces\InputInterface
+     * @var \Omniphx\Forrest\Interfaces\InputInterface
      */
     protected $input;
 
     /**
      * Inteface for Event listener
-     * @var Omniphx\Forrest\Interfaces\EventInterface
+     * @var \Omniphx\Forrest\Interfaces\EventInterface
      */
     protected $event;
 
@@ -124,7 +124,6 @@ class WebServer extends RequestWrapper implements WebServerInterface
     {
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code  = $this->input->get('code');
-        $state = $this->input->get('state');
 
         //Now we must make a request for the authorization token.
         $tokenURL = $this->credentials['loginURL'] . '/services/oauth2/token';
