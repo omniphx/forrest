@@ -3,6 +3,42 @@
 abstract class RequestWrapper {
 
     /**
+     * HTTP request client
+     * @var Client
+     */
+    protected $client;
+
+    /**
+     * Storage handler
+     * @var storage
+     */
+    protected $storage;
+
+    /**
+     * Redirect handler
+     * @var Redirect
+     */
+    protected $redirect;
+
+    /**
+     * Interface for Input calls
+     * @var Omniphx\Forrest\Interfaces\InputInterface
+     */
+    protected $input;
+
+    /**
+     * Inteface for Event listener
+     * @var Omniphx\Forrest\Interfaces\EventInterface
+     */
+    protected $event;
+
+    /**
+     * Config options
+     * @var array
+     */
+    protected $settings;
+
+    /**
      * Reqeust headers
      * @var Array
      */
