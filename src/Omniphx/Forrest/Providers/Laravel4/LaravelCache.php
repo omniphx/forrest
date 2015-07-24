@@ -15,11 +15,11 @@ class LaravelCache extends LaravelStorageProvider implements StorageInterface {
 
 	public function __construct(Config $config, Cache $cache)
 	{
-		$this->path = $config->get('forrest.storage.path');
+		$this->path = $config->get('forrest::config.storage.path');
 
 		$this->cache = $cache;
 
-		if($minutes = $config->get('forrest.storage.expire_in')) {
+		if($minutes = $config->get('forrest::config.storage.expire_in')) {
 			$this->minutes = $minutes;
 		}
 	}

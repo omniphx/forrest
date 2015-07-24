@@ -29,7 +29,7 @@ abstract class LaravelStorageProvider implements StorageInterface {
             return Crypt::decrypt($token);
         }
 
-        throw new MissingTokenException(sprintf('No token available in \''.\Config::get('forrest.storage.type').'\' storage'));
+        throw new MissingTokenException(sprintf('No token available in \''.\Config::get('forrest::config.storage.type').'\' storage'));
     }
 
     /**

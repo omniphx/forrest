@@ -3,25 +3,19 @@
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Cache\CacheManager as Cache;
+use Illuminate\Session\SessionManager as Session;
 
-class LaravelCache extends LaravelStorageProvider implements StorageInterface {
-
-	public $minutes = 20;
+class LaravelSession extends LaravelStorageProvider implements StorageInterface {
 
 	public $path;
 
-	protected $cache;
+	protected $session;
 
-	public function __construct(Config $config, Cache $cache)
+	public function __construct(Config $config, Session $session)
 	{
-		$this->path = $config->get('forrest.storage.path');
+		$this->path = $config->get('forrest::config.storage.path');
 
-		$this->cache = $cache;
-
-		if($minutes = $config->get('forrest.storage.expire_in')) {
-			$this->minutes = $minutes;
-		}
+		$this->session = $session;
 	}
 
 	/**
@@ -32,7 +26,7 @@ class LaravelCache extends LaravelStorageProvider implements StorageInterface {
 	 */
 	public function put($key, $value)
 	{
-		return $this->cache->put($this->path.$key, $value, $this->minutes);
+		return $this->session->put($this->path.$key, $value);
 	}
 
 	/**
@@ -42,8 +36,8 @@ class LaravelCache extends LaravelStorageProvider implements StorageInterface {
 	 */
 	public function get($key)
 	{
-		if ($this->cache->has($this->path.$key)) {
-			return $this->cache->get($this->path.$key);
+		if ($this->session->has($this->path.$key)) {
+			return $this->session->get($this->path.$key);
 		}
 
 		throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
@@ -56,7 +50,7 @@ class LaravelCache extends LaravelStorageProvider implements StorageInterface {
 	 */
 	public function has($key)
 	{
-		return $this->cache->has($this->path.$key);
+		return $this->session->has($this->path.$key);
 	}
 
 }
