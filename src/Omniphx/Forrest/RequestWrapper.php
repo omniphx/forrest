@@ -62,7 +62,7 @@ abstract class RequestWrapper {
         $url = $this->formatURL($path);
 
         $options['method'] = 'GET';
-        if($requestBody) {
+        if(! empty($requestBody)) {
             $options['body'] = $requestBody;
         }
 
@@ -79,7 +79,7 @@ abstract class RequestWrapper {
         $url = $this->formatURL($path);
 
         $options['method'] = 'POST';
-        if($requestBody) {
+        if(! empty($requestBody)) {
             $options['body'] = $requestBody;
         }
 
@@ -96,7 +96,7 @@ abstract class RequestWrapper {
         $url = $this->formatURL($path);
 
         $options['method'] = 'PUT';
-        if($requestBody) {
+        if(! empty($requestBody)) {
             $options['body'] = $requestBody;
         }
 
@@ -113,7 +113,7 @@ abstract class RequestWrapper {
         $url = $this->formatURL($path);
 
         $options['method'] = 'DELETE';
-        if($requestBody) {
+        if(! empty($requestBody)) {
             $options['body'] = $requestBody;
         }
 
@@ -130,7 +130,7 @@ abstract class RequestWrapper {
         $url = $this->formatURL($path);
 
         $options['method'] = 'HEAD';
-        if($requestBody) {
+        if(! empty($requestBody)) {
             $options['body'] = $requestBody;
         }
 
@@ -147,7 +147,7 @@ abstract class RequestWrapper {
         $url = $this->formatURL($path);
 
         $options['method'] = 'PATCH';
-        if($requestBody) {
+        if(! empty($requestBody)) {
             $options['body'] = $requestBody;
         }
 
@@ -602,7 +602,7 @@ abstract class RequestWrapper {
 
             return $this->responseFormat($response, $format);
 
-        } catch(RequestException $e) {
+        } catch(\GuzzleHttp\Exception\RequestException $e) {
             $this->assignExceptions($e);
         }
 
@@ -639,6 +639,8 @@ abstract class RequestWrapper {
         $format = $options['format'];
         $data   = $options['body'];
 
+        $body == null;
+
         if ($format == 'json') {
             $body = json_encode($data);
         }
@@ -649,7 +651,6 @@ abstract class RequestWrapper {
         return $body;
     }
 
-    //Need to think through this for it to work
     private function setRequestFormat($format)
     {
         if ($format == 'json') {

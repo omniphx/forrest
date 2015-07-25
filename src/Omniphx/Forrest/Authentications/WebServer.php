@@ -150,7 +150,6 @@ class WebServer extends RequestWrapper implements WebServerInterface
 
     /**
      * Refresh authentication token
-     * @param  Array $refreshToken
      * @return mixed $response
      */
     public function refresh()
