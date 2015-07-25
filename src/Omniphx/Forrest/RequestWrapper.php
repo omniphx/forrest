@@ -639,13 +639,13 @@ abstract class RequestWrapper {
         $format = $options['format'];
         $data   = $options['body'];
 
-        $body == null;
-
         if ($format == 'json') {
             $body = json_encode($data);
         }
         else if($format == 'xml') {
             $body = urlencode($data);
+        } else {
+            $body = $data;
         }
 
         return $body;
