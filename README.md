@@ -18,11 +18,11 @@ Forrest can be installed through composer. Open your `composer.json` file and ad
 
 Next run `composer update` from the command line to install the package.
 
-If you are using Laravel, add the service provider and alias to your `bootstrap/app.php` file:
+If you are using Laravel, add the service provider and alias to your `config/app.php` file:
 
-    'Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider'
+    Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
 
-    'Forrest' => 'Omniphx\Forrest\Providers\Laravel\Facades\Forrest'
+    'Forrest' => Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
 
 >For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
 
