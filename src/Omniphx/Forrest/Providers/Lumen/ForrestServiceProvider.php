@@ -78,5 +78,4 @@ class ForrestServiceProvider extends ServiceProvider {
     {
         return __DIR__ . '/../config/forrest.php';
     }
-
 }
