@@ -1,4 +1,4 @@
-<?php namespace Omniphx\Forrest\Providers\Laravel;
+<?php namespace Omniphx\Forrest\Providers\Lumen;
 
 use Illuminate\Support\ServiceProvider;
 
