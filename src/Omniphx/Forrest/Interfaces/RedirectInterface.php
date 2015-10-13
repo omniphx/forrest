@@ -1,12 +1,15 @@
-<?php namespace Omniphx\Forrest\Interfaces;
+<?php
 
-interface RedirectInterface {
+namespace Omniphx\Forrest\Interfaces;
 
-	/**
-	 * Redirect to new url
-	 * @param  string $parameter
-	 * @return void
-	 */
-	public function to($parameter);
-
+interface RedirectInterface
+{
+    /**
+     * Redirect to new url.
+     *
+     * @param string $parameter
+     *
+     * @return void
+     */
+    public function to($parameter);
 }

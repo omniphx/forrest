@@ -1,3 +1,7 @@
-<?php namespace Omniphx\Forrest\Exceptions;
+<?php
 
-class MissingRefreshTokenException extends \RuntimeException {}
+namespace Omniphx\Forrest\Exceptions;
+
+class MissingRefreshTokenException extends \RuntimeException
+{
+}

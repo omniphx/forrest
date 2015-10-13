@@ -1,3 +1,7 @@
-<?php namespace Omniphx\Forrest\Exceptions;
+<?php
 
-class MissingKeyException extends \RuntimeException {}
+namespace Omniphx\Forrest\Exceptions;
+
+class MissingKeyException extends \RuntimeException
+{
+}

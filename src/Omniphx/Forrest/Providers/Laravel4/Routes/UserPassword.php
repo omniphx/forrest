@@ -9,8 +9,7 @@
 |
 */
 
-Route::get('/authenticate', function()
-{
+Route::get('/authenticate', function () {
     Forrest::authenticate();
 
     $url = Config::get('forrest::authRedirect');

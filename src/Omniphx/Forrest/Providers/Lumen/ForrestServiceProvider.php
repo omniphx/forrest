@@ -1,9 +1,11 @@
-<?php namespace Omniphx\Forrest\Providers\Lumen;
+<?php
+
+namespace Omniphx\Forrest\Providers\Lumen;
 
 use Illuminate\Support\ServiceProvider;
 
-class ForrestServiceProvider extends ServiceProvider {
-
+class ForrestServiceProvider extends ServiceProvider
+{
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -19,13 +21,13 @@ class ForrestServiceProvider extends ServiceProvider {
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../../../../config/config.php' => $this->configPath()
+            __DIR__.'/../../../../config/config.php' => $this->configPath(),
         ]);
 
         $authentication = config('forrest.authentication');
 
-        if(!is_null($authentication)){
-            include __DIR__ . "/Routes/$authentication.php";
+        if (!is_null($authentication)) {
+            include __DIR__."/Routes/$authentication.php";
         }
     }
 
@@ -36,24 +38,24 @@ class ForrestServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bindShared('forrest', function($app){
+        $this->app->bindShared('forrest', function ($app) {
 
             //Config options:
-            $settings           = config('forrest');
+            $settings = config('forrest');
             $authenticationType = config('forrest.authentication');
-            $storageType        = config('forrest.storage.type');
+            $storageType = config('forrest.storage.type');
 
             //Dependencies:
-            $client   = new \GuzzleHttp\Client();
-            $input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
-            $event    = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
+            $client = new \GuzzleHttp\Client();
+            $input = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
+            $event = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
             $redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
 
             //Determine storage dependency:
-            if($storageType == 'cache') {
-                $storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelCache(app('config'), app('cache'));
+            if ($storageType == 'cache') {
+                $storage = new \Omniphx\Forrest\Providers\Laravel\LaravelCache(app('config'), app('cache'));
             } else {
-                $storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession(app('config'), app('session'));
+                $storage = new \Omniphx\Forrest\Providers\Laravel\LaravelSession(app('config'), app('session'));
             }
 
             //Class namespace:
@@ -71,11 +73,11 @@ class ForrestServiceProvider extends ServiceProvider {
      */
     public function provides()
     {
-        return array();
+        return [];
     }
 
     protected function configPath()
     {
-        return __DIR__ . '/../config/forrest.php';
+        return __DIR__.'/../config/forrest.php';
     }
 }

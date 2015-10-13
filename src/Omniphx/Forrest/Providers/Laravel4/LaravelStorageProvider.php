@@ -1,31 +1,38 @@
-<?php namespace Omniphx\Forrest\Providers\Laravel4;
+<?php
 
-use Omniphx\Forrest\Interfaces\StorageInterface;
-use Omniphx\Forrest\Exceptions\MissingTokenException;
-use Omniphx\Forrest\Exceptions\MissingRefreshTokenException;
+namespace Omniphx\Forrest\Providers\Laravel4;
+
 use Crypt;
+use Omniphx\Forrest\Exceptions\MissingRefreshTokenException;
+use Omniphx\Forrest\Exceptions\MissingTokenException;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 
-abstract class LaravelStorageProvider implements StorageInterface {
-
+abstract class LaravelStorageProvider implements StorageInterface
+{
     /**
      * Encrypt authentication token and store it in session.
+     *
      * @param array $token
+     *
      * @return void
      */
     public function putTokenData($token)
     {
         $encryptedToken = Crypt::encrypt($token);
+
         return $this->put('token', $encryptedToken);
     }
 
     /**
      * Get token from the session and decrypt it.
+     *
      * @return mixed
      */
     public function getTokenData()
     {
         if ($this->has('token')) {
             $token = $this->get('token');
+
             return Crypt::decrypt($token);
         }
 
@@ -34,23 +41,28 @@ abstract class LaravelStorageProvider implements StorageInterface {
 
     /**
      * Encrypt refresh token and pass into session.
-     * @param  Array $token
+     *
+     * @param array $token
+     *
      * @return void
      */
     public function putRefreshToken($token)
     {
         $encryptedToken = Crypt::encrypt($token);
+
         return $this->put('refresh_token', $encryptedToken);
     }
 
     /**
      * Get refresh token from session and decrypt it.
+     *
      * @return mixed
      */
     public function getRefreshToken()
     {
         if ($this->has('refresh_token')) {
             $token = $this->get('refresh_token');
+
             return Crypt::decrypt($token);
         }
 

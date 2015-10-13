@@ -9,13 +9,11 @@
 |
 */
 
-Route::get('/authenticate', function()
-{
+Route::get('/authenticate', function () {
     return Forrest::authenticate();
 });
 
-Route::get('/callback', function()
-{
+Route::get('/callback', function () {
     Forrest::callback();
 
     $url = Config::get('forrest::authRedirect');

@@ -2,26 +2,25 @@
 
 namespace spec\Omniphx\Forrest\Providers\Laravel;
 
-use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Session\SessionManager as Session;
+use PhpSpec\ObjectBehavior;
+use Prophecy\Argument;
 
 class LaravelSessionSpec extends ObjectBehavior
 {
-
-    function let(Config $config, Session $session)
+    public function let(Config $config, Session $session)
     {
         $this->beConstructedWith($config, $session);
     }
 
-    function it_is_initializable(Config $config)
+    public function it_is_initializable(Config $config)
     {
         $config->get(Argument::any())->shouldBeCalled();
         $this->shouldHaveType('Omniphx\Forrest\Providers\Laravel\LaravelSession');
     }
 
-    function it_should_allow_a_get(FakeSessionStore $session)
+    public function it_should_allow_a_get(FakeSessionStore $session)
     {
         $session->has(Argument::any())->shouldBeCalled()->willReturn(true);
         $session->get(Argument::any())->shouldBeCalled();
@@ -29,24 +28,32 @@ class LaravelSessionSpec extends ObjectBehavior
         $this->get('test');
     }
 
-    function it_should_allow_a_put(FakeSessionStore $session)
+    public function it_should_allow_a_put(FakeSessionStore $session)
     {
         $session->put(Argument::any(), Argument::any())->shouldBeCalled();
 
         $this->put('test', 'value');
     }
 
-    function it_should_allow_a_has(FakeSessionStore $session)
+    public function it_should_allow_a_has(FakeSessionStore $session)
     {
         $session->has(Argument::any())->shouldBeCalled();
 
         $this->has('test');
     }
-
 }
 
-class FakeSessionStore extends Session {
-    function has($str) {}
-    function get($str) {}
-    function put($str) {}
+class FakeSessionStore extends Session
+{
+    public function has($str)
+    {
+    }
+
+    public function get($str)
+    {
+    }
+
+    public function put($str)
+    {
+    }
 }
