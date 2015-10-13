@@ -1,12 +1,15 @@
-<?php namespace Omniphx\Forrest\Interfaces;
+<?php
 
-interface InputInterface {
+namespace Omniphx\Forrest\Interfaces;
 
-	/**
-	 * Get input from response
-	 * @param  string $parameter
-	 * @return mixed
-	 */
-	public function get($parameter);
-
+interface InputInterface
+{
+    /**
+     * Get input from response.
+     *
+     * @param string $parameter
+     *
+     * @return mixed
+     */
+    public function get($parameter);
 }

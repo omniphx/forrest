@@ -1,24 +1,29 @@
-<?php namespace Omniphx\Forrest\Interfaces;
+<?php
 
-interface AuthenticationInterface {
+namespace Omniphx\Forrest\Interfaces;
 
-	/**
-	 * Begin authentication process
-	 * @param String $url
-	 * @return mixed
-	 */
-	public function authenticate($url);
+interface AuthenticationInterface
+{
+    /**
+     * Begin authentication process.
+     *
+     * @param string $url
+     *
+     * @return mixed
+     */
+    public function authenticate($url);
 
     /**
-     * Refresh authentication token
+     * Refresh authentication token.
+     *
      * @return mixed $response
      */
     public function refresh();
 
     /**
-     * Revokes authentication token
+     * Revokes authentication token.
+     *
      * @return mixed $response
      */
     public function revoke();
-
 }

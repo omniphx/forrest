@@ -1,3 +1,7 @@
-<?php namespace Omniphx\Forrest\Exceptions;
+<?php
 
-class TokenExpiredException extends \RuntimeException {}
+namespace Omniphx\Forrest\Exceptions;
+
+class TokenExpiredException extends \RuntimeException
+{
+}

@@ -1,5 +1,7 @@
-<?php namespace Omniphx\Forrest\Interfaces;
+<?php
 
-interface UserPasswordInterface extends AuthenticationInterface{
+namespace Omniphx\Forrest\Interfaces;
 
+interface UserPasswordInterface extends AuthenticationInterface
+{
 }

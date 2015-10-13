@@ -1,3 +1,7 @@
-<?php namespace Omniphx\Forrest\Exceptions;
+<?php
 
-class SalesforceException extends \RuntimeException {}
+namespace Omniphx\Forrest\Exceptions;
+
+class SalesforceException extends \RuntimeException
+{
+}
