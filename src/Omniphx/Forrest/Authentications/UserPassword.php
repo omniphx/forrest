@@ -55,7 +55,7 @@ class UserPassword extends Client implements UserPasswordInterface
     {
         $tokenURL = $this->credentials['loginURL'];
         $tokenURL .= '/services/oauth2/token';
-        $parameters['body'] = [
+        $parameters['form_params'] = [
             'grant_type'    => 'password',
             'client_id'     => $this->credentials['consumerKey'],
             'client_secret' => $this->credentials['consumerSecret'],
@@ -65,7 +65,7 @@ class UserPassword extends Client implements UserPasswordInterface
         $response = $this->client->post($tokenURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -83,7 +83,7 @@ class UserPassword extends Client implements UserPasswordInterface
     {
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
-            'body' => [
+            'form_params' => [
                 'grant_type'    => 'password',
                 'client_id'     => $this->credentials['consumerKey'],
                 'client_secret' => $this->credentials['consumerSecret'],
@@ -93,7 +93,7 @@ class UserPassword extends Client implements UserPasswordInterface
         ]);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse =  json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -110,7 +110,7 @@ class UserPassword extends Client implements UserPasswordInterface
         $url = $this->credentials['loginURL'].'/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
-        $options['body']['token'] = $accessToken;
+        $options['form_params']['token'] = $accessToken;
 
         return $this->client->post($url, $options);
     }

@@ -111,7 +111,7 @@ class WebServer extends Client implements WebServerInterface
         //Now we must make a request for the authorization token.
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
-            'body' => [
+            'form_params' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
                 'client_id'     => $this->credentials['consumerKey'],
@@ -121,7 +121,7 @@ class WebServer extends Client implements WebServerInterface
         ]);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -144,7 +144,7 @@ class WebServer extends Client implements WebServerInterface
 
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
-            'body'    => [
+            'form_params'    => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',
                 'client_id'     => $this->credentials['consumerKey'],
@@ -153,7 +153,7 @@ class WebServer extends Client implements WebServerInterface
         ]);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -170,7 +170,7 @@ class WebServer extends Client implements WebServerInterface
         $url = $this->credentials['loginURL'].'/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
-        $options['body']['token'] = $accessToken;
+        $options['form_params']['token'] = $accessToken;
 
         return $this->client->post($url, $options);
     }

@@ -12,11 +12,11 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0",
+        "php": ">=5.5.0",
         "illuminate/cache": ">=4.0",
         "illuminate/session": ">=4.0",
         "illuminate/config": ">=4.0",
-        "guzzlehttp/guzzle": "~5.0"
+        "guzzlehttp/guzzle": "~6.0"
     },
     "require-dev": {
         "phpspec/phpspec": "~2.0"
