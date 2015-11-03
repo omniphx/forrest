@@ -623,12 +623,10 @@ abstract class Client
             $parameters['body'] = $this->formatBody($options);
         }
 
-        $request = $this->client->createRequest($method, $pURL, $parameters);
-
         try {
-            $response = $this->client->send($request);
+            $response = $this->client->{$method}($pURL, $parameters);
 
-            $this->event->fire('forrest.response', [$request, $response]);
+            $this->event->fire('forrest.response', [$response]);
 
             return $this->responseFormat($response, $format);
         } catch (RequestException $e) {
@@ -714,7 +712,7 @@ abstract class Client
     private function responseFormat($response, $format)
     {
         if ($format == 'json') {
-            return $response->json();
+            return json_decode($response->getBody(), true);
         } elseif ($format == 'xml') {
             return $response->xml();
         }
