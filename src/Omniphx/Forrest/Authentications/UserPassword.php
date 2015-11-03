@@ -93,7 +93,7 @@ class UserPassword extends Client implements UserPasswordInterface
         ]);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse =  json_decode($response->getBody(), true);
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
