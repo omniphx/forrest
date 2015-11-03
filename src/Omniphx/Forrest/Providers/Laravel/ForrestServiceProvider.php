@@ -46,7 +46,7 @@ class ForrestServiceProvider extends ServiceProvider
             $storageType = config('forrest.storage.type');
 
             //Dependencies:
-            $client = new \GuzzleHttp\Client();
+            $client = new \GuzzleHttp\Client(['http_errors' => false]);
             $input = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
             $event = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
             $redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();

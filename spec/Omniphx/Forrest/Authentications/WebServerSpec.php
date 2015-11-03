@@ -3,8 +3,8 @@
 namespace spec\Omniphx\Forrest\Authentications;
 
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Message\RequestInterface;
-use GuzzleHttp\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -14,6 +14,14 @@ use Prophecy\Argument;
 
 class WebServerSpec extends ObjectBehavior
 {
+    protected $versionJSON = '[{"label":"Winter \'16","url":"/services/data/v35.0","version":"35.0"}]';
+
+    protected $authenticationJSON = '{"access_token":"00Do0000000secret","instance_url":"https://na17.salesforce.com","id":"https://login.salesforce.com/id/00D","token_type":"Bearer","issued_at":"1447000236011","signature":"secretsig","refresh_token":"refreshToken"}';
+
+    protected $responseJSON = '{"foo":"bar"}';
+
+    protected $responseXML = "<meseek><intro>I'm Mr. Meseeks, look at me!</intro><role>Get 2 strokes off Gary's golf swing</role><solution>Has he tried keeping his shoulder's square?</solution></meseek>";
+
     public function let(
         ClientInterface $mockedClient,
         ResponseInterface $mockedResponse,
@@ -50,13 +58,6 @@ class WebServerSpec extends ObjectBehavior
             'language' => 'en_US',
         ];
 
-        $token = [
-            'access_token'  => 'xxxxaccess.tokenxxxx',
-            'id'            => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
-            'instance_url'  => 'https://na##.salesforce.com',
-            'token_type'    => 'Bearer',
-            'refresh_token' => 'xxxxrefresh.tokenxxxx', ];
-
         $resources = [
             'sobjects'     => '/services/data/v30.0/sobjects',
             'connect'      => '/services/data/v30.0/connect',
@@ -68,7 +69,7 @@ class WebServerSpec extends ObjectBehavior
             'analytics'    => '/services/data/v30.0/analytics',
             'recent'       => '/services/data/v30.0/recent',
             'process'      => '/services/data/v30.0/process',
-            'identity'     => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
+            'identity'     => 'https://login.salesforce.com/id/00D',
             'flexiPage'    => '/services/data/v30.0/flexiPage',
             'search'       => '/services/data/v30.0/search',
             'quickActions' => '/services/data/v30.0/quickActions',
@@ -77,12 +78,13 @@ class WebServerSpec extends ObjectBehavior
         //Storage stubs
         $mockedStorage->get('resources')->willReturn($resources);
         $mockedStorage->get('version')->willReturn([
-            'url' => '/resourceURL', ]);
-        $mockedStorage->getTokenData()->willReturn($token);
-        $mockedStorage->putTokenData(Argument::type('array'));
-
-        //Client stubs
-        $mockedClient->send(Argument::any())->willReturn($mockedResponse);
+            'url'     => '/services/data/v35.0',
+            'version' => '35.0']);
+        $mockedStorage->getTokenData()->willReturn([
+            'access_token' => 'accessToken',
+            'id'           => 'https://login.salesforce.com/id/00D',
+            'instance_url' => 'https://na00.salesforce.com',
+            'token_type'   => 'Oauth', ]);
 
         $this->beConstructedWith(
             $mockedClient,
@@ -106,24 +108,24 @@ class WebServerSpec extends ObjectBehavior
 
     public function it_should_callback(
         ClientInterface $mockedClient,
+        ClientInterface $mockedClient2,
         RequestInterface $mockedRequest,
         ResponseInterface $tokenResponse,
         ResponseInterface $versionResponse,
+        ResponseInterface $simpleResponse,
         StorageInterface $mockedStorage)
     {
-        $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))->shouldBeCalled(1)->willReturn($tokenResponse);
-        $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
-        $mockedClient->createRequest(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedRequest);
+        $mockedClient->request('post','https://login.salesforce.com/services/oauth2/token', ["form_params" => ["code" => null, "grant_type" => "authorization_code", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "redirect_uri" => "callbackURL"]])->shouldBeCalled()->willReturn($tokenResponse);
+        $tokenResponse->getBody()->shouldBeCalled()->willReturn($this->authenticationJSON);
 
-        $tokenResponse->json()->shouldBeCalled(1)->willReturn([
-            'access_token'  => 'value1',
-            'refresh_token' => 'value2', ]);
+        $mockedClient->request('get','https://na00.salesforce.com', ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($simpleResponse);
+        $simpleResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
-        $versionResponse->json()->shouldBeCalled()->willReturn([['version' => '30.0'],['version' => '31.0']]);
+        $mockedStorage->putTokenData(["access_token" => "00Do0000000secret", "instance_url" => "https://na17.salesforce.com", "id" => "https://login.salesforce.com/id/00D", "token_type" => "Bearer", "issued_at" => "1447000236011", "signature" => "secretsig", "refresh_token" => "refreshToken"])->shouldBeCalled();
+        $mockedStorage->putRefreshToken('refreshToken')->shouldBeCalled();
+        $mockedStorage->get('version')->willReturn(null);
 
-        $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
-        $mockedStorage->putRefreshToken(Argument::exact('value2'))->shouldBeCalled();
-        $mockedStorage->put(Argument::type('string'), Argument::type('array'))->shouldBeCalled();
+        $mockedStorage->put("resources", ["foo" => "bar"])->shouldBeCalled();
 
         $this->callback()->shouldReturn(null);
     }
@@ -135,7 +137,7 @@ class WebServerSpec extends ObjectBehavior
     {
         $mockedStorage->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
 
-        $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
+        $mockedClient->refresh('get','https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
 
