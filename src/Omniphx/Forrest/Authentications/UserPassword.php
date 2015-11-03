@@ -62,6 +62,9 @@ class UserPassword extends Client implements UserPasswordInterface
             'username'      => $this->credentials['username'],
             'password'      => $this->credentials['password'],
         ];
+
+        $this->client = new \GuzzleHttp\Client(['http_errors' => false]);
+        
         $response = $this->client->post($tokenURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
@@ -82,6 +85,7 @@ class UserPassword extends Client implements UserPasswordInterface
     public function refresh()
     {
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
+        $this->client = new \GuzzleHttp\Client(['http_errors' => false]);
         $response = $this->client->post($tokenURL, [
             'form_params' => [
                 'grant_type'    => 'password',
@@ -111,7 +115,8 @@ class UserPassword extends Client implements UserPasswordInterface
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['form_params']['token'] = $accessToken;
-
+        $this->client = new \GuzzleHttp\Client(['http_errors' => false]);
+                
         return $this->client->post($url, $options);
     }
 

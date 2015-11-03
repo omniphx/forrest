@@ -110,6 +110,9 @@ class WebServer extends Client implements WebServerInterface
 
         //Now we must make a request for the authorization token.
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
+
+        $this->client = new \GuzzleHttp\Client(['http_errors' => false]);
+
         $response = $this->client->post($tokenURL, [
             'form_params' => [
                 'code'          => $code,
@@ -142,6 +145,8 @@ class WebServer extends Client implements WebServerInterface
     {
         $refreshToken = $this->storage->getRefreshToken();
 
+        $this->client = new \GuzzleHttp\Client(['http_errors' => false]);
+                
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
             'form_params'    => [
