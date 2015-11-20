@@ -2,6 +2,7 @@
 composer.phar
 composer.lock
 .DS_Store
+/.idea
 /src/config/local
 /src/config/production
 mm.log
