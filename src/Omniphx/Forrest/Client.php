@@ -26,6 +26,13 @@ abstract class Client
     protected $storage;
 
     /**
+     * Token data.
+     *
+     * @var array
+     */
+    protected $tokenData;
+
+    /**
      * Reqeust headers.
      *
      * @var array
@@ -535,7 +542,11 @@ abstract class Client
      */
     public function getTokenData()
     {
-        return $this->storage->getTokenData();
+        if (empty($this->tokenData)) {
+            $this->tokenData = $this->storage->getTokenData();
+        }
+
+        return $this->tokenData;
     }
 
     /**
@@ -647,7 +658,7 @@ abstract class Client
     {
         $format = $options['format'];
 
-        $authToken = $this->storage->getTokenData();
+        $authToken = $this->getTokenData();
 
         $accessToken = $authToken['access_token'];
         $tokenType = $authToken['token_type'];
