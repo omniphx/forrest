@@ -16,14 +16,14 @@ class WebServer extends Client implements WebServerInterface
     /**
      * Redirect handler.
      *
-     * @var Redirect
+     * @var RedirectInterface
      */
     protected $redirect;
 
     /**
      * Inteface for Input calls.
      *
-     * @var Omniphx\Forrest\Interfaces\InputInterface
+     * @var \Omniphx\Forrest\Interfaces\InputInterface
      */
     protected $input;
 
@@ -63,7 +63,9 @@ class WebServer extends Client implements WebServerInterface
      * Call this method to redirect user to login page and initiate
      * the Web Server OAuth Authentication Flow.
      *
-     * @return void
+     * @param null $loginURL
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function authenticate($loginURL = null)
     {
@@ -106,7 +108,6 @@ class WebServer extends Client implements WebServerInterface
     {
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
-        $state = $this->input->get('state');
 
         //Now we must make a request for the authorization token.
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
@@ -133,8 +134,6 @@ class WebServer extends Client implements WebServerInterface
 
     /**
      * Refresh authentication token.
-     *
-     * @param array $refreshToken
      *
      * @return mixed $response
      */
