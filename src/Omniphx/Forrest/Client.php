@@ -604,13 +604,12 @@ abstract class Client
     {
         try {
             $this->storage->get('version');
-            $resources = $this->resources(['format' => 'json']);
-            $this->storage->put('resources', $resources);
         } catch (\Exception $e) {
             $this->storeVersion();
-            $resources = $this->resources(['format' => 'json']);
-            $this->storage->put('resources', $resources);
         }
+
+        $resources = $this->resources(['format' => 'json']);
+        $this->storage->put('resources', $resources);
     }
 
     /**
