@@ -9,7 +9,7 @@ interface RedirectInterface
      *
      * @param string $parameter
      *
-     * @return void
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function to($parameter);
 }

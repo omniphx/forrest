@@ -16,14 +16,14 @@ class UserPassword extends Client implements UserPasswordInterface
     /**
      * Redirect handler.
      *
-     * @var Redirect
+     * @var RedirectInterface
      */
     protected $redirect;
 
     /**
      * Interface for Input calls.
      *
-     * @var Omniphx\Forrest\Interfaces\InputInterface
+     * @var InputInterface
      */
     protected $input;
 
