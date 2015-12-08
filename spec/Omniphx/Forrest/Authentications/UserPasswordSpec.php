@@ -21,8 +21,8 @@ class UserPasswordSpec extends ObjectBehavior
         StorageInterface $mockedStorage,
         RedirectInterface $mockedRedirect,
         InputInterface $mockedInput,
-        EventInterface $mockedEvent)
-    {
+        EventInterface $mockedEvent
+    ) {
         $settings = [
             'authenticationFlow' => 'UserPassword',
             'credentials'        => [
@@ -34,22 +34,22 @@ class UserPasswordSpec extends ObjectBehavior
                 'password'       => '',
 
             ],
-            'parameters' => [
+            'parameters'         => [
                 'display'   => 'popup',
                 'immediate' => 'false',
                 'state'     => '',
                 'scope'     => '',
             ],
-            'instanceURL'  => '',
-            'authRedirect' => 'redirectURL',
-            'version'      => '30.0',
-            'defaults'     => [
+            'instanceURL'        => '',
+            'authRedirect'       => 'redirectURL',
+            'version'            => '30.0',
+            'defaults'           => [
                 'method'          => 'get',
                 'format'          => 'json',
                 'compression'     => false,
                 'compressionType' => 'gzip',
             ],
-            'language' => 'en_US',
+            'language'           => 'en_US',
         ];
 
         $mockedStorage->get('resources')->willReturn([
@@ -67,14 +67,17 @@ class UserPasswordSpec extends ObjectBehavior
             'flexiPage'    => '/services/data/v30.0/flexiPage',
             'search'       => '/services/data/v30.0/search',
             'quickActions' => '/services/data/v30.0/quickActions',
-            'appMenu'      => '/services/data/v30.0/appMenu', ]);
+            'appMenu'      => '/services/data/v30.0/appMenu',
+        ]);
         $mockedStorage->get('version')->willReturn([
-            'url' => 'resourceURLs', ]);
+            'url' => 'resourceURLs',
+        ]);
         $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'accessToken',
             'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
             'instance_url' => 'https://na00.salesforce.com',
-            'token_type'   => 'Oauth', ]);
+            'token_type'   => 'Oauth',
+        ]);
         $mockedStorage->putTokenData(Argument::any())->willReturn(null);
         $mockedStorage->put(Argument::any(), Argument::any())->willReturn(null);
 
@@ -98,19 +101,19 @@ class UserPasswordSpec extends ObjectBehavior
 
     public function it_should_authenticate(
         ResponseInterface $versionResponse,
-        ClientInterface $mockedClient)
-    {
+        ClientInterface $mockedClient
+    ) {
         $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
 
-        $versionResponse->json()->shouldBeCalled()->willReturn([['version' => '30.0'],['version' => '31.0']]);
+        $versionResponse->json()->shouldBeCalled()->willReturn([['version' => '30.0'], ['version' => '31.0']]);
 
         $this->authenticate('url')->shouldReturn(null);
     }
 
     public function it_should_refresh(
         ResponseInterface $mockedResponse,
-        StorageInterface $mockedStorage)
-    {
+        StorageInterface $mockedStorage
+    ) {
         $mockedResponse->json()->shouldBeCalled()->willReturn(['key' => 'value']);
         $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
@@ -120,8 +123,8 @@ class UserPasswordSpec extends ObjectBehavior
     public function it_should_return_the_request(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
-    {
+        ResponseInterface $mockedResponse
+    ) {
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
 
         $mockedResponse->json()->shouldBeCalled()->willReturn('worked');
@@ -131,12 +134,15 @@ class UserPasswordSpec extends ObjectBehavior
 
     public function it_should_refresh_the_token_if_response_throws_error(
         ClientInterface $mockedClient,
-        RequestInterface $mockedRequest)
-    {
+        RequestInterface $mockedRequest
+    ) {
         $mockedClient->send($mockedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
 
-        //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it. Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual behavior would never throw the exception, it would return a response.
-        $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url', ['key' => 'value']);
+        //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it.
+        //Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual
+        //behavior would never throw the exception, it would return a response.
+        $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url',
+            ['key' => 'value']);
     }
 
     public function it_should_revoke_the_authentication_token(ClientInterface $mockedClient)
@@ -149,9 +155,9 @@ class UserPasswordSpec extends ObjectBehavior
 
     public function it_should_return_the_versions(ResponseInterface $mockedResponse)
     {
-        $mockedResponse->json()->shouldBeCalled()->willReturn(['version' => '29.0','version' => '30.0']);
+        $mockedResponse->json()->shouldBeCalled()->willReturn(['version' => '29.0', 'version' => '30.0']);
 
-        $this->versions()->shouldReturn(['version' => '29.0','version' => '30.0']);
+        $this->versions()->shouldReturn(['version' => '29.0', 'version' => '30.0']);
     }
 
     public function it_should_return_resources(ResponseInterface $mockedResponse)
@@ -170,8 +176,8 @@ class UserPasswordSpec extends ObjectBehavior
 
     public function it_should_return_limits(
         StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
-    {
+        ResponseInterface $mockedResponse
+    ) {
         $mockedStorage->get('version')->shouldBeCalled()->willReturn(['url' => 'versionURL']);
         $mockedResponse->json()->shouldBeCalled()->willReturn('limits');
 
@@ -180,8 +186,8 @@ class UserPasswordSpec extends ObjectBehavior
 
     public function it_should_return_describe(
         StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
-    {
+        ResponseInterface $mockedResponse
+    ) {
         $mockedStorage->get('version')->shouldBeCalled()->willReturn(['url' => 'versionURL']);
         $mockedResponse->json()->shouldBeCalled()->willReturn('describe');
 
@@ -264,9 +270,10 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         StorageInterface $mockedStorage,
         RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
-    {
-        $mockedClient->createRequest(Argument::type('string'), Argument::type('string'), Argument::type('array'))->willReturn($mockedRequest);
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->createRequest(Argument::type('string'), Argument::type('string'),
+            Argument::type('array'))->willReturn($mockedRequest);
         $mockedClient->send(Argument::any())->willReturn($mockedResponse);
 
         $mockedResponse->json()->shouldBeCalled()->willReturn('jsonResource');
@@ -275,15 +282,16 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'abc',
             'instance_url' => 'def',
-            'token_type'   => 'bearer', ]);
+            'token_type'   => 'bearer',
+        ]);
 
         $this->request('uri', [])->shouldReturn('jsonResource');
         $this->request('uri', ['format' => 'xml'])->shouldReturn('xmlResource');
     }
 
     public function it_allows_access_to_the_guzzle_client(
-        ClientInterface $mockedClient)
-    {
+        ClientInterface $mockedClient
+    ) {
         $this->getClient()->shouldReturn($mockedClient);
     }
 }
