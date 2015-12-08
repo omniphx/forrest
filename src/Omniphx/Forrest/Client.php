@@ -397,7 +397,8 @@ abstract class Client
 
         $parameters = [
             'language'      => $this->settings['language'],
-            'publishStatus' => 'Online', ];
+            'publishStatus' => 'Online',
+        ];
 
         if (isset($options['parameters'])) {
             $parameters = array_replace_recursive($parameters, $options['parameters']);

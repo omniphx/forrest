@@ -43,6 +43,7 @@ class LaravelCacheSpec extends ObjectBehavior
         $this->has('test');
     }
 }
+
 class FakeCacheStore extends Cache
 {
     public function has($str)

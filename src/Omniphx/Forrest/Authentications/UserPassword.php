@@ -40,8 +40,8 @@ class UserPassword extends Client implements UserPasswordInterface
         RedirectInterface $redirect,
         InputInterface $input,
         EventInterface $event,
-        $settings)
-    {
+        $settings
+    ) {
         $this->client = $client;
         $this->storage = $storage;
         $this->redirect = $redirect;

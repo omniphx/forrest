@@ -47,8 +47,8 @@ class WebServer extends Client implements WebServerInterface
         RedirectInterface $redirect,
         InputInterface $input,
         EventInterface $event,
-        $settings)
-    {
+        $settings
+    ) {
         $this->client = $client;
         $this->storage = $storage;
         $this->redirect = $redirect;
@@ -143,7 +143,7 @@ class WebServer extends Client implements WebServerInterface
 
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
-            'body'    => [
+            'body' => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',
                 'client_id'     => $this->credentials['consumerKey'],
