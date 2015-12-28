@@ -38,7 +38,7 @@ class ForrestServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('forrest', function ($app) {
+        $this->app->singleton('forrest', function ($app) {
 
             //Config options:
             $settings = config('forrest');
