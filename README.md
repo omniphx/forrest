@@ -65,9 +65,7 @@ You can find the config file in: `config/forrest.php`
 After saving, you will now be given a Consumer Key and Consumer Secret. Update your config file with values for `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
 
 ### Setup
-Forrest will come with the following routes included in it's package.
-
->Feel free to overwrite these in your `routes.php` file. Your routes can be called anything you like, but the callback must what you used in your Connected App settings.
+Creating authentication routes
 
 ##### Web Server authentication flow
 ```php
@@ -80,9 +78,7 @@ Route::get('/callback', function()
 {
     Forrest::callback();
 
-    $url = Config::get('forrest::authRedirect');
-
-    return Redirect::to($url);
+    return Redirect::to('/');
 });
 ```
 ##### Username-Password authentication flow
@@ -94,10 +90,7 @@ With the Username Password flow, you can directly authenticate with the `Forrest
 Route::get('/authenticate', function()
 {
     Forrest::authenticate();
-
-    $url = Config::get('forrest::authRedirect');
-
-    return Redirect::to($url);
+    return Redirect::to('/');
 });
 ```
 

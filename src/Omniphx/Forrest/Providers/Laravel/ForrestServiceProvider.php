@@ -23,12 +23,6 @@ class ForrestServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../../../config/config.php' => config_path('forrest.php'),
         ]);
-
-        $authentication = config('forrest.authentication');
-
-        if (!is_null($authentication)) {
-            include __DIR__."/Routes/$authentication.php";
-        }
     }
 
     /**

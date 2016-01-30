@@ -17,16 +17,15 @@ return [
      */
     'credentials'    => [
         //Required:
-        'consumerKey'    => '',
-        'consumerSecret' => '',
-        'callbackURI'    => '',
-        'loginURL'       => 'https://login.salesforce.com',
+        'consumerKey'    => env('CONSUMER_KEY'),
+        'consumerSecret' => env('CONSUMER_SECRET'),
+        'callbackURI'    => env('CALLBACK_URI'),
+        'loginURL'       => env('LOGIN_URL'),
 
         // Only required for UserPassword authentication:
-        'username'       => '',
+        'username'       => env('USERNAME'),
         // Security token might need to be ammended to password unless IP Address is whitelisted
-        'password'       => '',
-
+        'password'       => env('PASSWORD'),
     ],
 
     /*
@@ -67,12 +66,6 @@ return [
      * Format looks like '32.0'
      */
     'version'        => '',
-
-    /*
-     * An optional redirect URL can be specified after the authentication is complete.
-     * If you override the routes included in this package, the authentication will return void.
-    */
-    'authRedirect'   => '/',
 
     /*
      * Optional (and not recommended) if you need to override the instance_url returned from Saleforce

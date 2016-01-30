@@ -2,6 +2,8 @@
 
 namespace Omniphx\Forrest\Exceptions;
 
-class TokenExpiredException extends \RuntimeException
+use GuzzleHttp\Exception\RequestException;
+
+class TokenExpiredException extends RequestException
 {
 }

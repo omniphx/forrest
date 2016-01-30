@@ -2,7 +2,7 @@
 
 namespace Omniphx\Forrest\Providers\Laravel;
 
-use Input;
+use Illuminate\Support\Facades\Input;
 use Omniphx\Forrest\Interfaces\InputInterface;
 
 class LaravelInput implements InputInterface
