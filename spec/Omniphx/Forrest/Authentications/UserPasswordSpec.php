@@ -3,12 +3,16 @@
 namespace spec\Omniphx\Forrest\Authentications;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\RequestInterface;
+use GuzzleHttp\Message\Response;
 use GuzzleHttp\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -132,17 +136,21 @@ class UserPasswordSpec extends ObjectBehavior
         $this->request('url', ['key' => 'value'])->shouldReturn('worked');
     }
 
-    public function it_should_refresh_the_token_if_response_throws_error(
+    public function it_should_throw_a_token_expired_exception_for_a_401_response(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest
     ) {
-        $mockedClient->send($mockedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
+        $failedRequest = new Request('GET','fakeurl');
+        $failedResponse = new Response(401);
+        $requestException = new RequestException('Salesforce token has expired', $failedRequest, $failedResponse);
+        $mockedClient->send($mockedRequest)->willThrow($requestException);
 
-        //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it.
-        //Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual
-        //behavior would never throw the exception, it would return a response.
-        $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url',
-            ['key' => 'value']);
+        $tokenException = new TokenExpiredException(
+            'Salesforce token has expired',
+            $requestException);
+
+        //Here we will handle a 401 exception and convert it to a TokenExpiredException
+        $this->shouldThrow($tokenException)->duringRequest('query',['key' => 'value']);
     }
 
     public function it_should_revoke_the_authentication_token(ClientInterface $mockedClient)
