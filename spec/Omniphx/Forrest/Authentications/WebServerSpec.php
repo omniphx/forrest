@@ -3,12 +3,16 @@
 namespace spec\Omniphx\Forrest\Authentications;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\RequestInterface;
+use GuzzleHttp\Message\Response;
 use GuzzleHttp\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -170,8 +174,13 @@ class WebServerSpec extends ObjectBehavior
         StorageInterface $mockedStorage,
         ResponseInterface $mockedResponse
     ) {
+        //Testing that we catch 401 errors and refresh the salesforce token.
+        $failedRequest = new Request('GET','fakeurl');
+        $failedResponse = new Response(401);
+        $requestException = new RequestException('Salesforce token has expired', $failedRequest, $failedResponse);
+        $mockedClient->send($mockedRequest)->willThrow($requestException);
+
         $mockedClient->createRequest(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedRequest);
-        $mockedClient->send($mockedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
 
         $mockedStorage->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
 
@@ -183,11 +192,12 @@ class WebServerSpec extends ObjectBehavior
 
         $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
-        //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it.
-        //Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual
-        //behavior would never throw the exception, it would return a response.
-        $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url',
-            ['key' => 'value']);
+        //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it. Basically creating an infinite loop of the token being expired. What we can do is verify the methods in the refresh() method are being fired.
+        $tokenException = new TokenExpiredException(
+            'Salesforce token has expired',
+            $requestException);
+
+        $this->shouldThrow($tokenException)->duringRequest('url',['key' => 'value']);
     }
 
     public function it_should_not_call_refresh_method_if_there_is_no_token(
@@ -195,7 +205,11 @@ class WebServerSpec extends ObjectBehavior
         RequestInterface $failedRequest,
         StorageInterface $mockedStorage
     ) {
-        $mockedClient->send($failedRequest)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
+        $failedRequest = new Request('GET','fakeurl');
+        $failedResponse = new Response(401);
+        $requestException = new RequestException('Salesforce token has expired', $failedRequest, $failedResponse);
+
+        $mockedClient->send($failedRequest)->willThrow($requestException);
 
         $mockedClient->createRequest(Argument::any(), Argument::any(), Argument::any())->willReturn($failedRequest);
 

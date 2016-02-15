@@ -767,12 +767,12 @@ abstract class Client
      */
     private function assignExceptions(RequestException $e)
     {
-        if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
-            throw new TokenExpiredException(sprintf('Salesforce token has expired'));
+        if ($e->hasResponse() && $e->getResponse()->getStatusCode() == 401) {
+            throw new TokenExpiredException('Salesforce token has expired', $e);
         } elseif ($e->hasResponse()) {
-            throw new SalesforceException(sprintf('Salesforce response error: %s', $e->getResponse()));
+            throw new SalesforceException('Salesforce response error', $e);
         } else {
-            throw new SalesforceException(sprintf('Invalid request: %s', $e->getRequest()));
+            throw new SalesforceException('Invalid request: %s', $e);
         }
     }
 }
