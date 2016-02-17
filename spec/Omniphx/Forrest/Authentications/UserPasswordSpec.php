@@ -3,16 +3,16 @@
 namespace spec\Omniphx\Forrest\Authentications;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\RequestInterface;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Message\ResponseInterface;
-use GuzzleHttp\Exception\RequestException;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
-use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -140,7 +140,7 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest
     ) {
-        $failedRequest = new Request('GET','fakeurl');
+        $failedRequest = new Request('GET', 'fakeurl');
         $failedResponse = new Response(401);
         $requestException = new RequestException('Salesforce token has expired', $failedRequest, $failedResponse);
         $mockedClient->send($mockedRequest)->willThrow($requestException);
@@ -150,7 +150,7 @@ class UserPasswordSpec extends ObjectBehavior
             $requestException);
 
         //Here we will handle a 401 exception and convert it to a TokenExpiredException
-        $this->shouldThrow($tokenException)->duringRequest('query',['key' => 'value']);
+        $this->shouldThrow($tokenException)->duringRequest('query', ['key' => 'value']);
     }
 
     public function it_should_revoke_the_authentication_token(ClientInterface $mockedClient)
