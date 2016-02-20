@@ -126,7 +126,9 @@ class WebServer extends Client implements WebServerInterface
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
-        $this->storage->putRefreshToken($jsonResponse['refresh_token']);
+        if (isset($jsonResponse['refresh_token'])) {
+            $this->storage->putRefreshToken($jsonResponse['refresh_token']);
+        }
 
         // Store resources into the storage.
         $this->storeResources();
