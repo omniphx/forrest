@@ -5,7 +5,6 @@ namespace Omniphx\Forrest\Providers\Laravel;
 use Illuminate\Cache\CacheManager as Cache;
 use Illuminate\Config\Repository as Config;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
-use Omniphx\Forrest\Interfaces\StorageInterface;
 
 class LaravelCache extends LaravelStorageProvider
 {
