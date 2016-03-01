@@ -20,12 +20,12 @@ class UserPasswordSpec extends ObjectBehavior
 {
     public function let(
         ClientInterface $mockedClient,
+        EventInterface $mockedEvent,
+        InputInterface $mockedInput,
+        RedirectInterface $mockedRedirect,
         ResponseInterface $mockedResponse,
         RequestInterface $mockedRequest,
-        StorageInterface $mockedStorage,
-        RedirectInterface $mockedRedirect,
-        InputInterface $mockedInput,
-        EventInterface $mockedEvent
+        StorageInterface $mockedStorage
     ) {
         $settings = [
             'authenticationFlow' => 'UserPassword',
@@ -91,10 +91,10 @@ class UserPasswordSpec extends ObjectBehavior
 
         $this->beConstructedWith(
             $mockedClient,
-            $mockedStorage,
-            $mockedRedirect,
-            $mockedInput,
             $mockedEvent,
+            $mockedInput,
+            $mockedRedirect,
+            $mockedStorage,
             $settings);
     }
 

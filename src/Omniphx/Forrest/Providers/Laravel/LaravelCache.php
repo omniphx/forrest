@@ -7,7 +7,7 @@ use Illuminate\Config\Repository as Config;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 
-class LaravelCache extends LaravelStorageProvider implements StorageInterface
+class LaravelCache extends LaravelStorageProvider
 {
     public $minutes = 20;
 

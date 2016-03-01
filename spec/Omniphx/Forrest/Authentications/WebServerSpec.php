@@ -20,12 +20,12 @@ class WebServerSpec extends ObjectBehavior
 {
     public function let(
         ClientInterface $mockedClient,
+        EventInterface $mockedEvent,
+        InputInterface $mockedInput,
+        RedirectInterface $mockedRedirect,
         ResponseInterface $mockedResponse,
         RequestInterface $mockedRequest,
-        StorageInterface $mockedStorage,
-        RedirectInterface $mockedRedirect,
-        InputInterface $mockedInput,
-        EventInterface $mockedEvent
+        StorageInterface $mockedStorage
     ) {
         $settings = [
             'credentials'        => [
@@ -93,10 +93,10 @@ class WebServerSpec extends ObjectBehavior
 
         $this->beConstructedWith(
             $mockedClient,
-            $mockedStorage,
-            $mockedRedirect,
-            $mockedInput,
             $mockedEvent,
+            $mockedInput,
+            $mockedRedirect,
+            $mockedStorage,
             $settings);
     }
 
@@ -105,8 +105,11 @@ class WebServerSpec extends ObjectBehavior
         $this->shouldHaveType('Omniphx\Forrest\Authentications\WebServer');
     }
 
-    public function it_should_authenticate(RedirectInterface $mockedRedirect)
+    public function it_should_authenticate(
+        RedirectInterface $mockedRedirect,
+        StorageInterface $mockedStorage)
     {
+        $mockedStorage->put("loginURL", "https://login.salesforce.com")->shouldBeCalled();
         $mockedRedirect->to(Argument::any())->willReturn('redirectURL');
         $this->authenticate()->shouldReturn('redirectURL');
     }
@@ -122,6 +125,7 @@ class WebServerSpec extends ObjectBehavior
             Argument::type('array'))->shouldBeCalled(1)->willReturn($tokenResponse);
         $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
         $mockedClient->createRequest(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedRequest);
+        $mockedStorage->get("loginURL")->shouldBeCalled()->willReturn('https://login.salesforce.com');
 
         $tokenResponse->json()->shouldBeCalled(1)->willReturn([
             'access_token'  => 'value1',
@@ -143,6 +147,7 @@ class WebServerSpec extends ObjectBehavior
         StorageInterface $mockedStorage
     ) {
         $mockedStorage->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
+        $mockedStorage->get("loginURL")->shouldBeCalled()->willReturn('https://login.salesforce.com');
 
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
             ->shouldBeCalled()
@@ -178,10 +183,10 @@ class WebServerSpec extends ObjectBehavior
         $failedRequest = new Request('GET', 'fakeurl');
         $failedResponse = new Response(401);
         $requestException = new RequestException('Salesforce token has expired', $failedRequest, $failedResponse);
+
         $mockedClient->send($mockedRequest)->willThrow($requestException);
-
         $mockedClient->createRequest(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedRequest);
-
+        $mockedStorage->get("loginURL")->shouldBeCalled()->willReturn('https://login.salesforce.com');
         $mockedStorage->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
 
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
