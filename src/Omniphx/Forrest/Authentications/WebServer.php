@@ -4,7 +4,7 @@ namespace Omniphx\Forrest\Authentications;
 
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Client;
-use Omniphx\Forrest\Exceptions\TokenExpiredException;
+use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -14,27 +14,6 @@ use Omniphx\Forrest\Interfaces\WebServerInterface;
 class WebServer extends Client implements WebServerInterface
 {
     /**
-     * Redirect handler.
-     *
-     * @var RedirectInterface
-     */
-    protected $redirect;
-
-    /**
-     * Inteface for Input calls.
-     *
-     * @var \Omniphx\Forrest\Interfaces\InputInterface
-     */
-    protected $input;
-
-    /**
-     * Authentication credentials.
-     *
-     * @var array
-     */
-    private $credentials;
-
-    /**
      * Authentication parameters.
      *
      * @var array
@@ -43,20 +22,14 @@ class WebServer extends Client implements WebServerInterface
 
     public function __construct(
         ClientInterface $client,
-        StorageInterface $storage,
-        RedirectInterface $redirect,
-        InputInterface $input,
         EventInterface $event,
+        InputInterface $input,
+        RedirectInterface $redirect,
+        StorageInterface $storage,
         $settings
     ) {
-        $this->client = $client;
-        $this->storage = $storage;
-        $this->redirect = $redirect;
-        $this->input = $input;
-        $this->event = $event;
-        $this->settings = $settings;
-        $this->credentials = $settings['credentials'];
-        $this->parameters = $settings['parameters'];
+        parent::__construct($client, $event, $input, $redirect, $storage, $settings);
+        $this->parameters = $this->settings['parameters'];
     }
 
     /**
@@ -67,33 +40,19 @@ class WebServer extends Client implements WebServerInterface
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function authenticate($loginURL = null)
+    public function authenticate($url = null)
     {
-        if (!isset($loginURL)) {
-            $loginURL = $this->credentials['loginURL'];
-        }
-
+        $loginURL = $url === null ? $this->credentials['loginURL'] : $url;
+        $this->storage->put('loginURL', $loginURL);
         $loginURL .= '/services/oauth2/authorize';
         $loginURL .= '?response_type=code';
         $loginURL .= '&client_id='.$this->credentials['consumerKey'];
         $loginURL .= '&redirect_uri='.urlencode($this->credentials['callbackURI']);
-        if ($this->parameters['display'] != '') {
-            $loginURL .= '&display='.$this->parameters['display'];
-        }
-        if ($this->parameters['immediate']) {
-            $loginURL .= '&immediate=true';
-        }
-        if ($this->parameters['state'] != '') {
-            $loginURL .= '&state='.urlencode($this->parameters['state']);
-        }
-        if ($this->parameters['scope'] != '') {
-            $scope = rawurlencode($this->parameters['scope']);
-            $loginURL .= '&scope='.$scope;
-        }
-        if ($this->parameters['prompt'] != '') {
-            $prompt = rawurlencode($this->parameters['prompt']);
-            $loginURL .= '&prompt='.$prompt;
-        }
+        $loginURL .= !empty($this->parameters['display']) ? '&display='.$this->parameters['display'] : '';
+        $loginURL .= $this->parameters['immediate'] ? '&immediate=true' : '';
+        $loginURL .= !empty($this->parameters['state']) ? '&state='.urlencode($this->parameters['state']) : '';
+        $loginURL .= !empty($this->parameters['scope']) ? '&scope='.rawurlencode($this->parameters['scope']) : '';
+        $loginURL .= !empty($this->parameters['prompt']) ? '&prompt='.rawurlencode($this->parameters['prompt']) : '';
 
         return $this->redirect->to($loginURL);
     }
@@ -106,11 +65,14 @@ class WebServer extends Client implements WebServerInterface
      */
     public function callback()
     {
+        $loginURL = $this->getLoginURL();
+
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
 
+        $tokenURL = $loginURL.'/services/oauth2/token';
+
         //Now we must make a request for the authorization token.
-        $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
             'body' => [
                 'code'          => $code,
@@ -124,7 +86,7 @@ class WebServer extends Client implements WebServerInterface
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = $response->json();
 
-        // Encrypt token and store token and in storage.
+        // Encrypt token and store token in storage.
         $this->storage->putTokenData($jsonResponse);
         if (isset($jsonResponse['refresh_token'])) {
             $this->storage->putRefreshToken($jsonResponse['refresh_token']);
@@ -142,8 +104,9 @@ class WebServer extends Client implements WebServerInterface
     public function refresh()
     {
         $refreshToken = $this->storage->getRefreshToken();
+        $tokenURL = $this->getLoginURL();
+        $tokenURL .= '/services/oauth2/token';
 
-        $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
         $response = $this->client->post($tokenURL, [
             'body' => [
                 'refresh_token' => $refreshToken,
@@ -177,21 +140,17 @@ class WebServer extends Client implements WebServerInterface
     }
 
     /**
-     * Try requesting token, if token expired try refreshing token.
+     * Retrieve login URL.
      *
-     * @param string $url
-     * @param array  $options
-     *
-     * @return mixed
+     * @return string
      */
-    public function request($url, $options)
+    private function getLoginURL()
     {
         try {
-            return $this->requestResource($url, $options);
-        } catch (TokenExpiredException $e) {
-            $this->refresh();
-
-            return $this->requestResource($url, $options);
+            //Session storage will not persist between the callback, recommend cache storage
+            return $this->storage->get('loginURL');
+        } catch (MissingKeyException $e) {
+            return $loginURL = $this->credentials['loginURL'];
         }
     }
 }
