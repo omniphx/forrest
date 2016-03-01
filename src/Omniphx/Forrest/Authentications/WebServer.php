@@ -5,7 +5,6 @@ namespace Omniphx\Forrest\Authentications;
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Client;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
-use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -52,8 +51,8 @@ class WebServer extends Client implements WebServerInterface
         $loginURL .= !empty($this->parameters['display']) ? '&display='.$this->parameters['display'] : '';
         $loginURL .= $this->parameters['immediate'] ? '&immediate=true' : '';
         $loginURL .= !empty($this->parameters['state']) ? '&state='.urlencode($this->parameters['state']) : '';
-        $loginURL .= !empty($this->parameters['scope']) ? '&scope=' . rawurlencode($this->parameters['scope']) : '';
-        $loginURL .= !empty($this->parameters['prompt']) ? '&prompt=' . rawurlencode($this->parameters['prompt']) : '';
+        $loginURL .= !empty($this->parameters['scope']) ? '&scope='.rawurlencode($this->parameters['scope']) : '';
+        $loginURL .= !empty($this->parameters['prompt']) ? '&prompt='.rawurlencode($this->parameters['prompt']) : '';
 
         return $this->redirect->to($loginURL);
     }
@@ -71,7 +70,7 @@ class WebServer extends Client implements WebServerInterface
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
 
-        $tokenURL = $loginURL . '/services/oauth2/token';
+        $tokenURL = $loginURL.'/services/oauth2/token';
 
         //Now we must make a request for the authorization token.
         $response = $this->client->post($tokenURL, [
@@ -141,8 +140,8 @@ class WebServer extends Client implements WebServerInterface
     }
 
     /**
-     * Retrieve login URL
-     * 
+     * Retrieve login URL.
+     *
      * @return string
      */
     private function getLoginURL()
@@ -150,7 +149,7 @@ class WebServer extends Client implements WebServerInterface
         try {
             //Session storage will not persist between the callback, recommend cache storage
             return $this->storage->get('loginURL');
-        } catch(MissingKeyException $e) {
+        } catch (MissingKeyException $e) {
             return $loginURL = $this->credentials['loginURL'];
         }
     }

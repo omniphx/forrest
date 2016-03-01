@@ -109,7 +109,7 @@ class WebServerSpec extends ObjectBehavior
         RedirectInterface $mockedRedirect,
         StorageInterface $mockedStorage)
     {
-        $mockedStorage->put("loginURL", "https://login.salesforce.com")->shouldBeCalled();
+        $mockedStorage->put('loginURL', 'https://login.salesforce.com')->shouldBeCalled();
         $mockedRedirect->to(Argument::any())->willReturn('redirectURL');
         $this->authenticate()->shouldReturn('redirectURL');
     }
@@ -125,7 +125,7 @@ class WebServerSpec extends ObjectBehavior
             Argument::type('array'))->shouldBeCalled(1)->willReturn($tokenResponse);
         $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
         $mockedClient->createRequest(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedRequest);
-        $mockedStorage->get("loginURL")->shouldBeCalled()->willReturn('https://login.salesforce.com');
+        $mockedStorage->get('loginURL')->shouldBeCalled()->willReturn('https://login.salesforce.com');
 
         $tokenResponse->json()->shouldBeCalled(1)->willReturn([
             'access_token'  => 'value1',
@@ -147,7 +147,7 @@ class WebServerSpec extends ObjectBehavior
         StorageInterface $mockedStorage
     ) {
         $mockedStorage->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
-        $mockedStorage->get("loginURL")->shouldBeCalled()->willReturn('https://login.salesforce.com');
+        $mockedStorage->get('loginURL')->shouldBeCalled()->willReturn('https://login.salesforce.com');
 
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
             ->shouldBeCalled()
@@ -186,7 +186,7 @@ class WebServerSpec extends ObjectBehavior
 
         $mockedClient->send($mockedRequest)->willThrow($requestException);
         $mockedClient->createRequest(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedRequest);
-        $mockedStorage->get("loginURL")->shouldBeCalled()->willReturn('https://login.salesforce.com');
+        $mockedStorage->get('loginURL')->shouldBeCalled()->willReturn('https://login.salesforce.com');
         $mockedStorage->getRefreshToken()->shouldBeCalled()->willReturn('refresh_token');
 
         $mockedClient->post('https://login.salesforce.com/services/oauth2/token', Argument::type('array'))
