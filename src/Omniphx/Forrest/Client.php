@@ -34,14 +34,31 @@ namespace Omniphx\Forrest;
  * search() and query() are not overloaded with the __call() method, this is because queries require urlencoding. I'm open to a more elegant solution, but prefer to leave it this way to make it simple to use.
  */
 
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Message\ResponseInterface;
+use Omniphx\Forrest\Exceptions\SalesforceException;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
+use Omniphx\Forrest\Interfaces\EventInterface;
+use Omniphx\Forrest\Interfaces\InputInterface;
+use Omniphx\Forrest\Interfaces\RedirectInterface;
+use Omniphx\Forrest\Interfaces\StorageInterface;
+
 abstract class Client
 {
     /**
      * HTTP request client.
      *
-     * @var Client
+     * @var ClientInterface
      */
     protected $client;
+
+    /**
+     * Event emitter.
+     *
+     * @var Interfaces\EventInterface
+     */
+    protected $event;
 
     /**
      * Config options.
@@ -53,16 +70,80 @@ abstract class Client
     /**
      * Storage handler.
      *
-     * @var storage
+     * @var Interfaces\StorageInterface
      */
     protected $storage;
 
     /**
-     * Reqeust headers.
+     * Token data.
+     *
+     * @var array
+     */
+    protected $tokenData;
+
+    /**
+     * Redirect handler.
+     *
+     * @var RedirectInterface
+     */
+    protected $redirect;
+
+    /**
+     * Inteface for Input calls.
+     *
+     * @var \Omniphx\Forrest\Interfaces\InputInterface
+     */
+    protected $input;
+
+    /**
+     * Authentication credentials.
+     *
+     * @var array
+     */
+    protected $credentials;
+
+    /**
+     * Request headers.
      *
      * @var array
      */
     private $headers;
+
+    public function __construct(
+        ClientInterface $client,
+        EventInterface $event,
+        InputInterface $input,
+        RedirectInterface $redirect,
+        StorageInterface $storage,
+        $settings
+    ) {
+        $this->client = $client;
+        $this->storage = $storage;
+        $this->redirect = $redirect;
+        $this->input = $input;
+        $this->event = $event;
+        $this->settings = $settings;
+        $this->credentials = $settings['credentials'];
+    }
+
+    /**
+     * Try requesting token, if token expired try refreshing token.
+     *
+     * @param string $url
+     * @param array  $options
+     *
+     * @return mixed
+     */
+    public function request($url, $options)
+    {
+        try {
+            return $this->requestResource($url, $options);
+        } catch (TokenExpiredException $e) {
+            $this->refresh();
+
+            return $this->requestResource($url, $options);
+        }
+    }
 
     /**
      * Try requesting token, if token expired try refreshing token.
@@ -80,18 +161,12 @@ abstract class Client
      * @param string $path
      * @param array  $requestBody
      * @param array  $options
+     *
+     * @return mixed
      */
     public function get($path, $requestBody = [], $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
-
-        $options['method'] = 'GET';
-        if ($requestBody) {
-            $options['body'] = $requestBody;
-        }
-
-        return $this->request($url, $options);
+        return $this->sendRequest($path, $requestBody, $options, 'GET');
     }
 
     /**
@@ -100,18 +175,12 @@ abstract class Client
      * @param string $path
      * @param array  $requestBody
      * @param array  $options
+     *
+     * @return mixed
      */
     public function post($path, $requestBody = [], $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
-
-        $options['method'] = 'POST';
-        if ($requestBody) {
-            $options['body'] = $requestBody;
-        }
-
-        return $this->request($url, $options);
+        return $this->sendRequest($path, $requestBody, $options, 'POST');
     }
 
     /**
@@ -120,18 +189,12 @@ abstract class Client
      * @param string $path
      * @param array  $requestBody
      * @param array  $options
+     *
+     * @return mixed
      */
     public function put($path, $requestBody = [], $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
-
-        $options['method'] = 'PUT';
-        if ($requestBody) {
-            $options['body'] = $requestBody;
-        }
-
-        return $this->request($url, $options);
+        return $this->sendRequest($path, $requestBody, $options, 'PUT');
     }
 
     /**
@@ -140,18 +203,12 @@ abstract class Client
      * @param string $path
      * @param array  $requestBody
      * @param array  $options
+     *
+     * @return mixed
      */
     public function delete($path, $requestBody = [], $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
-
-        $options['method'] = 'DELETE';
-        if ($requestBody) {
-            $options['body'] = $requestBody;
-        }
-
-        return $this->request($url, $options);
+        return $this->sendRequest($path, $requestBody, $options, 'DELETE');
     }
 
     /**
@@ -160,18 +217,12 @@ abstract class Client
      * @param string $path
      * @param array  $requestBody
      * @param array  $options
+     *
+     * @return mixed
      */
     public function head($path, $requestBody = [], $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
-
-        $options['method'] = 'HEAD';
-        if ($requestBody) {
-            $options['body'] = $requestBody;
-        }
-
-        return $this->request($url, $options);
+        return $this->sendRequest($path, $requestBody, $options, 'HEAD');
     }
 
     /**
@@ -180,18 +231,12 @@ abstract class Client
      * @param string $path
      * @param array  $requestBody
      * @param array  $options
+     *
+     * @return mixed
      */
     public function patch($path, $requestBody = [], $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
-
-        $options['method'] = 'PATCH';
-        if ($requestBody) {
-            $options['body'] = $requestBody;
-        }
-
-        return $this->request($url, $options);
+        return $this->sendRequest($path, $requestBody, $options, 'PATCH');
     }
 
     /**
@@ -275,7 +320,9 @@ abstract class Client
     }
 
     /**
-     * Describes all global objects availabe in the organization.
+     * Describes all global objects available in the organization.
+     *
+     * @param array $options
      *
      * @return array
      */
@@ -440,8 +487,7 @@ abstract class Client
      * Available for API version 30.0 or later.
      *
      * @param string $query
-     * @param array  $searchParameters
-     * @param array  $option
+     * @param array  $options
      *
      * @return array
      */
@@ -454,7 +500,8 @@ abstract class Client
 
         $parameters = [
             'language'      => $this->settings['language'],
-            'publishStatus' => 'Online', ];
+            'publishStatus' => 'Online',
+        ];
 
         if (isset($options['parameters'])) {
             $parameters = array_replace_recursive($parameters, $options['parameters']);
@@ -501,7 +548,7 @@ abstract class Client
      * Request to a custom Apex REST endpoint.
      *
      * @param string $customURI
-     * @param array  $option
+     * @param array  $options
      *
      * @return mixed
      */
@@ -524,7 +571,7 @@ abstract class Client
     /**
      * Public accessor to the Guzzle Client Object.
      *
-     * @return GuzzleHttp\ClientInterface
+     * @return ClientInterface
      */
     public function getClient()
     {
@@ -577,8 +624,26 @@ abstract class Client
      */
     public function getTokenData()
     {
-        return $this->storage->getTokenData();
+        if (empty($this->tokenData)) {
+            $this->tokenData = (array) $this->storage->getTokenData();
+        }
+
+        return $this->tokenData;
     }
+
+    /**
+     * Refresh authentication token.
+     *
+     * @return mixed $response
+     */
+    abstract public function refresh();
+
+    /**
+     * Revokes access token from Salesforce. Will not flush token from storage.
+     *
+     * @return mixed
+     */
+    abstract public function revoke();
 
     /**
      * Get the instance URL.
@@ -633,20 +698,19 @@ abstract class Client
     protected function storeResources()
     {
         try {
-            $version = $this->storage->get('version');
-            $resources = $this->resources(['format' => 'json']);
-            $this->storage->put('resources', $resources);
+            $this->storage->get('version');
         } catch (\Exception $e) {
             $this->storeVersion();
-            $resources = $this->resources(['format' => 'json']);
-            $this->storage->put('resources', $resources);
         }
+
+        $resources = $this->resources(['format' => 'json']);
+        $this->storage->put('resources', $resources);
     }
 
     /**
      * Method returns the response for the requested resource.
      *
-     * @param string $pURI
+     * @param string $pURL
      * @param array  $pOptions
      *
      * @return mixed
@@ -674,6 +738,8 @@ abstract class Client
         } catch (RequestException $e) {
             $this->assignExceptions($e);
         }
+
+        return '';
     }
 
     /**
@@ -685,9 +751,7 @@ abstract class Client
      */
     private function setHeaders(array $options)
     {
-        $format = $options['format'];
-
-        $authToken = $this->storage->getTokenData();
+        $authToken = $this->getTokenData();
 
         $accessToken = $authToken['access_token'];
         $tokenType = $authToken['token_type'];
@@ -709,6 +773,7 @@ abstract class Client
     {
         $format = $options['format'];
         $data = $options['body'];
+        $body = '';
 
         if ($format == 'json') {
             $body = json_encode($data);
@@ -719,7 +784,28 @@ abstract class Client
         return $body;
     }
 
-    //Need to think through this for it to work
+    /**
+     * Prepares options and sends the request.
+     *
+     * @param $path
+     * @param $requestBody
+     * @param $options
+     * @param $method
+     *
+     * @return mixed
+     */
+    private function sendRequest($path, $requestBody, $options, $method)
+    {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = $method;
+        if (!empty($requestBody)) {
+            $options['body'] = $requestBody;
+        }
+
+        return $this->request($url, $options);
+    }
 
     private function setRequestFormat($format)
     {
@@ -744,10 +830,10 @@ abstract class Client
     }
 
     /**
-     * Returns the response in the configured  format.
+     * Returns the response in the configured format.
      *
-     * @param Response $response
-     * @param string   $format
+     * @param ResponseInterface $response
+     * @param string            $format
      *
      * @return mixed $response
      */
@@ -771,18 +857,19 @@ abstract class Client
     /**
      * Method will elaborate on RequestException.
      *
-     * @param GuzzleHttp\Exception\ClientException $e
+     * @param RequestException $e
      *
-     * @return mixed
+     * @throws SalesforceException
+     * @throws TokenExpiredException
      */
-    private function assignExceptions($e)
+    private function assignExceptions(RequestException $e)
     {
-        if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
-            throw new TokenExpiredException(sprintf('Salesforce token has expired'));
+        if ($e->hasResponse() && $e->getResponse()->getStatusCode() == 401) {
+            throw new TokenExpiredException('Salesforce token has expired', $e);
         } elseif ($e->hasResponse()) {
-            throw new SalesforceException(sprintf('Salesforce response error: %s', $e->getResponse()));
+            throw new SalesforceException('Salesforce response error', $e);
         } else {
-            throw new SalesforceException(sprintf('Invalid request: %s', $e->getRequest()));
+            throw new SalesforceException('Invalid request: %s', $e);
         }
     }
 }

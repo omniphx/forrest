@@ -4,7 +4,6 @@ namespace Omniphx\Forrest\Authentications;
 
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Client;
-use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -13,42 +12,15 @@ use Omniphx\Forrest\Interfaces\UserPasswordInterface;
 
 class UserPassword extends Client implements UserPasswordInterface
 {
-    /**
-     * Redirect handler.
-     *
-     * @var Redirect
-     */
-    protected $redirect;
-
-    /**
-     * Interface for Input calls.
-     *
-     * @var Omniphx\Forrest\Interfaces\InputInterface
-     */
-    protected $input;
-
-    /**
-     * Authentication credentials.
-     *
-     * @var array
-     */
-    private $credentials;
-
     public function __construct(
         ClientInterface $client,
-        StorageInterface $storage,
-        RedirectInterface $redirect,
-        InputInterface $input,
         EventInterface $event,
-        $settings)
-    {
-        $this->client = $client;
-        $this->storage = $storage;
-        $this->redirect = $redirect;
-        $this->input = $input;
-        $this->event = $event;
-        $this->settings = $settings;
-        $this->credentials = $settings['credentials'];
+        InputInterface $input,
+        RedirectInterface $redirect,
+        StorageInterface $storage,
+        $settings
+    ) {
+        parent::__construct($client, $event, $input, $redirect, $storage, $settings);
     }
 
     public function authenticate($loginURL = null)
@@ -115,24 +87,5 @@ class UserPassword extends Client implements UserPasswordInterface
         $options['form_params']['token'] = $accessToken;
 
         return $this->client->request('post', $url, $options);
-    }
-
-    /**
-     * Try requesting token, if token expired try refreshing token.
-     *
-     * @param string $url
-     * @param array  $options
-     *
-     * @return mixed
-     */
-    public function request($url, $options)
-    {
-        try {
-            return $this->requestResource($url, $options);
-        } catch (TokenExpiredException $e) {
-            $this->refresh();
-
-            return $this->requestResource($url, $options);
-        }
     }
 }

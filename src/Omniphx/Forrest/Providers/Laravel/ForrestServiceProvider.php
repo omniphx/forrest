@@ -23,12 +23,6 @@ class ForrestServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../../../config/config.php' => config_path('forrest.php'),
         ]);
-
-        $authentication = config('forrest.authentication');
-
-        if (!is_null($authentication)) {
-            include __DIR__."/Routes/$authentication.php";
-        }
     }
 
     /**
@@ -38,7 +32,7 @@ class ForrestServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bindShared('forrest', function ($app) {
+        $this->app->singleton('forrest', function ($app) {
 
             //Config options:
             $settings = config('forrest');
@@ -61,7 +55,7 @@ class ForrestServiceProvider extends ServiceProvider
             //Class namespace:
             $forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
 
-            return new $forrest($client, $storage, $redirect, $input, $event, $settings);
+            return new $forrest($client, $event, $input, $redirect, $storage, $settings);
 
         });
     }

@@ -5,6 +5,10 @@ namespace spec\Omniphx\Forrest\Authentications;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Message\Request;
+use GuzzleHttp\Message\Response;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -24,13 +28,13 @@ class UserPasswordSpec extends ObjectBehavior
 
     public function let(
         ClientInterface $mockedClient,
+        EventInterface $mockedEvent,
+        InputInterface $mockedInput,
+        RedirectInterface $mockedRedirect,
         ResponseInterface $mockedResponse,
         RequestInterface $mockedRequest,
-        StorageInterface $mockedStorage,
-        RedirectInterface $mockedRedirect,
-        InputInterface $mockedInput,
-        EventInterface $mockedEvent)
-    {
+        StorageInterface $mockedStorage
+    ) {
         $settings = [
             'authenticationFlow' => 'UserPassword',
             'credentials'        => [
@@ -42,22 +46,22 @@ class UserPasswordSpec extends ObjectBehavior
                 'password'       => 'mypassword',
 
             ],
-            'parameters' => [
+            'parameters'         => [
                 'display'   => 'popup',
                 'immediate' => 'false',
                 'state'     => '',
                 'scope'     => '',
             ],
-            'instanceURL'  => '',
-            'authRedirect' => 'redirectURL',
-            'version'      => '30.0',
-            'defaults'     => [
+            'instanceURL'        => '',
+            'authRedirect'       => 'redirectURL',
+            'version'            => '30.0',
+            'defaults'           => [
                 'method'          => 'get',
                 'format'          => 'json',
                 'compression'     => false,
                 'compressionType' => 'gzip',
             ],
-            'language' => 'en_US',
+            'language'           => 'en_US',
         ];
 
         $mockedStorage->get('resources')->willReturn([
@@ -75,23 +79,26 @@ class UserPasswordSpec extends ObjectBehavior
             'flexiPage'    => '/services/data/v30.0/flexiPage',
             'search'       => '/services/data/v30.0/search',
             'quickActions' => '/services/data/v30.0/quickActions',
-            'appMenu'      => '/services/data/v30.0/appMenu', ]);
+            'appMenu'      => '/services/data/v30.0/appMenu',
+        ]);
         $mockedStorage->get('version')->willReturn([
-            'url' => 'resourceURLs', ]);
+            'url' => 'resourceURLs',
+        ]);
         $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'accessToken',
             'id'           => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
             'instance_url' => 'https://na00.salesforce.com',
-            'token_type'   => 'Oauth', ]);
+            'token_type'   => 'Oauth',
+        ]);
         $mockedStorage->putTokenData(Argument::any())->willReturn(null);
         $mockedStorage->put(Argument::any(), Argument::any())->willReturn(null);
 
         $this->beConstructedWith(
             $mockedClient,
-            $mockedStorage,
-            $mockedRedirect,
-            $mockedInput,
             $mockedEvent,
+            $mockedInput,
+            $mockedRedirect,
+            $mockedStorage,
             $settings);
     }
 
@@ -117,6 +124,9 @@ class UserPasswordSpec extends ObjectBehavior
 
         //Client->responseFormat()
         // $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->versionJSON);
+        // $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
+
+        // $versionResponse->json()->shouldBeCalled()->willReturn([['version' => '30.0'], ['version' => '31.0']]);
 
         $this->authenticate('url')->shouldReturn(null);
     }
@@ -129,6 +139,8 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedClient->request("post","https://login.salesforce.com/services/oauth2/token",["form_params" => ["grant_type" => "password", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "username" => "user@email.com", "password" => "mypassword"]])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->authenticationJSON);
+        // $mockedResponse->json()->shouldBeCalled()->willReturn(['key' => 'value']);
+        // $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
         $this->refresh()->shouldReturn(null);
     }
@@ -136,8 +148,8 @@ class UserPasswordSpec extends ObjectBehavior
     public function it_should_return_the_request(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
-    {
+        ResponseInterface $mockedResponse
+    ) {
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
 
         //Forrest->Client->requestResource()
@@ -147,14 +159,17 @@ class UserPasswordSpec extends ObjectBehavior
 
         $this->request('url', ['key' => 'value'])->shouldReturn(["foo"=>"bar"]);
     }
-
     public function it_should_refresh_the_token_if_token_expired_exception_is_thrown(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
     {
+        $failedRequest = new Request('GET', 'fakeurl');
+        $failedResponse = new Response(401);
+        $requestException = new RequestException('Salesforce token has expired', $failedRequest, $failedResponse);
+
         //First request throws an exception
-        $mockedClient->request("get", "url", ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled(1)->willThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException');
+        $mockedClient->request("get", "url", ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled(1)->willThrow($requestException);
 
         //Authenticates with refresh method
         $mockedClient->request("post","https://login.salesforce.com/services/oauth2/token",["form_params" => ["grant_type" => "password", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "username" => "user@email.com", "password" => "mypassword"]])->shouldBeCalled()->willReturn($mockedResponse);
@@ -162,7 +177,12 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->authenticationJSON);
 
         //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it. Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual behavior would never throw the exception, it would return a response.
-        $this->shouldThrow('\Omniphx\Forrest\Exceptions\TokenExpiredException')->duringRequest('url', ['key' => 'value']);
+        $tokenException = new TokenExpiredException(
+            'Salesforce token has expired',
+            $requestException);
+
+        //Here we will handle a 401 exception and convert it to a TokenExpiredException
+        $this->shouldThrow($tokenException)->duringRequest('url', ['key' => 'value']);
     }
 
     public function it_should_revoke_the_authentication_token(
@@ -186,6 +206,9 @@ class UserPasswordSpec extends ObjectBehavior
         $versionArray = json_decode($this->versionJSON, true);
 
         $this->versions()->shouldReturn($versionArray);
+        // $mockedResponse->json()->shouldBeCalled()->willReturn(['version' => '29.0', 'version' => '30.0']);
+
+        // $this->versions()->shouldReturn(['version' => '29.0', 'version' => '30.0']);
     }
 
     public function it_should_return_resources(
@@ -217,8 +240,8 @@ class UserPasswordSpec extends ObjectBehavior
     public function it_should_return_limits(
         ClientInterface $mockedClient,
         StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
-    {
+        ResponseInterface $mockedResponse
+    ) {
         $mockedStorage->get('version')->shouldBeCalled()->willReturn(['url' => 'versionURL']);
 
         $mockedClient->request("get","https://na00.salesforce.comversionURL/limits",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
@@ -233,8 +256,8 @@ class UserPasswordSpec extends ObjectBehavior
     public function it_should_return_describe(
         ClientInterface $mockedClient,
         StorageInterface $mockedStorage,
-        ResponseInterface $mockedResponse)
-    {
+        ResponseInterface $mockedResponse
+    ) {
         $mockedStorage->get('version')->shouldBeCalled()->willReturn(['url' => 'versionURL']);
         $mockedClient->request("get","https://na00.salesforce.comversionURL/sobjects",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
 
@@ -408,14 +431,15 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'abc',
             'instance_url' => 'def',
-            'token_type'   => 'bearer', ]);
+            'token_type'   => 'bearer',
+        ]);
 
         $this->request('uri', ['format' => 'xml'])->shouldReturnAnInstanceOf('SimpleXMLElement');
     }
 
     public function it_allows_access_to_the_guzzle_client(
-        ClientInterface $mockedClient)
-    {
+        ClientInterface $mockedClient
+    ) {
         $this->getClient()->shouldReturn($mockedClient);
     }
 }
