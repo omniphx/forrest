@@ -6,8 +6,8 @@ use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
@@ -193,7 +193,11 @@ class UserPasswordSpec extends ObjectBehavior
         $this->revoke()->shouldReturn($mockedResponse);
     }
 
-    //Client
+    /*
+     *
+     * Specs below are for the parent class.
+     * 
+     */
 
     public function it_should_return_the_versions(
         ClientInterface $mockedClient,
@@ -398,6 +402,27 @@ class UserPasswordSpec extends ObjectBehavior
         $this->suggestedQueries('suggested')->shouldReturn($responseJSON);
     }
 
+    public function it_should_return_custom_request(
+        ResponseInterface $mockedResponse,
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest
+    ) {
+        $mockedClient->request("get",
+            "https://na00.salesforce.com/services/apexrest/FieldCase?foo=bar", [
+                "headers" => [
+                    "Authorization" => "Oauth accessToken",
+                    "Accept" => "application/json",
+                    "Content-Type" => "application/json"
+                ]])->willReturn($mockedResponse);
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+
+        $this->custom('/FieldCase', ['parameters' => ['foo' => 'bar']])
+            ->shouldReturn($responseJSON);
+    }
+
     public function it_returns_a_json_resource(
         ClientInterface $mockedClient,
         StorageInterface $mockedStorage,
@@ -413,7 +438,7 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'abc',
             'instance_url' => 'def',
-            'token_type'   => 'bearer', ]);
+            'token_type'   => 'bearer']);
 
         $this->request('uri', [])->shouldReturn($responseJSON);
     }
@@ -437,9 +462,223 @@ class UserPasswordSpec extends ObjectBehavior
         $this->request('uri', ['format' => 'xml'])->shouldReturnAnInstanceOf('SimpleXMLElement');
     }
 
+    public function it_should_format_header_in_urlencoding(
+        ClientInterface $mockedClient,
+        StorageInterface $mockedStorage,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedStorage->getTokenData()->willReturn([
+            'access_token' => 'accesstoken',
+            'instance_url' => 'def',
+            'token_type'   => 'bearer',
+        ]);
+
+        $mockedClient->request(
+            'get',
+            'uri',
+            [
+                'headers' => [
+                    'Authorization' => 'bearer accesstoken',
+                    'Accept'        => 'application/x-www-form-urlencoded',
+                    'Content-Type'  => 'application/x-www-form-urlencoded',
+                ],
+            ])
+            ->shouldBeCalled()->willReturn($mockedResponse);
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn('rawresponse');
+
+        $this->request('uri', ['format' => 'urlencoded'])->shouldReturn('rawresponse');
+    }
+
+    public function it_should_format_header_with_gzip(
+        ClientInterface $mockedClient,
+        StorageInterface $mockedStorage,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedStorage->getTokenData()->willReturn([
+            'access_token' => 'accesstoken',
+            'instance_url' => 'def',
+            'token_type'   => 'bearer',
+        ]);
+
+        $mockedClient->request(
+            'get',
+            'uri',
+            [
+                'headers' => [
+                    'Authorization'    => 'bearer accesstoken',
+                    'Accept'           => 'application/json',
+                    'Content-Type'     => 'application/json',
+                    'Accept-Encoding'  => 'gzip',
+                    'Content-Encoding' => 'gzip',
+                ],
+            ])
+            ->shouldBeCalled()->willReturn($mockedResponse);
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+
+        $this->request('uri', ['compression' => true, 'compressionType' => 'gzip'])->shouldReturn($responseJSON);
+    }
+
+    public function it_should_format_header_with_deflate(
+        ClientInterface $mockedClient,
+        StorageInterface $mockedStorage,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedStorage->getTokenData()->willReturn([
+            'access_token' => 'accesstoken',
+            'instance_url' => 'def',
+            'token_type'   => 'bearer',
+        ]);
+
+        $mockedClient->request(
+            'get',
+            'uri',
+            [
+                'headers' => [
+                    'Authorization'    => 'bearer accesstoken',
+                    'Accept'           => 'application/json',
+                    'Content-Type'     => 'application/json',
+                    'Accept-Encoding'  => 'deflate',
+                    'Content-Encoding' => 'deflate',
+                ],
+            ])
+            ->shouldBeCalled()->willReturn($mockedResponse);
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+
+        $this->request('uri', ['compression' => true, 'compressionType' => 'deflate'])->shouldReturn($responseJSON);
+    }
+
+    public function it_should_format_header_without_compression(
+        ClientInterface $mockedClient,
+        StorageInterface $mockedStorage,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedStorage->getTokenData()->willReturn([
+            'access_token' => 'accesstoken',
+            'instance_url' => 'def',
+            'token_type'   => 'bearer',
+        ]);
+
+        $mockedClient->request(
+            'get',
+            'uri',
+            [
+                'headers' => [
+                    'Authorization' => 'bearer accesstoken',
+                    'Accept'        => 'application/json',
+                    'Content-Type'  => 'application/json',
+                ],
+            ])
+            ->shouldBeCalled()->willReturn($mockedResponse);
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+
+        $this->request('uri', ['compression' => false])->shouldReturn($responseJSON);
+    }
+
     public function it_allows_access_to_the_guzzle_client(
         ClientInterface $mockedClient
     ) {
         $this->getClient()->shouldReturn($mockedClient);
+    }
+
+    public function it_should_allow_a_get_request(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->request('GET', Argument::any(), Argument::any())->willReturn($mockedResponse);
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+        $this->get('uri')->shouldReturn($responseJSON);
+    }
+
+    public function it_should_allow_a_post_request(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->request('POST', Argument::any(), Argument::any())->willReturn($mockedResponse);
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+        $this->post('uri', ['test' => 'param'])->shouldReturn($responseJSON);
+    }
+
+    public function it_should_allow_a_put_request(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->request('PUT', Argument::any(), Argument::any())->willReturn($mockedResponse);
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+        $this->put('uri', ['test' => 'param'])->shouldReturn($responseJSON);
+    }
+
+    public function it_should_allow_a_patch_request(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->request('PATCH', Argument::any(), Argument::any())->willReturn($mockedResponse);
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+        $this->patch('uri', ['test' => 'param'])->shouldReturn($responseJSON);
+    }
+
+    public function it_should_allow_a_head_request(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->request('HEAD', Argument::any(), Argument::any())->willReturn($mockedResponse);
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+
+        $this->head('url')->shouldReturn($responseJSON);
+    }
+
+    public function it_should_allow_a_delete_request(
+        ClientInterface $mockedClient,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->request('DELETE', Argument::any(), Argument::any())->willReturn($mockedResponse);
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
+
+        $responseJSON = json_decode($this->responseJSON, true);
+
+        $this->delete('url')->shouldReturn($responseJSON);
+    }
+
+    public function it_should_fire_a_response_event(
+        ClientInterface $mockedClient,
+        EventInterface $mockedEvent,
+        RequestInterface $mockedRequest,
+        ResponseInterface $mockedResponse
+    ) {
+        $mockedClient->request(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedRequest);
+        $mockedClient->send(Argument::any(), Argument::any(), Argument::any())->willReturn($mockedResponse);
+        $mockedEvent->fire('forrest.response', Argument::any())->shouldBeCalled();
+
+        $this->versions();
     }
 }

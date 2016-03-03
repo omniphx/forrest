@@ -107,7 +107,7 @@ class WebServer extends Client implements WebServerInterface
         $tokenURL = $this->getLoginURL();
         $tokenURL .= '/services/oauth2/token';
 
-        $response = $this->client->post($tokenURL, [
+        $response = $this->client->request('post', $tokenURL, [
             'form_params'    => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',
@@ -131,7 +131,8 @@ class WebServer extends Client implements WebServerInterface
     public function revoke()
     {
         $accessToken = $this->getTokenData()['access_token'];
-        $url = $this->credentials['loginURL'].'/services/oauth2/revoke';
+        $url = $this->getLoginURL();
+        $url .= '/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['form_params']['token'] = $accessToken;

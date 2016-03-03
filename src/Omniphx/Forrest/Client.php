@@ -2,6 +2,16 @@
 
 namespace Omniphx\Forrest;
 
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Message\ResponseInterface;
+use Omniphx\Forrest\Exceptions\SalesforceException;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
+use Omniphx\Forrest\Interfaces\EventInterface;
+use Omniphx\Forrest\Interfaces\InputInterface;
+use Omniphx\Forrest\Interfaces\RedirectInterface;
+use Omniphx\Forrest\Interfaces\StorageInterface;
+
 /**
  * API resources
  * @method ClientInterface chatter(array $options = [])
@@ -33,16 +43,6 @@ namespace Omniphx\Forrest;
  *
  * search() and query() are not overloaded with the __call() method, this is because queries require urlencoding. I'm open to a more elegant solution, but prefer to leave it this way to make it simple to use.
  */
-
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Message\ResponseInterface;
-use Omniphx\Forrest\Exceptions\SalesforceException;
-use Omniphx\Forrest\Exceptions\TokenExpiredException;
-use Omniphx\Forrest\Interfaces\EventInterface;
-use Omniphx\Forrest\Interfaces\InputInterface;
-use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Omniphx\Forrest\Interfaces\StorageInterface;
 
 abstract class Client
 {
@@ -144,16 +144,6 @@ abstract class Client
             return $this->requestResource($url, $options);
         }
     }
-
-    /**
-     * Try requesting token, if token expired try refreshing token.
-     *
-     * @param string $url
-     * @param array  $options
-     *
-     * @return mixed
-     */
-    abstract protected function request($url, $options);
 
     /**
      * GET method call using any custom path.
@@ -731,7 +721,7 @@ abstract class Client
         }
 
         try {
-            $response = $this->client->request($method,$pURL, $parameters);
+            $response = $this->client->request($method, $pURL, $parameters);
             $this->event->fire('forrest.response', [$response]);
 
             return $this->responseFormat($response, $format);
