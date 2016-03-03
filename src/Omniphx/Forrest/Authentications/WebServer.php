@@ -43,16 +43,16 @@ class WebServer extends Client implements WebServerInterface
     public function authenticate($url = null)
     {
         $loginURL = $url === null ? $this->credentials['loginURL'] : $url;
-        $this->storage->put('loginURL', $loginURL);
+        $state = '&state='.urlencode($loginURL);
         $loginURL .= '/services/oauth2/authorize';
         $loginURL .= '?response_type=code';
         $loginURL .= '&client_id='.$this->credentials['consumerKey'];
         $loginURL .= '&redirect_uri='.urlencode($this->credentials['callbackURI']);
         $loginURL .= !empty($this->parameters['display']) ? '&display='.$this->parameters['display'] : '';
         $loginURL .= $this->parameters['immediate'] ? '&immediate=true' : '';
-        $loginURL .= !empty($this->parameters['state']) ? '&state='.urlencode($this->parameters['state']) : '';
         $loginURL .= !empty($this->parameters['scope']) ? '&scope='.rawurlencode($this->parameters['scope']) : '';
         $loginURL .= !empty($this->parameters['prompt']) ? '&prompt='.rawurlencode($this->parameters['prompt']) : '';
+        $loginURL .= $state;
 
         return $this->redirect->to($loginURL);
     }
@@ -69,10 +69,13 @@ class WebServer extends Client implements WebServerInterface
 
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
+        $state = $this->input->get('state');
+        $loginURL = urldecode($state);
+        $this->storage->put('loginURL', $loginURL);
 
         $tokenURL = $loginURL.'/services/oauth2/token';
 
-        $response = $this->client->request('post',$tokenURL, [
+        $response = $this->client->request('post', $tokenURL, [
             'form_params' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
