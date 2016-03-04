@@ -115,35 +115,32 @@ class WebServerSpec extends ObjectBehavior
     }
 
     public function it_should_authenticate(
-        RedirectInterface $mockedRedirect,
-        StorageInterface $mockedStorage)
+        RedirectInterface $mockedRedirect)
     {
-        $mockedStorage->put('loginURL', 'https://login.salesforce.com')->shouldBeCalled();
         $mockedRedirect->to(Argument::any())->willReturn('redirectURL');
         $this->authenticate()->shouldReturn('redirectURL');
     }
 
     public function it_should_callback(
         ClientInterface $mockedClient,
-        ClientInterface $mockedClient2,
-        RequestInterface $mockedRequest,
+        InputInterface $mockedInput,
         ResponseInterface $tokenResponse,
-        ResponseInterface $versionResponse,
-        ResponseInterface $simpleResponse,
+        ResponseInterface $storeResources,
         StorageInterface $mockedStorage)
     {
-        $mockedClient->request('post','https://login.salesforce.com/services/oauth2/token', ["form_params" => ["code" => null, "grant_type" => "authorization_code", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "redirect_uri" => "callbackURL"]])->shouldBeCalled()->willReturn($tokenResponse);
+        $mockedInput->get('code')->shouldBeCalled()->willReturn('callbackCode');
+        $mockedInput->get('state')->shouldBeCalled()->willReturn(urlencode('https://login.salesforce.com'));
+
+        $mockedClient->request('post','https://login.salesforce.com/services/oauth2/token', ["form_params" => ["code" => "callbackCode", "grant_type" => "authorization_code", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "redirect_uri" => "callbackURL"]])->shouldBeCalled()->willReturn($tokenResponse);
         $tokenResponse->getBody()->shouldBeCalled()->willReturn($this->authenticationJSON);
-
-        $mockedClient->request('get','https://na00.salesforce.com', ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($simpleResponse);
-        $simpleResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
-
+        $mockedClient->request('get','https://na00.salesforce.com', ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($storeResources);
+        $mockedStorage->get('version')->willReturn(null);
+        $mockedStorage->put('loginURL', 'https://login.salesforce.com')->shouldBeCalled();
+        $mockedStorage->put("resources", ["foo" => "bar"])->shouldBeCalled();
         $mockedStorage->putTokenData(["access_token" => "00Do0000000secret", "instance_url" => "https://na17.salesforce.com", "id" => "https://login.salesforce.com/id/00D", "token_type" => "Bearer", "issued_at" => "1447000236011", "signature" => "secretsig", "refresh_token" => "refreshToken"])->shouldBeCalled();
         $mockedStorage->putRefreshToken('refreshToken')->shouldBeCalled();
-        $mockedStorage->get('version')->willReturn(null);
-        $mockedStorage->get('loginURL')->shouldBeCalled()->willReturn('https://login.salesforce.com');
 
-        $mockedStorage->put("resources", ["foo" => "bar"])->shouldBeCalled();
+        $storeResources->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
         $this->callback()->shouldReturn(null);
     }

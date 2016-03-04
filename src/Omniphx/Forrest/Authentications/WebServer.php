@@ -65,8 +65,6 @@ class WebServer extends Client implements WebServerInterface
      */
     public function callback()
     {
-        $loginURL = $this->getLoginURL();
-
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
         $state = $this->input->get('state');
