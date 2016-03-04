@@ -27,17 +27,18 @@ class UserPassword extends Client implements UserPasswordInterface
     {
         $tokenURL = $this->credentials['loginURL'];
         $tokenURL .= '/services/oauth2/token';
-        $parameters['body'] = [
+        $parameters['form_params'] = [
             'grant_type'    => 'password',
             'client_id'     => $this->credentials['consumerKey'],
             'client_secret' => $this->credentials['consumerSecret'],
             'username'      => $this->credentials['username'],
             'password'      => $this->credentials['password'],
         ];
-        $response = $this->client->post($tokenURL, $parameters);
+
+        $response = $this->client->request('post', $tokenURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -54,18 +55,19 @@ class UserPassword extends Client implements UserPasswordInterface
     public function refresh()
     {
         $tokenURL = $this->credentials['loginURL'].'/services/oauth2/token';
-        $response = $this->client->post($tokenURL, [
-            'body' => [
-                'grant_type'    => 'password',
-                'client_id'     => $this->credentials['consumerKey'],
-                'client_secret' => $this->credentials['consumerSecret'],
-                'username'      => $this->credentials['username'],
-                'password'      => $this->credentials['password'],
-            ],
-        ]);
+
+        $parameters['form_params'] = [
+            'grant_type'    => 'password',
+            'client_id'     => $this->credentials['consumerKey'],
+            'client_secret' => $this->credentials['consumerSecret'],
+            'username'      => $this->credentials['username'],
+            'password'      => $this->credentials['password'],
+        ];
+
+        $response = $this->client->request('post', $tokenURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -82,8 +84,8 @@ class UserPassword extends Client implements UserPasswordInterface
         $url = $this->credentials['loginURL'].'/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
-        $options['body']['token'] = $accessToken;
+        $options['form_params']['token'] = $accessToken;
 
-        return $this->client->post($url, $options);
+        return $this->client->request('post', $url, $options);
     }
 }

@@ -43,16 +43,16 @@ class WebServer extends Client implements WebServerInterface
     public function authenticate($url = null)
     {
         $loginURL = $url === null ? $this->credentials['loginURL'] : $url;
-        $this->storage->put('loginURL', $loginURL);
+        $state = '&state='.urlencode($loginURL);
         $loginURL .= '/services/oauth2/authorize';
         $loginURL .= '?response_type=code';
         $loginURL .= '&client_id='.$this->credentials['consumerKey'];
         $loginURL .= '&redirect_uri='.urlencode($this->credentials['callbackURI']);
         $loginURL .= !empty($this->parameters['display']) ? '&display='.$this->parameters['display'] : '';
         $loginURL .= $this->parameters['immediate'] ? '&immediate=true' : '';
-        $loginURL .= !empty($this->parameters['state']) ? '&state='.urlencode($this->parameters['state']) : '';
         $loginURL .= !empty($this->parameters['scope']) ? '&scope='.rawurlencode($this->parameters['scope']) : '';
         $loginURL .= !empty($this->parameters['prompt']) ? '&prompt='.rawurlencode($this->parameters['prompt']) : '';
+        $loginURL .= $state;
 
         return $this->redirect->to($loginURL);
     }
@@ -65,16 +65,16 @@ class WebServer extends Client implements WebServerInterface
      */
     public function callback()
     {
-        $loginURL = $this->getLoginURL();
-
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
+        $state = $this->input->get('state');
+        $loginURL = urldecode($state);
+        $this->storage->put('loginURL', $loginURL);
 
         $tokenURL = $loginURL.'/services/oauth2/token';
 
-        //Now we must make a request for the authorization token.
-        $response = $this->client->post($tokenURL, [
-            'body' => [
+        $response = $this->client->request('post', $tokenURL, [
+            'form_params' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
                 'client_id'     => $this->credentials['consumerKey'],
@@ -84,7 +84,7 @@ class WebServer extends Client implements WebServerInterface
         ]);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -107,8 +107,8 @@ class WebServer extends Client implements WebServerInterface
         $tokenURL = $this->getLoginURL();
         $tokenURL .= '/services/oauth2/token';
 
-        $response = $this->client->post($tokenURL, [
-            'body' => [
+        $response = $this->client->request('post', $tokenURL, [
+            'form_params'    => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',
                 'client_id'     => $this->credentials['consumerKey'],
@@ -117,7 +117,7 @@ class WebServer extends Client implements WebServerInterface
         ]);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = $response->json();
+        $jsonResponse = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.
         $this->storage->putTokenData($jsonResponse);
@@ -131,10 +131,11 @@ class WebServer extends Client implements WebServerInterface
     public function revoke()
     {
         $accessToken = $this->getTokenData()['access_token'];
-        $url = $this->credentials['loginURL'].'/services/oauth2/revoke';
+        $url = $this->getLoginURL();
+        $url .= '/services/oauth2/revoke';
 
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
-        $options['body']['token'] = $accessToken;
+        $options['form_params']['token'] = $accessToken;
 
         return $this->client->post($url, $options);
     }

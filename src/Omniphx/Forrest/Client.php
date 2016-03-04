@@ -12,6 +12,38 @@ use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 
+/**
+ * API resources.
+ *
+ * @method ClientInterface chatter(array $options = [])
+ * @method ClientInterface tabs(array $options = [])
+ * @method ClientInterface appMenu(array $options = [])
+ * @method ClientInterface quickActions(array $options = [])
+ * @method ClientInterface queryAll(array $options = [])
+ * @method ClientInterface commerce(array $options = [])
+ * @method ClientInterface wave(array $options = [])
+ * @method ClientInterface exchange-connect(array $options = [])
+ * @method ClientInterface analytics(array $options = [])
+ * @method ClientInterface identity(array $options = [])
+ * @method ClientInterface composite(array $options = [])
+ * @method ClientInterface theme(array $options = [])
+ * @method ClientInterface nouns(array $options = [])
+ * @method ClientInterface recent(array $options = [])
+ * @method ClientInterface licensing(array $options = [])
+ * @method ClientInterface limits(array $options = [])
+ * @method ClientInterface async-queries(array $options = [])
+ * @method ClientInterface emailConnect(array $options = [])
+ * @method ClientInterface compactLayouts(array $options = [])
+ * @method ClientInterface flexiPage(array $options = [])
+ * @method ClientInterface knowledgeManagement(array $options = [])
+ * @method ClientInterface sobjects(array $options = [])
+ * @method ClientInterface actions(array $options = [])
+ * @method ClientInterface support(array $options = [])
+ *
+ * Note: Not all methods are available to certain orgs/licenses
+ *
+ * search() and query() are not overloaded with the __call() method, this is because queries require urlencoding. I'm open to a more elegant solution, but prefer to leave it this way to make it simple to use.
+ */
 abstract class Client
 {
     /**
@@ -630,10 +662,11 @@ abstract class Client
     protected function storeVersion()
     {
         $configVersion = $this->settings['version'];
-
         if ($configVersion != null) {
             $versions = $this->versions(['format' => 'json']);
+            // var_dump($this->verisons);
             foreach ($versions as $version) {
+                var_dump($version);
                 if ($version['version'] == $configVersion) {
                     $this->storage->put('version', $version);
                 }
@@ -687,12 +720,9 @@ abstract class Client
             $parameters['body'] = $this->formatBody($options);
         }
 
-        $request = $this->client->createRequest($method, $pURL, $parameters);
-
         try {
-            $response = $this->client->send($request);
-
-            $this->event->fire('forrest.response', [$request, $response]);
+            $response = $this->client->request($method, $pURL, $parameters);
+            $this->event->fire('forrest.response', [$response]);
 
             return $this->responseFormat($response, $format);
         } catch (RequestException $e) {
@@ -800,12 +830,19 @@ abstract class Client
     private function responseFormat($response, $format)
     {
         if ($format == 'json') {
-            return $response->json();
+            $responseJSON = $response->getBody();
+            $decodedJSON = json_decode($responseJSON, true);
+
+            return $decodedJSON;
         } elseif ($format == 'xml') {
-            return $response->xml();
+            $body = $response->getBody();
+            $contents = (string) $body;
+            $decodedXML = simplexml_load_string($contents);
+
+            return $decodedXML;
         }
 
-        return $response;
+        return $response->getBody();
     }
 
     /**
