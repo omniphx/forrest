@@ -94,7 +94,6 @@ class WebServer extends Client implements WebServerInterface
 
         // Store resources into the storage.
         $this->storeResources();
-
     }
 
     /**
