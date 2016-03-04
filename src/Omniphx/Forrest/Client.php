@@ -13,7 +13,8 @@ use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 
 /**
- * API resources
+ * API resources.
+ *
  * @method ClientInterface chatter(array $options = [])
  * @method ClientInterface tabs(array $options = [])
  * @method ClientInterface appMenu(array $options = [])
@@ -38,12 +39,11 @@ use Omniphx\Forrest\Interfaces\StorageInterface;
  * @method ClientInterface sobjects(array $options = [])
  * @method ClientInterface actions(array $options = [])
  * @method ClientInterface support(array $options = [])
- * 
+ *
  * Note: Not all methods are available to certain orgs/licenses
  *
  * search() and query() are not overloaded with the __call() method, this is because queries require urlencoding. I'm open to a more elegant solution, but prefer to leave it this way to make it simple to use.
  */
-
 abstract class Client
 {
     /**
@@ -832,12 +832,13 @@ abstract class Client
         if ($format == 'json') {
             $responseJSON = $response->getBody();
             $decodedJSON = json_decode($responseJSON, true);
-            return $decodedJSON;
 
+            return $decodedJSON;
         } elseif ($format == 'xml') {
             $body = $response->getBody();
-            $contents = (String)$body;
+            $contents = (string) $body;
             $decodedXML = simplexml_load_string($contents);
+
             return $decodedXML;
         }
 

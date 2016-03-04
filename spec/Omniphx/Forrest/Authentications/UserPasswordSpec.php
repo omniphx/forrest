@@ -3,8 +3,6 @@
 namespace spec\Omniphx\Forrest\Authentications;
 
 use GuzzleHttp\ClientInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -15,6 +13,8 @@ use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class UserPasswordSpec extends ObjectBehavior
 {
@@ -113,14 +113,14 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         StorageInterface $mockedStorage)
     {
-        $mockedClient->request("post","https://login.salesforce.com/services/oauth2/token",["form_params" => ["grant_type" => "password", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "username" => "user@email.com", "password" => "mypassword"]])->shouldBeCalled(1)->willReturn($mockedResponse);
+        $mockedClient->request('post', 'https://login.salesforce.com/services/oauth2/token', ['form_params' => ['grant_type' => 'password', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'username' => 'user@email.com', 'password' => 'mypassword']])->shouldBeCalled(1)->willReturn($mockedResponse);
 
-        $authenticationDecoded = json_decode($this->authenticationJSON,true);
+        $authenticationDecoded = json_decode($this->authenticationJSON, true);
 
         $mockedStorage->putTokenData(Argument::any())->shouldBeCalled(1);
 
         //Client->requestResource()
-        $mockedClient->request("get", "https://na00.salesforce.comresourceURLs", ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled(1)->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.comresourceURLs', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled(1)->willReturn($mockedResponse);
 
         //Client->responseFormat()
         // $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->versionJSON);
@@ -132,11 +132,11 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_refresh(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse,
         StorageInterface $mockedStorage)
     {
-        $mockedClient->request("post","https://login.salesforce.com/services/oauth2/token",["form_params" => ["grant_type" => "password", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "username" => "user@email.com", "password" => "mypassword"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('post', 'https://login.salesforce.com/services/oauth2/token', ['form_params' => ['grant_type' => 'password', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'username' => 'user@email.com', 'password' => 'mypassword']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->authenticationJSON);
         // $mockedResponse->json()->shouldBeCalled()->willReturn(['key' => 'value']);
@@ -153,12 +153,13 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
 
         //Forrest->Client->requestResource()
-        $mockedClient->request("get", "url", ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled(1)->willReturn($mockedResponse);
+        $mockedClient->request('get', 'url', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled(1)->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->responseJSON);
 
-        $this->request('url', ['key' => 'value'])->shouldReturn(["foo"=>"bar"]);
+        $this->request('url', ['key' => 'value'])->shouldReturn(['foo' => 'bar']);
     }
+
     public function it_should_refresh_the_token_if_token_expired_exception_is_thrown(
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest,
@@ -169,10 +170,10 @@ class UserPasswordSpec extends ObjectBehavior
         $requestException = new RequestException('Salesforce token has expired', $failedRequest, $failedResponse);
 
         //First request throws an exception
-        $mockedClient->request("get", "url", ["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled(1)->willThrow($requestException);
+        $mockedClient->request('get', 'url', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled(1)->willThrow($requestException);
 
         //Authenticates with refresh method
-        $mockedClient->request("post","https://login.salesforce.com/services/oauth2/token",["form_params" => ["grant_type" => "password", "client_id" => "testingClientId", "client_secret" => "testingClientSecret", "username" => "user@email.com", "password" => "mypassword"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('post', 'https://login.salesforce.com/services/oauth2/token', ['form_params' => ['grant_type' => 'password', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'username' => 'user@email.com', 'password' => 'mypassword']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->authenticationJSON);
 
@@ -189,21 +190,21 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("post","https://login.salesforce.com/services/oauth2/revoke",["headers" => ["content-type" => "application/x-www-form-urlencoded"], "form_params" => ["token" => "accessToken"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('post', 'https://login.salesforce.com/services/oauth2/revoke', ['headers' => ['content-type' => 'application/x-www-form-urlencoded'], 'form_params' => ['token' => 'accessToken']])->shouldBeCalled()->willReturn($mockedResponse);
         $this->revoke()->shouldReturn($mockedResponse);
     }
 
     /*
      *
      * Specs below are for the parent class.
-     * 
+     *
      */
 
     public function it_should_return_the_versions(
         ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->versionJSON);
 
@@ -219,7 +220,7 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.comresourceURLs",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.comresourceURLs', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -232,7 +233,7 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -248,7 +249,7 @@ class UserPasswordSpec extends ObjectBehavior
     ) {
         $mockedStorage->get('version')->shouldBeCalled()->willReturn(['url' => 'versionURL']);
 
-        $mockedClient->request("get","https://na00.salesforce.comversionURL/limits",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.comversionURL/limits', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -263,7 +264,7 @@ class UserPasswordSpec extends ObjectBehavior
         ResponseInterface $mockedResponse
     ) {
         $mockedStorage->get('version')->shouldBeCalled()->willReturn(['url' => 'versionURL']);
-        $mockedClient->request("get","https://na00.salesforce.comversionURL/sobjects",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.comversionURL/sobjects', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -273,10 +274,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_query(
-       ClientInterface $mockedClient, 
+       ClientInterface $mockedClient,
        ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/query?q=query",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/query?q=query', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -286,10 +287,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_query_next(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.comnext",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.comnext', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -299,10 +300,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_queryExplain(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/query?explain=queryExplain",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/query?explain=queryExplain', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -312,10 +313,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_queryAll(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/queryAll?q=queryAll",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/queryAll?q=queryAll', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -325,10 +326,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_quickActions(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/quickActions",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/quickActions', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -338,10 +339,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_search(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/search?q=search",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/search?q=search', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -351,10 +352,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_ScopeOrder(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/search/scopeOrder",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/search/scopeOrder', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -364,10 +365,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_searchLayouts(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/search/layout/?q=objectList",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/search/layout/?q=objectList', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -377,10 +378,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_suggestedArticles(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/search/suggestTitleMatches?q=suggestedArticles",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/search/suggestTitleMatches?q=suggestedArticles', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -390,10 +391,10 @@ class UserPasswordSpec extends ObjectBehavior
     }
 
     public function it_should_return_suggestedQueries(
-        ClientInterface $mockedClient, 
+        ClientInterface $mockedClient,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","https://na00.salesforce.com/services/data/v30.0/search/suggestSearchQueries?q=suggested",["headers" => ["Authorization" => "Oauth accessToken", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'https://na00.salesforce.com/services/data/v30.0/search/suggestSearchQueries?q=suggested', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -407,13 +408,13 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         RequestInterface $mockedRequest
     ) {
-        $mockedClient->request("get",
-            "https://na00.salesforce.com/services/apexrest/FieldCase?foo=bar", [
-                "headers" => [
-                    "Authorization" => "Oauth accessToken",
-                    "Accept" => "application/json",
-                    "Content-Type" => "application/json"
-                ]])->willReturn($mockedResponse);
+        $mockedClient->request('get',
+            'https://na00.salesforce.com/services/apexrest/FieldCase?foo=bar', [
+                'headers' => [
+                    'Authorization' => 'Oauth accessToken',
+                    'Accept'        => 'application/json',
+                    'Content-Type'  => 'application/json',
+                ], ])->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -429,7 +430,7 @@ class UserPasswordSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","uri",["headers" => ["Authorization" => "bearer abc", "Accept" => "application/json", "Content-Type" => "application/json"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'uri', ['headers' => ['Authorization' => 'bearer abc', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
@@ -438,7 +439,7 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedStorage->getTokenData()->willReturn([
             'access_token' => 'abc',
             'instance_url' => 'def',
-            'token_type'   => 'bearer']);
+            'token_type'   => 'bearer', ]);
 
         $this->request('uri', [])->shouldReturn($responseJSON);
     }
@@ -449,7 +450,7 @@ class UserPasswordSpec extends ObjectBehavior
         RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse)
     {
-        $mockedClient->request("get","uri",["headers" => ["Authorization" => "bearer abc", "Accept" => "application/xml", "Content-Type" => "application/xml"]])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedClient->request('get', 'uri', ['headers' => ['Authorization' => 'bearer abc', 'Accept' => 'application/xml', 'Content-Type' => 'application/xml']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseXML);
 

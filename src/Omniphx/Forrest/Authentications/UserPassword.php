@@ -34,8 +34,8 @@ class UserPassword extends Client implements UserPasswordInterface
             'username'      => $this->credentials['username'],
             'password'      => $this->credentials['password'],
         ];
-        
-        $response = $this->client->request('post',$tokenURL,$parameters);
+
+        $response = $this->client->request('post', $tokenURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = json_decode($response->getBody(), true);
@@ -64,7 +64,7 @@ class UserPassword extends Client implements UserPasswordInterface
             'password'      => $this->credentials['password'],
         ];
 
-        $response = $this->client->request('post',$tokenURL,$parameters);
+        $response = $this->client->request('post', $tokenURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = json_decode($response->getBody(), true);
