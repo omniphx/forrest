@@ -73,7 +73,7 @@ class WebServer extends Client implements WebServerInterface
 
         $tokenURL = $loginURL.'/services/oauth2/token';
 
-        $response = $this->client->request('post', $tokenURL, [
+        $jsonResponse = $this->client->request('post', $tokenURL, [
             'form_params' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
@@ -84,12 +84,13 @@ class WebServer extends Client implements WebServerInterface
         ]);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
-        $jsonResponse = json_decode($response->getBody(), true);
+        $response = json_decode($jsonResponse->getBody(), true);
+        $this->handleAuthenticationErrors($response);
 
         // Encrypt token and store token in storage.
-        $this->storage->putTokenData($jsonResponse);
-        if (isset($jsonResponse['refresh_token'])) {
-            $this->storage->putRefreshToken($jsonResponse['refresh_token']);
+        $this->storage->putTokenData($response);
+        if (isset($response['refresh_token'])) {
+            $this->storage->putRefreshToken($response['refresh_token']);
         }
 
         // Store resources into the storage.
