@@ -733,8 +733,11 @@ abstract class Client
         return '';
     }
 
-    protected function handleAuthenticationErrors(array $response) {
-        if(isset($response['error'])) throw new InvalidLoginCreditialsException($response['error_description']);
+    protected function handleAuthenticationErrors(array $response)
+    {
+        if (isset($response['error'])) {
+            throw new InvalidLoginCreditialsException($response['error_description']);
+        }
     }
 
     /**
