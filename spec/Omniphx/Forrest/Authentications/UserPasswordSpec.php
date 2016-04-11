@@ -113,20 +113,11 @@ class UserPasswordSpec extends ObjectBehavior
         ClientInterface $mockedClient,
         StorageInterface $mockedStorage)
     {
-        $mockedClient->request('post', 'https://login.salesforce.com/services/oauth2/token', ['form_params' => ['grant_type' => 'password', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'username' => 'user@email.com', 'password' => 'mypassword']])->shouldBeCalled(1)->willReturn($mockedResponse);
+        $mockedClient->request('post', 'url/services/oauth2/token', ['form_params' => ['grant_type' => 'password', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'username' => 'user@email.com', 'password' => 'mypassword']])->shouldBeCalled(1)->willReturn($mockedResponse);
 
-        $authenticationDecoded = json_decode($this->authenticationJSON, true);
-
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->authenticationJSON);
         $mockedStorage->putTokenData(Argument::any())->shouldBeCalled(1);
-
-        //Client->requestResource()
         $mockedClient->request('get', 'https://na00.salesforce.comresourceURLs', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled(1)->willReturn($mockedResponse);
-
-        //Client->responseFormat()
-        // $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->versionJSON);
-        // $mockedClient->send(Argument::any())->shouldBeCalled(1)->willReturn($versionResponse);
-
-        // $versionResponse->json()->shouldBeCalled()->willReturn([['version' => '30.0'], ['version' => '31.0']]);
 
         $this->authenticate('url')->shouldReturn(null);
     }
@@ -139,8 +130,6 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedClient->request('post', 'https://login.salesforce.com/services/oauth2/token', ['form_params' => ['grant_type' => 'password', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'username' => 'user@email.com', 'password' => 'mypassword']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->authenticationJSON);
-        // $mockedResponse->json()->shouldBeCalled()->willReturn(['key' => 'value']);
-        // $mockedStorage->putTokenData(Argument::type('array'))->shouldBeCalled();
 
         $this->refresh()->shouldReturn(null);
     }
@@ -152,7 +141,6 @@ class UserPasswordSpec extends ObjectBehavior
     ) {
         $mockedClient->send($mockedRequest)->willReturn($mockedResponse);
 
-        //Forrest->Client->requestResource()
         $mockedClient->request('get', 'url', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled(1)->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->responseJSON);

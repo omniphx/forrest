@@ -5,6 +5,7 @@ namespace Omniphx\Forrest;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Message\ResponseInterface;
+use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EventInterface;
@@ -730,6 +731,13 @@ abstract class Client
         }
 
         return '';
+    }
+
+    protected function handleAuthenticationErrors(array $response)
+    {
+        if (isset($response['error'])) {
+            throw new InvalidLoginCreditialsException($response['error_description']);
+        }
     }
 
     /**
