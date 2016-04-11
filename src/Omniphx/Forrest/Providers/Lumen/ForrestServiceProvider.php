@@ -61,8 +61,7 @@ class ForrestServiceProvider extends ServiceProvider
             //Class namespace:
             $forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
 
-            return new $forrest($client, $storage, $redirect, $input, $event, $settings);
-
+            return new $forrest($client, $event, $input, $redirect, $storage, $settings);
         });
     }
 

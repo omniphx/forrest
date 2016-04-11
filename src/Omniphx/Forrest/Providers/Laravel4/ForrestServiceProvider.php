@@ -48,10 +48,10 @@ class ForrestServiceProvider extends ServiceProvider
             $input = new \Omniphx\Forrest\Providers\Laravel4\LaravelInput();
             $event = new \Omniphx\Forrest\Providers\Laravel4\LaravelEvent();
 
-            $authentication = '\\Omniphx\\Forrest\\Authentications\\';
-            $authentication .= $settings['authentication'];
+            $forrest = '\\Omniphx\\Forrest\\Authentications\\';
+            $forrest .= $settings['authentication'];
 
-            return new $authentication($client, $storage, $redirect, $input, $event, $settings);
+            return new $forrest($client, $event, $input, $redirect, $storage, $settings);
         });
     }
 
