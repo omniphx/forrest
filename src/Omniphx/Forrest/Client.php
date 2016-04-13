@@ -665,9 +665,7 @@ abstract class Client
         $configVersion = $this->settings['version'];
         if ($configVersion != null) {
             $versions = $this->versions(['format' => 'json']);
-            // var_dump($this->verisons);
             foreach ($versions as $version) {
-                var_dump($version);
                 if ($version['version'] == $configVersion) {
                     $this->storage->put('version', $version);
                 }
