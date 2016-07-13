@@ -2,7 +2,13 @@
 
 namespace Omniphx\Forrest\Providers\Lumen;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
+use Omniphx\Forrest\Providers\Laravel\LaravelCache;
+use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
+use Omniphx\Forrest\Providers\Laravel\LaravelInput;
+use Omniphx\Forrest\Providers\Laravel\LaravelRedirect;
+use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 
 class ForrestServiceProvider extends ServiceProvider
 {
@@ -23,12 +29,6 @@ class ForrestServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../../../config/config.php' => $this->configPath(),
         ]);
-
-        $authentication = config('forrest.authentication');
-
-        if (!is_null($authentication)) {
-            include __DIR__."/Routes/$authentication.php";
-        }
     }
 
     /**
@@ -42,20 +42,20 @@ class ForrestServiceProvider extends ServiceProvider
 
             //Config options:
             $settings = config('forrest');
-            $authenticationType = config('forrest.authentication');
             $storageType = config('forrest.storage.type');
+            $authenticationType = config('forrest.authentication');
 
             //Dependencies:
-            $client = new \GuzzleHttp\Client();
-            $input = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
-            $event = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
-            $redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
+            $client = new Client();
+            $input = new LaravelInput();
+            $event = new LaravelEvent();
+            $redirect = new LaravelRedirect();
 
             //Determine storage dependency:
             if ($storageType == 'cache') {
-                $storage = new \Omniphx\Forrest\Providers\Laravel\LaravelCache(app('config'), app('cache'));
+                $storage = new LaravelCache(app('config'), app('cache'));
             } else {
-                $storage = new \Omniphx\Forrest\Providers\Laravel\LaravelSession(app('config'), app('session'));
+                $storage = new LaravelSession(app('config'), app('session'));
             }
 
             //Class namespace:

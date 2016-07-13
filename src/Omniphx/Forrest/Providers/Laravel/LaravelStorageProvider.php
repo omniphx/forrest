@@ -2,7 +2,8 @@
 
 namespace Omniphx\Forrest\Providers\Laravel;
 
-use Crypt;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Crypt;
 use Omniphx\Forrest\Exceptions\MissingRefreshTokenException;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
 use Omniphx\Forrest\Interfaces\StorageInterface;
@@ -36,7 +37,7 @@ abstract class LaravelStorageProvider implements StorageInterface
             return Crypt::decrypt($token);
         }
 
-        throw new MissingTokenException(sprintf('No token available in \''.\Config::get('forrest.storage.type').'\' storage'));
+        throw new MissingTokenException(sprintf('No token available in \''.Config::get('forrest.storage.type').'\' storage'));
     }
 
     /**
