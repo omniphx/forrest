@@ -20,11 +20,11 @@ class ForrestServiceProvider extends ServiceProvider
     protected $defer = false;
 
     /**
-     * Register the service provider.
+     * Bootstrap the application events.
      *
      * @return void
      */
-    public function register()
+    public function boot()
     {
         $this->publishes([
             __DIR__.'/../../../../config/config.php' => $this->configPath(),
@@ -32,11 +32,11 @@ class ForrestServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap the application events.
+     * Register the service provider.
      *
      * @return void
      */
-    public function boot()
+    public function register()
     {
         $this->app->singleton('forrest', function ($app) {
 
