@@ -2,7 +2,13 @@
 
 namespace Omniphx\Forrest\Providers\Laravel;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
+use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
+use Omniphx\Forrest\Providers\Laravel\LaravelInput;
+use Omniphx\Forrest\Providers\Laravel\LaravelRedirect;
+use Omniphx\Forrest\Providers\Laravel\LaravelCache;
+use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 
 class ForrestServiceProvider extends ServiceProvider
 {
@@ -14,11 +20,11 @@ class ForrestServiceProvider extends ServiceProvider
     protected $defer = false;
 
     /**
-     * Bootstrap the application events.
+     * Register the service provider.
      *
      * @return void
      */
-    public function boot()
+    public function register()
     {
         $this->publishes([
             __DIR__.'/../../../../config/config.php' => config_path('forrest.php'),
@@ -26,37 +32,36 @@ class ForrestServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the service provider.
+     * Bootstrap the application events.
      *
      * @return void
      */
-    public function register()
+    public function boot()
     {
         $this->app->singleton('forrest', function ($app) {
 
             //Config options:
-            $settings = config('forrest');
+            $settings           = config('forrest');
+            $storageType        = config('forrest.storage.type');
             $authenticationType = config('forrest.authentication');
-            $storageType = config('forrest.storage.type');
 
             //Dependencies:
-            $client = new \GuzzleHttp\Client(['http_errors' => false]);
-            $input = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
-            $event = new \Omniphx\Forrest\Providers\Laravel\LaravelEvent();
-            $redirect = new \Omniphx\Forrest\Providers\Laravel\LaravelRedirect();
+            $client   = new Client(['http_errors' => false]);
+            $input    = new LaravelInput();
+            $event    = new LaravelEvent();
+            $redirect = new LaravelRedirect();
 
             //Determine storage dependency:
             if ($storageType == 'cache') {
-                $storage = new \Omniphx\Forrest\Providers\Laravel\LaravelCache(app('config'), app('cache'));
+                $storage = new LaravelCache(app('config'), app('cache'));
             } else {
-                $storage = new \Omniphx\Forrest\Providers\Laravel\LaravelSession(app('config'), app('session'));
+                $storage = new LaravelSession(app('config'), app('session'));
             }
 
             //Class namespace:
             $forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
 
             return new $forrest($client, $event, $input, $redirect, $storage, $settings);
-
         });
     }
 
