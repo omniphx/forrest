@@ -29,16 +29,6 @@ class ForrestServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../../../config/config.php' => $this->configPath(),
         ]);
-
-        $this->checkForAuthentication();
-    }
-
-    protected function checkForAuthentication()
-    {
-        $authentication = config('forrest.authentication');
-        if (!empty($authentication)) {
-            require_once __DIR__ . "/Routes/{$authentication}.php";
-        }
     }
 
     /**
