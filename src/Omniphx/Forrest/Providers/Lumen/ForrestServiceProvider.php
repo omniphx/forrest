@@ -5,9 +5,9 @@ namespace Omniphx\Forrest\Providers\Lumen;
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
 use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
+use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelInput;
 use Omniphx\Forrest\Providers\Laravel\LaravelRedirect;
-use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 
 class ForrestServiceProvider extends ServiceProvider
@@ -41,14 +41,14 @@ class ForrestServiceProvider extends ServiceProvider
         $this->app->singleton('forrest', function ($app) {
 
             //Config options:
-            $settings           = config('forrest');
-            $storageType        = config('forrest.storage.type');
+            $settings = config('forrest');
+            $storageType = config('forrest.storage.type');
             $authenticationType = config('forrest.authentication');
 
             //Dependencies:
-            $client   = new Client();
-            $input    = new LaravelInput();
-            $event    = new LaravelEvent();
+            $client = new Client();
+            $input = new LaravelInput();
+            $event = new LaravelEvent();
             $redirect = new LaravelRedirect();
 
             //Determine storage dependency:
