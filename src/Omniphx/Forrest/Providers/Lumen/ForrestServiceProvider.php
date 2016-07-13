@@ -4,8 +4,8 @@ namespace Omniphx\Forrest\Providers\Lumen;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
-use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
+use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
 use Omniphx\Forrest\Providers\Laravel\LaravelInput;
 use Omniphx\Forrest\Providers\Laravel\LaravelRedirect;
 use Omniphx\Forrest\Providers\Laravel\LaravelSession;
