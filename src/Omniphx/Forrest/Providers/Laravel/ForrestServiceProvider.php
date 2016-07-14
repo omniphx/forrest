@@ -16,7 +16,7 @@ class ForrestServiceProvider extends BaseServiceProvider
     /**
      * Returns the location of the package config file.
      *
-     * @return String file location
+     * @return string file location
      */
     protected function getConfigPath()
     {

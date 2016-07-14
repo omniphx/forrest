@@ -79,4 +79,11 @@ abstract class BaseServiceProvider extends ServiceProvider
             return new $forrest($client, $event, $input, $redirect, $storage, $settings);
         });
     }
+
+    /**
+     * Returns the location of the package config file.
+     *
+     * @return string file location
+     */
+    abstract protected function getConfigPath();
 }
