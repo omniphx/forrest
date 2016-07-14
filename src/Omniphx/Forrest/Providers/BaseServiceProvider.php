@@ -27,6 +27,13 @@ abstract class BaseServiceProvider extends ServiceProvider
     protected $defer = false;
 
     /**
+     * Returns the location of the package config file.
+     *
+     * @return string file location
+     */
+    abstract protected function getConfigPath();
+
+    /**
      * Bootstrap the application events.
      *
      * @return void
@@ -55,10 +62,7 @@ abstract class BaseServiceProvider extends ServiceProvider
             $authenticationType = config('forrest.authentication');
 
             // Determine showing HTTP errors
-            $http_errors = true;
-            if (!$this->is_laravel) {
-                $http_errors = false;
-            }
+            $http_errors = $this->is_laravel ? true : false;
 
             // Dependencies
             $client = new Client(['http_errors' => $http_errors]);
@@ -79,11 +83,4 @@ abstract class BaseServiceProvider extends ServiceProvider
             return new $forrest($client, $event, $input, $redirect, $storage, $settings);
         });
     }
-
-    /**
-     * Returns the location of the package config file.
-     *
-     * @return string file location
-     */
-    abstract protected function getConfigPath();
 }
