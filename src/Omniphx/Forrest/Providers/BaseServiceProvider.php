@@ -13,7 +13,7 @@ use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 abstract class BaseServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if the application is laravel/lumen
+     * Indicates if the application is laravel/lumen.
      *
      * @var bool
      */
