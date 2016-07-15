@@ -42,7 +42,7 @@ abstract class BaseServiceProvider extends ServiceProvider
     {
         if (method_exists($this, 'getConfigPath')) {
             $this->publishes([
-                __DIR__.'/../../../../config/config.php' => $this->getConfigPath(),
+                __DIR__.'/../../../config/config.php' => $this->getConfigPath(),
             ]);
         }
     }
