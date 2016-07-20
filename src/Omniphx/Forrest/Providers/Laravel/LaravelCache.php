@@ -10,6 +10,8 @@ class LaravelCache extends LaravelStorageProvider
 {
     public $minutes = 20;
 
+    protected $store_forever;
+
     public $path;
 
     protected $cache;
@@ -23,6 +25,8 @@ class LaravelCache extends LaravelStorageProvider
         if ($minutes = $config->get('forrest.storage.expire_in')) {
             $this->minutes = $minutes;
         }
+
+        $this->store_forever = $config->get('forrest.storage.store_forever');
     }
 
     /**
@@ -35,7 +39,11 @@ class LaravelCache extends LaravelStorageProvider
      */
     public function put($key, $value)
     {
-        return $this->cache->put($this->path.$key, $value, $this->minutes);
+        if ($this->store_forever) {
+            return $this->cache->forever($this->path.$key, $value);
+        } else {
+            return $this->cache->put($this->path.$key, $value, $this->minutes);
+        }
     }
 
     /**
