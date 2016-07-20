@@ -42,8 +42,7 @@ class LaravelCache extends LaravelStorageProvider implements StorageInterface
     {
         if ($this->store_forever) {
             return $this->cache->forever($this->path.$key, $value);
-        }
-        else {
+        } else {
             return $this->cache->put($this->path.$key, $value, $this->minutes);
         }
     }
