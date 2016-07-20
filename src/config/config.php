@@ -56,9 +56,9 @@ return [
      * Where do you want to store access tokens fetched from Salesforce
      */
     'storage'        => [
-        'type'      => 'session', // 'session' or 'cache' are the two options
-        'path'      => 'forrest_', // unique storage path to avoid collisions
-        'expire_in' => 60, // number of minutes to expire cache/session
+        'type'          => 'session', // 'session' or 'cache' are the two options
+        'path'          => 'forrest_', // unique storage path to avoid collisions
+        'expire_in'     => 60, // number of minutes to expire cache/session
         'store_forever' => false, // never expire cache/session
     ],
 
