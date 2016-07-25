@@ -28,9 +28,19 @@ class LaravelCacheSpec extends ObjectBehavior
         $this->get('test');
     }
 
+    public function it_should_allow_storing_cache_forever(FakeCacheStore $cache, Config $config)
+    {
+        $config->get(Argument::any())->shouldBeCalled()->willReturn(10);
+        $config->get('forrest.storage.store_forever')->shouldBeCalled()->willReturn(true);
+        $cache->forever(Argument::any(), Argument::any())->shouldBeCalled();
+
+        $this->put('test', 'value');
+    }
+
     public function it_should_allow_a_put(FakeCacheStore $cache, Config $config)
     {
         $config->get(Argument::any())->shouldBeCalled()->willReturn(10);
+        $config->get('forrest.storage.store_forever')->shouldBeCalled()->willReturn(false);
         $cache->put(Argument::any(), Argument::any(), Argument::type('integer'))->shouldBeCalled();
 
         $this->put('test', 'value');
@@ -55,6 +65,10 @@ class FakeCacheStore extends Cache
     }
 
     public function put($str)
+    {
+    }
+
+    public function forever($str)
     {
     }
 }
