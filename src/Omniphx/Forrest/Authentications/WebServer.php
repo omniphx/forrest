@@ -58,6 +58,16 @@ class WebServer extends Client implements WebServerInterface
     }
 
     /**
+     * @param StorageInterface $storage
+     * @return $this
+     */
+    public function setStorage(StorageInterface $storage)
+    {
+        $this->storage = $storage;
+        return $this;
+    }
+
+    /**
      * @param null $url
      * @param array $additionalParams
      * @return \Illuminate\Http\RedirectResponse
