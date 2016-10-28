@@ -1,5 +1,5 @@
 {
-    "name": "MEGApixel23/forrest",
+    "name": "omniphx/forrest",
     "description": "Salesforce / Force.com REST API Client for Laravel 5",
     "license":"MIT",
     "keywords":["salesforce", "laravel", "rest", "force.com", "force"],
