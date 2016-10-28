@@ -146,6 +146,14 @@ abstract class Client
         }
     }
 
+    public function requestPath($path, $options)
+    {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        return $this->request($url, $options);
+    }
+
     /**
      * GET method call using any custom path.
      *
@@ -615,11 +623,7 @@ abstract class Client
      */
     public function getTokenData()
     {
-        if (empty($this->tokenData)) {
-            $this->tokenData = (array) $this->storage->getTokenData();
-        }
-
-        return $this->tokenData;
+        return $this->storage->getTokenData();
     }
 
     /**
