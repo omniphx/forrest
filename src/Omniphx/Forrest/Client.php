@@ -154,6 +154,16 @@ abstract class Client
         return $this->request($url, $options);
     }
 
+    public function bulkResource($path, $options)
+    {
+        $token = $this->storage->getTokenData()['access_token'];
+        $options = array_merge_recursive($options, [
+            'headers' => ['X-SFDC-Session' => $token]
+        ]);
+
+        return $this->requestPath($path, $options);
+    }
+
     /**
      * GET method call using any custom path.
      *
@@ -718,6 +728,10 @@ abstract class Client
         $this->setHeaders($options);
 
         $parameters['headers'] = $this->headers;
+
+        if (isset($pOptions['headers'])) {
+            $parameters['headers'] = array_merge($parameters['headers'], $pOptions['headers']);
+        }
 
         if (isset($options['body'])) {
             $parameters['body'] = $this->formatBody($options);
