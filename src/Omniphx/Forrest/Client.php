@@ -156,12 +156,26 @@ abstract class Client
 
     public function bulkResource($path, $options)
     {
-        $token = $this->storage->getTokenData()['access_token'];
-        $options = array_merge_recursive($options, [
-            'headers' => ['X-SFDC-Session' => $token]
-        ]);
+        try {
+            $token = $this->storage->getTokenData()['access_token'];
+            $options = array_merge_recursive($options, [
+                'headers' => ['X-SFDC-Session' => $token]
+            ]);
 
-        return $this->requestPath($path, $options);
+            return $this->requestPath($path, $options);
+        } catch (SalesforceException $e) {
+            $responseBody = \GuzzleHttp\json_decode(
+                $e->getPrevious()->getResponseBodySummary($e->getPrevious()->getResponse())
+            );
+
+            // If token has expired refreshes it.
+            if (isset($responseBody->exceptionCode) && $responseBody->exceptionCode === 'InvalidSessionId') {
+                $this->refresh();
+                return $this->requestPath($path, $options);
+            }
+
+            throw $e;
+        }
     }
 
     /**
