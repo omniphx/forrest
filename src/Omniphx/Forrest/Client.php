@@ -751,7 +751,9 @@ abstract class Client
             $response = $this->client->request($method, $pURL, $parameters);
             $this->event->fire('forrest.response', [$response]);
 
-            return $this->responseFormat($response, $options['response_format'] ?? $format);
+            return $this->responseFormat(
+                $response, isset($options['response_format']) ? $options['response_format'] : $format
+            );
         } catch (RequestException $e) {
             $this->assignExceptions($e);
         }
