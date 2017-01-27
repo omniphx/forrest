@@ -4,7 +4,6 @@ namespace Omniphx\Forrest;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Message\ResponseInterface;
 use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
@@ -20,18 +19,15 @@ use Omniphx\Forrest\Interfaces\StorageInterface;
  * @method ClientInterface tabs(array $options = [])
  * @method ClientInterface appMenu(array $options = [])
  * @method ClientInterface quickActions(array $options = [])
- * @method ClientInterface queryAll(array $options = [])
  * @method ClientInterface commerce(array $options = [])
  * @method ClientInterface wave(array $options = [])
  * @method ClientInterface exchange-connect(array $options = [])
  * @method ClientInterface analytics(array $options = [])
- * @method ClientInterface identity(array $options = [])
  * @method ClientInterface composite(array $options = [])
  * @method ClientInterface theme(array $options = [])
  * @method ClientInterface nouns(array $options = [])
  * @method ClientInterface recent(array $options = [])
  * @method ClientInterface licensing(array $options = [])
- * @method ClientInterface limits(array $options = [])
  * @method ClientInterface async-queries(array $options = [])
  * @method ClientInterface emailConnect(array $options = [])
  * @method ClientInterface compactLayouts(array $options = [])
@@ -143,6 +139,38 @@ abstract class Client
             $this->refresh();
 
             return $this->requestResource($url, $options);
+        }
+    }
+
+    public function requestPath($path, $options)
+    {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        return $this->request($url, $options);
+    }
+
+    public function bulkResource($path, array $options = [])
+    {
+        try {
+            $token = $this->storage->getTokenData()['access_token'];
+            $options = array_merge_recursive($options, [
+                'headers' => ['X-SFDC-Session' => $token]
+            ]);
+
+            return $this->requestPath($path, $options);
+        } catch (SalesforceException $e) {
+            $responseBody = \GuzzleHttp\json_decode(
+                $e->getPrevious()->getResponseBodySummary($e->getPrevious()->getResponse())
+            );
+
+            // If token has expired refreshes it.
+            if (isset($responseBody->exceptionCode) && $responseBody->exceptionCode === 'InvalidSessionId') {
+                $this->refresh();
+                return $this->requestPath($path, $options);
+            }
+
+            throw $e;
         }
     }
 
@@ -615,11 +643,7 @@ abstract class Client
      */
     public function getTokenData()
     {
-        if (empty($this->tokenData)) {
-            $this->tokenData = (array) $this->storage->getTokenData();
-        }
-
-        return $this->tokenData;
+        return $this->storage->getTokenData();
     }
 
     /**
@@ -715,6 +739,10 @@ abstract class Client
 
         $parameters['headers'] = $this->headers;
 
+        if (isset($pOptions['headers'])) {
+            $parameters['headers'] = array_merge($parameters['headers'], $pOptions['headers']);
+        }
+
         if (isset($options['body'])) {
             $parameters['body'] = $this->formatBody($options);
         }
@@ -723,7 +751,9 @@ abstract class Client
             $response = $this->client->request($method, $pURL, $parameters);
             $this->event->fire('forrest.response', [$response]);
 
-            return $this->responseFormat($response, $format);
+            return $this->responseFormat(
+                $response, isset($options['response_format']) ? $options['response_format'] : $format
+            );
         } catch (RequestException $e) {
             $this->assignExceptions($e);
         }
@@ -769,15 +799,16 @@ abstract class Client
     {
         $format = $options['format'];
         $data = $options['body'];
-        $body = '';
 
         if ($format == 'json') {
-            $body = json_encode($data);
-        } elseif ($format == 'xml') {
-            $body = urlencode($data);
+            return json_encode($data);
         }
 
-        return $body;
+        if ($format == 'xml') {
+            return urlencode($data);
+        }
+
+        return $data;
     }
 
     /**
@@ -828,7 +859,7 @@ abstract class Client
     /**
      * Returns the response in the configured format.
      *
-     * @param ResponseInterface $response
+     * @param object $response
      * @param string            $format
      *
      * @return mixed $response

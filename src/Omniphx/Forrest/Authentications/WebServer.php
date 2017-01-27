@@ -62,6 +62,40 @@ class WebServer extends Client implements WebServerInterface
     }
 
     /**
+     * @param StorageInterface $storage
+     * @return $this
+     */
+    public function setStorage(StorageInterface $storage)
+    {
+        $this->storage = $storage;
+        return $this;
+    }
+
+    /**
+     * @param null $url
+     * @param array $additionalParams
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function authenticateWithState($url = null, $additionalParams = array())
+    {
+        $loginURL = $url === null ? $this->credentials['loginURL'] : $url;
+        $state = '&state=' . urlencode(
+                http_build_query(['loginUrl' => $loginURL, 'additionalParams' => $additionalParams])
+            );
+        $loginURL .= '/services/oauth2/authorize';
+        $loginURL .= '?response_type=code';
+        $loginURL .= '&client_id='.$this->credentials['consumerKey'];
+        $loginURL .= '&redirect_uri='.urlencode($this->credentials['callbackURI']);
+        $loginURL .= !empty($this->parameters['display']) ? '&display='.$this->parameters['display'] : '';
+        $loginURL .= $this->parameters['immediate'] ? '&immediate=true' : '';
+        $loginURL .= !empty($this->parameters['scope']) ? '&scope='.rawurlencode($this->parameters['scope']) : '';
+        $loginURL .= !empty($this->parameters['prompt']) ? '&prompt='.rawurlencode($this->parameters['prompt']) : '';
+        $loginURL .= $state;
+
+        return $this->redirect->to($loginURL);
+    }
+
+    /**
      * When settings up your callback route, you will need to call this method to
      * acquire an authorization token. This token will be used for the API requests.
      *
@@ -105,6 +139,52 @@ class WebServer extends Client implements WebServerInterface
 
         // Return settings
         return $stateOptions;
+    }
+
+    /**
+     * When settings up your callback route, you will need to call this method to
+     * acquire an authorization token. This token will be used for the API requests.
+     *
+     * @returns array
+     */
+    public function callbackWithState()
+    {
+        //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
+        $code = $this->input->get('code');
+        parse_str(urldecode($this->input->get('state')), $state);
+        $loginURL = $state['loginUrl'];
+        $this->storage->put('loginURL', $loginURL);
+        $additionalParams = isset($state['additionalParams']) ? $state['additionalParams'] : null;
+
+        $tokenURL = $loginURL.'/services/oauth2/token';
+
+        $jsonResponse = $this->client->request('post', $tokenURL, [
+            'form_params' => [
+                'code'          => $code,
+                'grant_type'    => 'authorization_code',
+                'client_id'     => $this->credentials['consumerKey'],
+                'client_secret' => $this->credentials['consumerSecret'],
+                'redirect_uri'  => $this->credentials['callbackURI'],
+            ],
+        ]);
+
+        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
+        $response = json_decode($jsonResponse->getBody(), true);
+        $this->handleAuthenticationErrors($response);
+
+        // Encrypt token and store token in storage.
+        $this->storage->putTokenData($response);
+        if (isset($response['refresh_token'])) {
+            $this->storage->putRefreshToken($response['refresh_token']);
+        }
+
+        // Store resources into the storage.
+        $this->storeResources();
+
+        return [
+            'additionalParams' => $additionalParams,
+            'tokenData' => $this->getTokenData()
+        ];
     }
 
     /**
