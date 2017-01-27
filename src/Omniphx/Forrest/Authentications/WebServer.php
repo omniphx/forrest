@@ -40,10 +40,14 @@ class WebServer extends Client implements WebServerInterface
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function authenticate($url = null)
+    public function authenticate($url = null, $stateOptions = [])
     {
+        
         $loginURL = $url === null ? $this->credentials['loginURL'] : $url;
-        $state = '&state='.urlencode($loginURL);
+        $stateOptions['loginUrl'] = $loginURL;
+
+        $state = '&state='.urlencode(json_encode($stateOptions));
+
         $loginURL .= '/services/oauth2/authorize';
         $loginURL .= '?response_type=code';
         $loginURL .= '&client_id='.$this->credentials['consumerKey'];
@@ -67,9 +71,12 @@ class WebServer extends Client implements WebServerInterface
     {
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
-        $state = $this->input->get('state');
-        $loginURL = urldecode($state);
+        $stateOptions = json_decode(urldecode($this->input->get('state')), true);
+        $loginURL = $stateOptions['loginUrl'];
         $this->storage->put('loginURL', $loginURL);
+
+        // Store user options so they can be used later
+        $this->storage->put('stateOptions', $stateOptions);
 
         $tokenURL = $loginURL.'/services/oauth2/token';
 
@@ -95,6 +102,9 @@ class WebServer extends Client implements WebServerInterface
 
         // Store resources into the storage.
         $this->storeResources();
+
+        // Return settings
+        return $stateOptions;
     }
 
     /**

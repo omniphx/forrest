@@ -129,7 +129,8 @@ class WebServerSpec extends ObjectBehavior
         StorageInterface $mockedStorage)
     {
         $mockedInput->get('code')->shouldBeCalled()->willReturn('callbackCode');
-        $mockedInput->get('state')->shouldBeCalled()->willReturn(urlencode('https://login.salesforce.com'));
+		$stateOptions = ['loginUrl' => 'https://login.salesforce.com'];
+        $mockedInput->get('state')->shouldBeCalled()->willReturn(urlencode(json_encode($stateOptions)));
 
         $mockedClient->request('post', 'https://login.salesforce.com/services/oauth2/token', ['form_params' => ['code' => 'callbackCode', 'grant_type' => 'authorization_code', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'redirect_uri' => 'callbackURL']])->shouldBeCalled()->willReturn($tokenResponse);
         $tokenResponse->getBody()->shouldBeCalled()->willReturn($this->authenticationJSON);
@@ -137,12 +138,13 @@ class WebServerSpec extends ObjectBehavior
         $mockedStorage->get('version')->willReturn(null);
         $mockedStorage->put('loginURL', 'https://login.salesforce.com')->shouldBeCalled();
         $mockedStorage->put('resources', ['foo' => 'bar'])->shouldBeCalled();
+		$mockedStorage->put('stateOptions', $stateOptions)->shouldBeCalled();
         $mockedStorage->putTokenData(['access_token' => '00Do0000000secret', 'instance_url' => 'https://na17.salesforce.com', 'id' => 'https://login.salesforce.com/id/00D', 'token_type' => 'Bearer', 'issued_at' => '1447000236011', 'signature' => 'secretsig', 'refresh_token' => 'refreshToken'])->shouldBeCalled();
         $mockedStorage->putRefreshToken('refreshToken')->shouldBeCalled();
 
         $storeResources->getBody()->shouldBeCalled()->willReturn($this->responseJSON);
 
-        $this->callback()->shouldReturn(null);
+        $this->callback()->shouldReturn($stateOptions);
     }
 
     public function it_should_refresh(
