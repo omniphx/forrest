@@ -3,20 +3,19 @@
 namespace Omniphx\Forrest\Providers\Laravel;
 
 use Illuminate\Config\Repository as Config;
-use Illuminate\Session\SessionManager as Session;
+use Illuminate\Http\Request;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 
 class LaravelSession extends LaravelStorageProvider
 {
     public $path;
 
-    protected $session;
+    protected $request;
 
-    public function __construct(Config $config, Session $session)
+    public function __construct(Config $config, Request $request)
     {
         $this->path = $config->get('forrest.storage.path');
-
-        $this->session = $session;
+        $this->request = $request;
     }
 
     /**
@@ -29,7 +28,7 @@ class LaravelSession extends LaravelStorageProvider
      */
     public function put($key, $value)
     {
-        return $this->session->put($this->path.$key, $value);
+        return $this->request->session()->put($this->path.$key, $value);
     }
 
     /**
@@ -41,8 +40,8 @@ class LaravelSession extends LaravelStorageProvider
      */
     public function get($key)
     {
-        if ($this->session->has($this->path.$key)) {
-            return $this->session->get($this->path.$key);
+        if ($this->has($key)) {
+            return $this->request->session()->get($this->path.$key);
         }
 
         throw new MissingKeyException(sprintf('No value for requested key: %s', $key));
@@ -57,6 +56,6 @@ class LaravelSession extends LaravelStorageProvider
      */
     public function has($key)
     {
-        return $this->session->has($this->path.$key);
+        return $this->request->session()->has($this->path.$key);
     }
 }
