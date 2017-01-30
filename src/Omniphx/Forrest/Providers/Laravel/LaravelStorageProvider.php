@@ -31,13 +31,13 @@ abstract class LaravelStorageProvider implements StorageInterface
      */
     public function getTokenData()
     {
-        if ($this->has('token')) {
-            $token = $this->get('token');
-
-            return Crypt::decrypt($token);
+        if(!$this->has('token')) {
+            throw new MissingTokenException(sprintf('No token available in \''.Config::get('forrest.storage.type').'\' storage'));
         }
 
-        throw new MissingTokenException(sprintf('No token available in \''.Config::get('forrest.storage.type').'\' storage'));
+        $token = $this->get('token');
+
+        return Crypt::decrypt($token);
     }
 
     /**
