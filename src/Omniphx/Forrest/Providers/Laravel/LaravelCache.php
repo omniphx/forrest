@@ -55,11 +55,11 @@ class LaravelCache extends LaravelStorageProvider
      */
     public function get($key)
     {
-        if ($this->cache->has($this->path.$key)) {
-            return $this->cache->get($this->path.$key);
+        if(!$this->cache->has($this->path.$key)) {
+            throw new MissingKeyException(sprintf('No value for requested key: %s', $key));
         }
 
-        throw new MissingKeyException(sprintf('No value for requested key: %s', $key));
+        return $this->cache->get($this->path.$key);
     }
 
     /**

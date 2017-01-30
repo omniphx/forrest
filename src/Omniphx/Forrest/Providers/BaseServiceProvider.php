@@ -57,8 +57,8 @@ abstract class BaseServiceProvider extends ServiceProvider
         $this->app->singleton('forrest', function ($app) {
 
             // Config options
-            $settings = config('forrest');
-            $storageType = config('forrest.storage.type');
+            $settings           = config('forrest');
+            $storageType        = config('forrest.storage.type');
             $authenticationType = config('forrest.authentication');
 
             // Determine showing HTTP errors
@@ -70,11 +70,15 @@ abstract class BaseServiceProvider extends ServiceProvider
             $event = new LaravelEvent();
             $redirect = new LaravelRedirect();
 
-            // Determine storage dependency
-            if ($storageType == 'cache') {
-                $storage = new LaravelCache(app('config'), app('cache'));
-            } else {
-                $storage = new LaravelSession(app('config'), app('session'));
+            switch ($storageType) {
+                case 'session':
+                    $storage = new LaravelSession(app('config'), app('request').sesion());
+                    break;
+                case 'cache':
+                    $storage = new LaravelCache(app('config'), app('cache'));
+                    break;
+                default:
+                    $storage = new LaravelSession(app('config'), app('request').session());
             }
 
             // Class namespace
