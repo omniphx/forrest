@@ -167,6 +167,67 @@ abstract class Client
         }
     }
 
+    private function formatRequest()
+    {
+        switch ($this->options['format']) {
+            case 'json':
+                return $this->handleRequest(new JSONFormatter());
+                break;
+
+            case 'xml':
+                return $this->handleRequest(new XMLFormatter());
+                break;
+
+            case 'urlencoded':
+                return $this->handleRequest(new URLEncodedFormatter());
+                break;
+
+            default:
+                return $this->handleRequest(new JSONFormat());
+                break;
+        }
+    }
+
+    private function handleRequest(RequestFormatterInterface $requestFormatter)
+    {
+        $this->headers = $requestFormatter->setHeaders();
+        $this->setAuthorizationHeaders();
+        $this->setCompression();
+
+        $this->parameters['headers'] = $this->headers;
+
+        if (isset($this->options['body']))
+            $this->parameters['body'] = $requestFormatter->setBody($this->options['body']);
+
+        try {
+            $response = $this->httpClient->request($this->options['method'], $this->url, $this->parameters);
+        } catch (RequestException $e) {
+            $this->assignExceptions($e);
+        }
+
+        $this->event->fire('forrest.response', [$response]);
+
+        return $requestFormatter->formatResponse($response);
+    }
+
+    private function setAuthorizationHeaders()
+    {
+        $authToken = $this->getTokenData();
+
+        $accessToken = $authToken['access_token'];
+        $tokenType   = $authToken['token_type'];
+
+        $this->headers['Authorization'] = "$tokenType $accessToken";
+    }
+
+    private function setCompression()
+    {
+        if (!$this->options['compression']) return;
+
+        $this->headers['Accept-Encoding']  = $this->options['compressionType'];
+        $this->headers['Content-Encoding'] = $this->options['compressionType'];
+    }
+
     /**
      * GET method call using any custom path.
      *
@@ -267,9 +328,8 @@ abstract class Client
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = $method;
-        if (!empty($requestBody)) {
+        if (!empty($requestBody))
             $options['body'] = $requestBody;
-        }
 
         return $this->request($url, $options);
     }
@@ -306,8 +366,7 @@ abstract class Client
      */
     public function resources($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('version')['url'];
+        $url = $this->getBaseUrl();
 
         $resources = $this->request($url, $options);
 
@@ -345,8 +404,7 @@ abstract class Client
      */
     public function limits($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('version')['url'];
+        $url = $this->getBaseUrl();
         $url .= '/limits';
 
         $limits = $this->request($url, $options);
@@ -363,8 +421,7 @@ abstract class Client
      */
     public function describe($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('version')['url'];
+        $url = $this->getBaseUrl();
         $url .= '/sobjects';
 
         $describe = $this->request($url, $options);
@@ -628,28 +685,36 @@ abstract class Client
     {
         $url = $this->getInstanceUrl();
         $url .= $this->storage->get('resources')[$name];
+        $url .= $this->appendURL($arguments);
 
-        $options = [];
-
-        if (isset($arguments[0])) {
-            if (is_string($arguments[0])) {
-                $url .= "/$arguments[0]";
-            } elseif (is_array($arguments[0])) {
-                foreach ($arguments[0] as $key => $value) {
-                    $options[$key] = $value;
-                }
-            }
-        }
-
-        if (isset($arguments[1])) {
-            if (is_array($arguments[1])) {
-                foreach ($arguments[1] as $key => $value) {
-                    $options[$key] = $value;
-                }
-            }
-        }
+        $options = $this->setOptions($arguments);
 
         return $this->request($url, $options);
+    }
+
+    private function appendURL($arguments) {
+        if (!isset($arguments[0])) return '';
+        if (!is_string($arguments[0])) return '';
+
+        return "/$arguments[0]";
+    }
+
+    private function setOptions($arguments) {
+        $options = [];
+        if (empty($arguments)) return $options;
+
+        $this->setArgument($arguments[0], $options);
+        $this->setArgument($arguments[1], $options);
+
+        return $options;
+    }
+
+    private function setArgument($argument, $options) {
+        if (!isset($argument)) return;
+        if (!is_array($argument)) return;
+        foreach ($argument as $key => $value) {
+            $options[$key] = $value;
+        }
     }
 
     /**
@@ -687,9 +752,19 @@ abstract class Client
      */
     protected function getInstanceUrl()
     {
-        if (empty($url)) return $this->getTokenData()['instance_url'];
+        $url = $this->settings['instanceURL'];
+        if (empty($url))
+            $url = $this->getTokenData()['instance_url'];
 
-        return $this->settings['instanceURL'];
+        return $url;
+    }
+
+    protected function getBaseUrl()
+    {
+        $url = $this->getInstanceUrl();
+        $url .= $this->storage->get('version')['url'];
+
+        return $url;
     }
 
     /**
@@ -747,75 +822,6 @@ abstract class Client
 
         $resources = $this->resources(['format' => 'json']);
         $this->storage->put('resources', $resources);
-    }
-
-    /**
-     * Method returns the response for the requested resource.
-     *
-     * @param string $url
-     * @param array  $pOptions
-     *
-     * @return mixed
-     */
-    protected function formatRequest()
-    {
-        switch ($this->options['format']) {
-            case 'json':
-                return $this->handleRequest(new JSONFormatter());
-                break;
-
-            case 'xml':
-                return $this->handleRequest(new XMLFormatter());
-                break;
-
-            case 'urlencoded':
-                return $this->handleRequest(new URLEncodedFormatter());
-                break;
-
-            default:
-                return $this->handleRequest(new JSONFormat());
-                break;
-        }
-    }
-
-    private function handleRequest(RequestFormatterInterface $requestFormatter)
-    {
-        $this->headers = $requestFormatter->setHeaders();
-        $this->setAuthorizationHeaders();
-        $this->setCompression();
-
-        $this->parameters['headers'] = $this->headers;
-
-        if (isset($this->options['body']))
-            $this->parameters['body'] = $requestFormatter->setBody($this->options['body']);
-
-        try {
-            $response = $this->httpClient->request($this->options['method'], $this->url, $this->parameters);
-        } catch (RequestException $e) {
-            $this->assignExceptions($e);
-        }
-
-        $this->event->fire('forrest.response', [$response]);
-
-        return $requestFormatter->formatResponse($response);
-    }
-
-    private function setAuthorizationHeaders()
-    {
-        $authToken = $this->getTokenData();
-
-        $accessToken = $authToken['access_token'];
-        $tokenType   = $authToken['token_type'];
-
-        $this->headers['Authorization'] = "$tokenType $accessToken";
-    }
-
-    private function setCompression()
-    {
-        if (!$this->options['compression']) return;
-
-        $this->headers['Accept-Encoding']  = $this->options['compressionType'];
-        $this->headers['Content-Encoding'] = $this->options['compressionType'];
     }
 
     protected function handleAuthenticationErrors(array $response)
