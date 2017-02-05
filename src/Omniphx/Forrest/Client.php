@@ -703,16 +703,16 @@ abstract class Client
     protected function storeVersion()
     {
         $versions = $this->versions();
-        $this->storeConfiguredVersion($verison);
+        $this->storeConfiguredVersion($versions);
 
-        if(isset($this->storage['version'])) return;
-        $this->storeLatestVersion($verisons);
+        if($this->storage->has('version')) return;
+        $this->storeLatestVersion($versions);
     }
 
     private function storeConfiguredVersion($versions)
     {
         $configVersion = $this->settings['version'];
-        if (!isset($configVersion)) return;
+        if (empty($configVersion)) return;
         
         foreach($versions as $version)
             $this->determineIfConfigVersionExists($version['version'], $configVersion);
@@ -724,7 +724,7 @@ abstract class Client
         $this->storage->put('version', $version);
     }
 
-    private function storeLatestVersion($verisons)
+    private function storeLatestVersion($versions)
     {
         $latestVersion = end($versions);
         $this->storage->put('version', $latestVersion);
