@@ -4,7 +4,7 @@ namespace Omniphx\Forrest\RequestFormatters;
 
 use Omniphx\Forrest\Interfaces\RequestFormatterInterface;
 
-private class XMLFormatter implements RequestFormatterInterface
+class XMLFormatter implements RequestFormatterInterface
 {
     public function setHeaders()
     {

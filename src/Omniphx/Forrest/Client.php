@@ -56,7 +56,7 @@ abstract class Client
      *
      * @var ClientInterface
      */
-    protected $client;
+    protected $httpClient;
 
     /**
      * Event emitter.
@@ -129,14 +129,14 @@ abstract class Client
     private $parameters;
 
     public function __construct(
-        ClientInterface $client,
+        ClientInterface $httpClient,
         EventInterface $event,
         InputInterface $input,
         RedirectInterface $redirect,
         StorageInterface $storage,
         $settings
     ) {
-        $this->client = $client;
+        $this->httpClient = $httpClient;
         $this->storage = $storage;
         $this->redirect = $redirect;
         $this->input = $input;
@@ -156,7 +156,7 @@ abstract class Client
     public function request($url, $options)
     {
         $this->url = $url;
-        $this->$options = array_replace_recursive($this->settings['defaults'], $options);
+        $this->options = array_replace_recursive($this->settings['defaults'], $options);
 
         try {
             return $this->formatRequest();
@@ -610,7 +610,7 @@ abstract class Client
      */
     public function getClient()
     {
-        return $this->client;
+        return $this->httpClient;
     }
 
     /**
@@ -761,52 +761,45 @@ abstract class Client
     {
         switch ($this->options['format']) {
             case 'json':
-                $this->handleRequest(new JSONFormatter());
+                return $this->handleRequest(new JSONFormatter());
                 break;
 
             case 'xml':
-                $this->handleRequest(new XMLFormatter());
+                return $this->handleRequest(new XMLFormatter());
                 break;
 
             case 'urlencoded':
-                $this->handleRequest(new URLEncodedFormatter());
+                return $this->handleRequest(new URLEncodedFormatter());
                 break;
 
             default:
-                $this->handleRequest(new JSONFormat());
+                return $this->handleRequest(new JSONFormat());
                 break;
         }
     }
 
-    private function handleRequest(FormatInterface $formatRequest)
+    private function handleRequest(RequestFormatterInterface $requestFormatter)
     {
-        $this->headers = $formatRequest->setHeaders();
+        $this->headers = $requestFormatter->setHeaders();
         $this->setAuthorizationHeaders();
         $this->setCompression();
 
         $this->parameters['headers'] = $this->headers;
 
-        if (!isset($this->options['body'])) return;
-        $this->parameters['body'] = $formatRequest->setBody();
+        if (isset($this->options['body']))
+            $this->parameters['body'] = $requestFormatter->setBody($this->options['body']);
 
         try {
-            $response = $this->client->request($this->options['method'], $this->url, $this->parameters);
+            $response = $this->httpClient->request($this->options['method'], $this->url, $this->parameters);
         } catch (RequestException $e) {
             $this->assignExceptions($e);
         }
 
         $this->event->fire('forrest.response', [$response]);
 
-        return $this->formatResponse($response);
+        return $requestFormatter->formatResponse($response);
     }
 
-    /**
-     * Set the headers for the request.
-     *
-     * @param array $options
-     *
-     * @return array $headers
-     */
     private function setAuthorizationHeaders()
     {
         $authToken = $this->getTokenData();
@@ -817,11 +810,12 @@ abstract class Client
         $this->headers['Authorization'] = "$tokenType $accessToken";
     }
 
-    private function setCompression($options)
+    private function setCompression()
     {
-        if ($this->options['compression'] !== false) return;
-        $this->headers['Accept-Encoding'] = $options['compressionType'];
-        $this->headers['Content-Encoding'] = $options['compressionType'];
+        if (!$this->options['compression']) return;
+
+        $this->headers['Accept-Encoding']  = $this->options['compressionType'];
+        $this->headers['Content-Encoding'] = $this->options['compressionType'];
     }
 
     protected function handleAuthenticationErrors(array $response)

@@ -4,7 +4,7 @@ namespace Omniphx\Forrest\RequestFormatters;
 
 use Omniphx\Forrest\Interfaces\RequestFormatterInterface;
 
-public class JSONFormatter implements RequestFormatterInterface
+class JSONFormatter implements RequestFormatterInterface
 {
     public function setHeaders()
     {

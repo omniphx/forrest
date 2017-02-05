@@ -4,7 +4,7 @@ namespace Omniphx\Forrest\RequestFormatters;
 
 use Omniphx\Forrest\Interfaces\RequestFormatterInterface;
 
-public class URLEncodedFormatter implements RequestFormatterInterface
+class URLEncodedFormatter implements RequestFormatterInterface
 {
     public function setHeaders()
     {
@@ -23,5 +23,4 @@ public class URLEncodedFormatter implements RequestFormatterInterface
     {
         return $response->getBody();
     }
-}
 }
