@@ -72,13 +72,13 @@ abstract class BaseServiceProvider extends ServiceProvider
 
             switch ($storageType) {
                 case 'session':
-                    $storage = new LaravelSession(app('config'), app('request').session());
+                    $storage = new LaravelSession(app('config'), app('request')->session());
                     break;
                 case 'cache':
                     $storage = new LaravelCache(app('config'), app('cache'));
                     break;
                 default:
-                    $storage = new LaravelSession(app('config'), app('request').session());
+                    $storage = new LaravelSession(app('config'), app('request')->session());
             }
 
             // Class namespace
