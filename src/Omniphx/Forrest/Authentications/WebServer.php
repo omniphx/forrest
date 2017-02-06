@@ -21,14 +21,14 @@ class WebServer extends Client implements WebServerInterface
     private $parameters;
 
     public function __construct(
-        ClientInterface $client,
+        ClientInterface $httpClient,
         EventInterface $event,
         InputInterface $input,
         RedirectInterface $redirect,
         StorageInterface $storage,
         $settings
     ) {
-        parent::__construct($client, $event, $input, $redirect, $storage, $settings);
+        parent::__construct($httpClient, $event, $input, $redirect, $storage, $settings);
         $this->parameters = $this->settings['parameters'];
     }
 
@@ -80,7 +80,7 @@ class WebServer extends Client implements WebServerInterface
 
         $tokenURL = $loginURL.'/services/oauth2/token';
 
-        $jsonResponse = $this->client->request('post', $tokenURL, [
+        $jsonResponse = $this->httpClient->request('post', $tokenURL, [
             'form_params' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
@@ -118,7 +118,7 @@ class WebServer extends Client implements WebServerInterface
         $tokenURL = $this->getLoginURL();
         $tokenURL .= '/services/oauth2/token';
 
-        $response = $this->client->request('post', $tokenURL, [
+        $response = $this->httpClient->request('post', $tokenURL, [
             'form_params'    => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',
@@ -148,7 +148,7 @@ class WebServer extends Client implements WebServerInterface
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['form_params']['token'] = $accessToken;
 
-        return $this->client->post($url, $options);
+        return $this->httpClient->post($url, $options);
     }
 
     /**

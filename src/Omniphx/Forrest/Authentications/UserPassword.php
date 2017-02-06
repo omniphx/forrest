@@ -13,14 +13,14 @@ use Omniphx\Forrest\Interfaces\UserPasswordInterface;
 class UserPassword extends Client implements UserPasswordInterface
 {
     public function __construct(
-        ClientInterface $client,
+        ClientInterface $httpClient,
         EventInterface $event,
         InputInterface $input,
         RedirectInterface $redirect,
         StorageInterface $storage,
         $settings
     ) {
-        parent::__construct($client, $event, $input, $redirect, $storage, $settings);
+        parent::__construct($httpClient, $event, $input, $redirect, $storage, $settings);
     }
 
     public function authenticate($url = null)
@@ -35,7 +35,7 @@ class UserPassword extends Client implements UserPasswordInterface
             'password'      => $this->credentials['password'],
         ];
 
-        $jsonResponse = $this->client->request('post', $loginURL, $parameters);
+        $jsonResponse = $this->httpClient->request('post', $loginURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $response = json_decode($jsonResponse->getBody(), true);
@@ -65,7 +65,7 @@ class UserPassword extends Client implements UserPasswordInterface
             'password'      => $this->credentials['password'],
         ];
 
-        $response = $this->client->request('post', $tokenURL, $parameters);
+        $response = $this->httpClient->request('post', $tokenURL, $parameters);
 
         // Response returns an json of access_token, instance_url, id, issued_at, and signature.
         $jsonResponse = json_decode($response->getBody(), true);
@@ -87,6 +87,6 @@ class UserPassword extends Client implements UserPasswordInterface
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['form_params']['token'] = $accessToken;
 
-        return $this->client->request('post', $url, $options);
+        return $this->httpClient->request('post', $url, $options);
     }
 }

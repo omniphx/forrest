@@ -11,7 +11,11 @@ use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
+use Omniphx\Forrest\Interfaces\RequestFormatterInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
+use Omniphx\Forrest\RequestFormatters\JSONFormatter;
+use Omniphx\Forrest\RequestFormatters\URLEncodedFormatter;
+use Omniphx\Forrest\RequestFormatters\XMLFormatter;
 
 /**
  * API resources.
@@ -52,7 +56,7 @@ abstract class Client
      *
      * @var ClientInterface
      */
-    protected $client;
+    protected $httpClient;
 
     /**
      * Event emitter.
@@ -104,21 +108,35 @@ abstract class Client
     protected $credentials;
 
     /**
+     * Request options.
+     *
+     * @var array
+     */
+    private $options;
+
+    /**
      * Request headers.
      *
      * @var array
      */
     private $headers;
 
+    /**
+     * Request parameters.
+     *
+     * @var array
+     */
+    private $parameters;
+
     public function __construct(
-        ClientInterface $client,
+        ClientInterface $httpClient,
         EventInterface $event,
         InputInterface $input,
         RedirectInterface $redirect,
         StorageInterface $storage,
         $settings
     ) {
-        $this->client = $client;
+        $this->httpClient = $httpClient;
         $this->storage = $storage;
         $this->redirect = $redirect;
         $this->input = $input;
@@ -137,13 +155,77 @@ abstract class Client
      */
     public function request($url, $options)
     {
+        $this->url = $url;
+        $this->options = array_replace_recursive($this->settings['defaults'], $options);
+
         try {
-            return $this->requestResource($url, $options);
+            return $this->formatRequest();
         } catch (TokenExpiredException $e) {
             $this->refresh();
 
-            return $this->requestResource($url, $options);
+            return $this->formatRequest();
         }
+    }
+
+    private function formatRequest()
+    {
+        switch ($this->options['format']) {
+            case 'json':
+                return $this->handleRequest(new JSONFormatter());
+                break;
+
+            case 'xml':
+                return $this->handleRequest(new XMLFormatter());
+                break;
+
+            case 'urlencoded':
+                return $this->handleRequest(new URLEncodedFormatter());
+                break;
+
+            default:
+                return $this->handleRequest(new JSONFormat());
+                break;
+        }
+    }
+
+    private function handleRequest(RequestFormatterInterface $requestFormatter)
+    {
+        $this->headers = $requestFormatter->setHeaders();
+        $this->setAuthorizationHeaders();
+        $this->setCompression();
+
+        $this->parameters['headers'] = $this->headers;
+
+        if (isset($this->options['body']))
+            $this->parameters['body'] = $requestFormatter->setBody($this->options['body']);
+
+        try {
+            $response = $this->httpClient->request($this->options['method'], $this->url, $this->parameters);
+        } catch (RequestException $e) {
+            $this->assignExceptions($e);
+        }
+
+        $this->event->fire('forrest.response', [$response]);
+
+        return $requestFormatter->formatResponse($response);
+    }
+
+    private function setAuthorizationHeaders()
+    {
+        $authToken = $this->getTokenData();
+
+        $accessToken = $authToken['access_token'];
+        $tokenType   = $authToken['token_type'];
+
+        $this->headers['Authorization'] = "$tokenType $accessToken";
+    }
+
+    private function setCompression()
+    {
+        if (!$this->options['compression']) return;
+
+        $this->headers['Accept-Encoding']  = $this->options['compressionType'];
+        $this->headers['Content-Encoding'] = $this->options['compressionType'];
     }
 
     /**
@@ -231,6 +313,28 @@ abstract class Client
     }
 
     /**
+     * Prepares options and sends the request.
+     *
+     * @param $path
+     * @param $requestBody
+     * @param $options
+     * @param $method
+     *
+     * @return mixed
+     */
+    private function sendRequest($path, $requestBody, $options, $method)
+    {
+        $url = $this->getInstanceUrl();
+        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
+
+        $options['method'] = $method;
+        if (!empty($requestBody))
+            $options['body'] = $requestBody;
+
+        return $this->request($url, $options);
+    }
+
+    /**
      * Request that returns all currently supported versions.
      * Includes the verison, label and link to each version's root.
      * Formats: json, xml
@@ -262,8 +366,7 @@ abstract class Client
      */
     public function resources($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('version')['url'];
+        $url = $this->getBaseUrl();
 
         $resources = $this->request($url, $options);
 
@@ -301,8 +404,7 @@ abstract class Client
      */
     public function limits($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('version')['url'];
+        $url = $this->getBaseUrl();
         $url .= '/limits';
 
         $limits = $this->request($url, $options);
@@ -319,8 +421,7 @@ abstract class Client
      */
     public function describe($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('version')['url'];
+        $url = $this->getBaseUrl();
         $url .= '/sobjects';
 
         $describe = $this->request($url, $options);
@@ -566,7 +667,7 @@ abstract class Client
      */
     public function getClient()
     {
-        return $this->client;
+        return $this->httpClient;
     }
 
     /**
@@ -584,28 +685,36 @@ abstract class Client
     {
         $url = $this->getInstanceUrl();
         $url .= $this->storage->get('resources')[$name];
+        $url .= $this->appendURL($arguments);
 
-        $options = [];
-
-        if (isset($arguments[0])) {
-            if (is_string($arguments[0])) {
-                $url .= "/$arguments[0]";
-            } elseif (is_array($arguments[0])) {
-                foreach ($arguments[0] as $key => $value) {
-                    $options[$key] = $value;
-                }
-            }
-        }
-
-        if (isset($arguments[1])) {
-            if (is_array($arguments[1])) {
-                foreach ($arguments[1] as $key => $value) {
-                    $options[$key] = $value;
-                }
-            }
-        }
+        $options = $this->setOptions($arguments);
 
         return $this->request($url, $options);
+    }
+
+    private function appendURL($arguments) {
+        if (!isset($arguments[0])) return '';
+        if (!is_string($arguments[0])) return '';
+
+        return "/$arguments[0]";
+    }
+
+    private function setOptions($arguments) {
+        $options = [];
+        if (empty($arguments)) return $options;
+
+        $this->setArgument($arguments[0], $options);
+        $this->setArgument($arguments[1], $options);
+
+        return $options;
+    }
+
+    private function setArgument($argument, $options) {
+        if (!isset($argument)) return;
+        if (!is_array($argument)) return;
+        foreach ($argument as $key => $value) {
+            $options[$key] = $value;
+        }
     }
 
     /**
@@ -644,10 +753,16 @@ abstract class Client
     protected function getInstanceUrl()
     {
         $url = $this->settings['instanceURL'];
-
-        if (empty($url)) {
+        if (empty($url))
             $url = $this->getTokenData()['instance_url'];
-        }
+
+        return $url;
+    }
+
+    protected function getBaseUrl()
+    {
+        $url = $this->getInstanceUrl();
+        $url .= $this->storage->get('version')['url'];
 
         return $url;
     }
@@ -662,19 +777,32 @@ abstract class Client
      */
     protected function storeVersion()
     {
+        $versions = $this->versions();
+        $this->storeConfiguredVersion($versions);
+
+        if($this->storage->has('version')) return;
+        $this->storeLatestVersion($versions);
+    }
+
+    private function storeConfiguredVersion($versions)
+    {
         $configVersion = $this->settings['version'];
-        if ($configVersion != null) {
-            $versions = $this->versions(['format' => 'json']);
-            foreach ($versions as $version) {
-                if ($version['version'] == $configVersion) {
-                    $this->storage->put('version', $version);
-                }
-            }
-        } else {
-            $versions = $this->versions(['format' => 'json']);
-            $latestVersion = end($versions);
-            $this->storage->put('version', $latestVersion);
-        }
+        if (empty($configVersion)) return;
+        
+        foreach($versions as $version)
+            $this->determineIfConfigVersionExists($version['version'], $configVersion);
+    }
+
+    private function determineIfConfiguredVersionExists($existingVersion, $configVersion)
+    {
+        if ($version['version'] !== $configVersion) return;
+        $this->storage->put('version', $version);
+    }
+
+    private function storeLatestVersion($versions)
+    {
+        $latestVersion = end($versions);
+        $this->storage->put('version', $latestVersion);
     }
 
     /**
@@ -696,159 +824,11 @@ abstract class Client
         $this->storage->put('resources', $resources);
     }
 
-    /**
-     * Method returns the response for the requested resource.
-     *
-     * @param string $pURL
-     * @param array  $pOptions
-     *
-     * @return mixed
-     */
-    protected function requestResource($pURL, array $pOptions)
-    {
-        $options = array_replace_recursive($this->settings['defaults'], $pOptions);
-
-        $format = $options['format'];
-        $method = $options['method'];
-
-        $this->setHeaders($options);
-
-        $parameters['headers'] = $this->headers;
-
-        if (isset($options['body'])) {
-            $parameters['body'] = $this->formatBody($options);
-        }
-
-        try {
-            $response = $this->client->request($method, $pURL, $parameters);
-            $this->event->fire('forrest.response', [$response]);
-
-            return $this->responseFormat($response, $format);
-        } catch (RequestException $e) {
-            $this->assignExceptions($e);
-        }
-
-        return '';
-    }
-
     protected function handleAuthenticationErrors(array $response)
     {
         if (isset($response['error'])) {
             throw new InvalidLoginCreditialsException($response['error_description']);
         }
-    }
-
-    /**
-     * Set the headers for the request.
-     *
-     * @param array $options
-     *
-     * @return array $headers
-     */
-    private function setHeaders(array $options)
-    {
-        $authToken = $this->getTokenData();
-
-        $accessToken = $authToken['access_token'];
-        $tokenType = $authToken['token_type'];
-
-        $this->headers['Authorization'] = "$tokenType $accessToken";
-
-        $this->setRequestFormat($options['format']);
-        $this->setCompression($options);
-    }
-
-    /**
-     * Format the body for the request.
-     *
-     * @param array $options
-     *
-     * @return array $body
-     */
-    private function formatBody(array $options)
-    {
-        $format = $options['format'];
-        $data = $options['body'];
-        $body = '';
-
-        if ($format == 'json') {
-            $body = json_encode($data);
-        } elseif ($format == 'xml') {
-            $body = urlencode($data);
-        }
-
-        return $body;
-    }
-
-    /**
-     * Prepares options and sends the request.
-     *
-     * @param $path
-     * @param $requestBody
-     * @param $options
-     * @param $method
-     *
-     * @return mixed
-     */
-    private function sendRequest($path, $requestBody, $options, $method)
-    {
-        $url = $this->getInstanceUrl();
-        $url .= '/'.trim($path, "/\t\n\r\0\x0B");
-
-        $options['method'] = $method;
-        if (!empty($requestBody)) {
-            $options['body'] = $requestBody;
-        }
-
-        return $this->request($url, $options);
-    }
-
-    private function setRequestFormat($format)
-    {
-        if ($format == 'json') {
-            $this->headers['Accept'] = 'application/json';
-            $this->headers['Content-Type'] = 'application/json';
-        } elseif ($format == 'xml') {
-            $this->headers['Accept'] = 'application/xml';
-            $this->headers['Content-Type'] = 'application/xml';
-        } elseif ($format == 'urlencoded') {
-            $this->headers['Accept'] = 'application/x-www-form-urlencoded';
-            $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        }
-    }
-
-    private function setCompression($options)
-    {
-        if ($options['compression'] == true) {
-            $this->headers['Accept-Encoding'] = $options['compressionType'];
-            $this->headers['Content-Encoding'] = $options['compressionType'];
-        }
-    }
-
-    /**
-     * Returns the response in the configured format.
-     *
-     * @param ResponseInterface $response
-     * @param string            $format
-     *
-     * @return mixed $response
-     */
-    private function responseFormat($response, $format)
-    {
-        if ($format == 'json') {
-            $responseJSON = $response->getBody();
-            $decodedJSON = json_decode($responseJSON, true);
-
-            return $decodedJSON;
-        } elseif ($format == 'xml') {
-            $body = $response->getBody();
-            $contents = (string) $body;
-            $decodedXML = simplexml_load_string($contents);
-
-            return $decodedXML;
-        }
-
-        return $response->getBody();
     }
 
     /**
