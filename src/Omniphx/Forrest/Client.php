@@ -788,12 +788,12 @@ abstract class Client
     {
         $configVersion = $this->settings['version'];
         if (empty($configVersion)) return;
-        
+
         foreach($versions as $version)
-            $this->determineIfConfigVersionExists($version['version'], $configVersion);
+            $this->determineIfConfiguredVersionExists($version, $configVersion);
     }
 
-    private function determineIfConfiguredVersionExists($existingVersion, $configVersion)
+    private function determineIfConfiguredVersionExists($version, $configVersion)
     {
         if ($version['version'] !== $configVersion) return;
         $this->storage->put('version', $version);
