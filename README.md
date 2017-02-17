@@ -26,19 +26,7 @@ If you are using Laravel, add the service provider and alias to your `config/app
 
 >For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
 
-### Lumen Installation 
-
-You should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application. 
-
-Then you'll utilize the Lumen service provider by registering it in the `bootstrap/app.php` file. 
-
-```
-$app->register(Omniphx\Forrest\Providers\Lumen\ForrestServiceProvider::class);
-$app->configure('forrest');
-```
-
-
-### Configuration
+### Laravel Configuration
 You will need a configuration file to add your credentials. Publish a config file using the `artisan` command:
 ```bash
 php artisan vendor:publish
@@ -46,6 +34,18 @@ php artisan vendor:publish
 You can find the config file in: `config/forrest.php`
 
 >For Laravel 4, run `php artisan config:publish omniphx/forrest`. It will be found in `app/config/omniphx/forrest/config.php`
+
+### Lumen Installation
+
+You should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
+
+Then you'll utilize the Lumen service provider by registering it in the `bootstrap/app.php` file.
+
+```
+class_alias('Omniphx\Forrest\Providers\Laravel\Facades\Forrest', 'Forrest');
+$app->register(Omniphx\Forrest\Providers\Lumen\ForrestServiceProvider::class);
+$app->configure('forrest');
+```
 
 ## Getting Started
 ### Setting up a Connected App
