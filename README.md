@@ -47,6 +47,8 @@ Then you'll utilize the Lumen service provider by registering it in the `bootstr
 class_alias('Omniphx\Forrest\Providers\Laravel\Facades\Forrest', 'Forrest');
 $app->register(Omniphx\Forrest\Providers\Lumen\ForrestServiceProvider::class);
 $app->configure('forrest');
+$app->withFacades();
+
 ```
 
 ## Getting Started
