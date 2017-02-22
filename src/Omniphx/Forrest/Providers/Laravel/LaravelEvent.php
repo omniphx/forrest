@@ -2,7 +2,7 @@
 
 namespace Omniphx\Forrest\Providers\Laravel;
 
-use Event;
+use Illuminate\Support\Facades\Event;
 use Omniphx\Forrest\Interfaces\EventInterface;
 
 class LaravelEvent implements EventInterface
