@@ -41,9 +41,11 @@ abstract class BaseServiceProvider extends ServiceProvider
     public function boot()
     {
         if (method_exists($this, 'getConfigPath')) {
-            $this->publishes([
+            $this->publishes(
+                [
                 __DIR__.'/../../../config/config.php' => $this->getConfigPath(),
-            ]);
+                ]
+            );
         }
     }
 
@@ -54,37 +56,39 @@ abstract class BaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('forrest', function ($app) {
+        $this->app->singleton(
+            'forrest', function ($app) {
 
-            // Config options
-            $settings           = config('forrest');
-            $storageType        = config('forrest.storage.type');
-            $authenticationType = config('forrest.authentication');
+                // Config options
+                $settings           = config('forrest');
+                $storageType        = config('forrest.storage.type');
+                $authenticationType = config('forrest.authentication');
 
-            // Determine showing HTTP errors
-            $http_errors = $this->is_laravel ? true : false;
+                // Determine showing HTTP errors
+                $http_errors = $this->is_laravel || $this->is_lumen ? true : false;
 
-            // Dependencies
-            $client = new Client(['http_errors' => $http_errors]);
-            $input = new LaravelInput();
-            $event = new LaravelEvent();
-            $redirect = new LaravelRedirect();
+                // Dependencies
+                $client = new Client(['http_errors' => $http_errors]);
+                $input = new LaravelInput();
+                $event = new LaravelEvent();
+                $redirect = new LaravelRedirect();
 
-            switch ($storageType) {
+                switch ($storageType) {
                 case 'session':
                     $storage = new LaravelSession(app('config'), app('request')->session());
-                    break;
+break;
                 case 'cache':
                     $storage = new LaravelCache(app('config'), app('cache'));
-                    break;
+break;
                 default:
                     $storage = new LaravelSession(app('config'), app('request')->session());
+                }
+
+                // Class namespace
+                $forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
+
+                return new $forrest($client, $event, $input, $redirect, $storage, $settings);
             }
-
-            // Class namespace
-            $forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
-
-            return new $forrest($client, $event, $input, $redirect, $storage, $settings);
-        });
+        );
     }
 }

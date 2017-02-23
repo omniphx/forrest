@@ -12,7 +12,7 @@ class ForrestServiceProvider extends BaseServiceProvider
      * @var bool
      */
     protected $is_laravel = false;
-
+    protected $is_lumen = true;
     /**
      * Returns the location of the package config file.
      *
