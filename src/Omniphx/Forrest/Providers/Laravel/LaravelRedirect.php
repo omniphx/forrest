@@ -3,7 +3,6 @@
 namespace Omniphx\Forrest\Providers\Laravel;
 
 use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Redirect;
 
 class LaravelRedirect implements RedirectInterface
 {
@@ -16,6 +15,9 @@ class LaravelRedirect implements RedirectInterface
      */
     public function to($parameter)
     {
+        if (function_exists('redirect')) {
+            return redirect($parameter);
+        }
         return Redirect::to($parameter);
     }
 }
