@@ -29,13 +29,18 @@ Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
 
 >For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
 
-### Lumen Installation 
+### Lumen Installation
 
 ```php
 class_alias('Omniphx\Forrest\Providers\Laravel\Facades\Forrest', 'Forrest');
 $app->register(Omniphx\Forrest\Providers\Lumen\ForrestServiceProvider::class);
 $app->configure('forrest');
-$app->withFacades();
+$app->withFacades(
+    true, [
+    'Illuminate\Support\Facades\Redirect' => 'Redirect'
+    ]
+);
+$app->bind('redirect', 'Illuminate\Routing\Redirector');
 ```
 Then you'll utilize the Lumen service provider by registering it in the `bootstrap/app.php` file.
 
@@ -46,7 +51,7 @@ php artisan vendor:publish
 ```
 You can find the config file in: `config/forrest.php`
 
->For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application. 
+>For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
 
 >For Laravel 4, run `php artisan config:publish omniphx/forrest`. It will be found in `app/config/omniphx/forrest/config.php`
 
