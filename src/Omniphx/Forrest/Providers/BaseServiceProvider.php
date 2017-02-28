@@ -4,6 +4,8 @@ namespace Omniphx\Forrest\Providers;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
+use Omniphx\Forrest\Authentications\WebServer;
+use Omniphx\Forrest\Authentications\UserPassword;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
 use Omniphx\Forrest\Providers\Laravel\LaravelInput;
@@ -12,13 +14,6 @@ use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 
 abstract class BaseServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if the application is laravel/lumen.
-     *
-     * @var bool
-     */
-    protected $is_laravel = true;
-
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -34,17 +29,24 @@ abstract class BaseServiceProvider extends ServiceProvider
     abstract protected function getConfigPath();
 
     /**
+     * Returns client implementation
+     *
+     * @return GuzzleHttp\Client
+     */
+    protected abstract function getClient();
+
+    /**
      * Bootstrap the application events.
      *
      * @return void
      */
     public function boot()
     {
-        if (method_exists($this, 'getConfigPath')) {
-            $this->publishes([
-                __DIR__.'/../../../config/config.php' => $this->getConfigPath(),
-            ]);
-        }
+        if (!method_exists($this, 'getConfigPath')) return;
+
+        $this->publishes([
+            __DIR__.'/../../../config/config.php' => $this->getConfigPath(),
+        ]);
     }
 
     /**
@@ -61,14 +63,11 @@ abstract class BaseServiceProvider extends ServiceProvider
             $storageType        = config('forrest.storage.type');
             $authenticationType = config('forrest.authentication');
 
-            // Determine showing HTTP errors
-            $http_errors = $this->is_laravel ? true : false;
-
             // Dependencies
-            $client = new Client(['http_errors' => $http_errors]);
-            $input = new LaravelInput();
-            $event = new LaravelEvent();
-            $redirect = new LaravelRedirect();
+            $client = $this->getClient();
+            $input = new LaravelInput(app('request'));
+            $event = new LaravelEvent(app('events'));
+            $redirect = new LaravelRedirect(app('redirect'));
 
             switch ($storageType) {
                 case 'session':
@@ -81,10 +80,19 @@ abstract class BaseServiceProvider extends ServiceProvider
                     $storage = new LaravelSession(app('config'), app('request')->session());
             }
 
-            // Class namespace
-            $forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
+            switch ($authenticationType) {
+                case 'WebServer':
+                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    break;
+                case 'UserPassword':
+                    $forrest = new UserPassword($client, $event, $input, $redirect, $storage, $settings);
+                    break;
+                default:
+                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    break;
+            }
 
-            return new $forrest($client, $event, $input, $redirect, $storage, $settings);
+            return $forrest;
         });
     }
 }

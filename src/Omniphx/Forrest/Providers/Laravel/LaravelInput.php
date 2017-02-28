@@ -2,11 +2,20 @@
 
 namespace Omniphx\Forrest\Providers\Laravel;
 
-use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
 use Omniphx\Forrest\Interfaces\InputInterface;
 
 class LaravelInput implements InputInterface
 {
+    /**
+     * @var Request
+     */
+    protected $request;
+
+    public function __construct(Request $request) {
+        $this->request = $request;
+    }
+
     /**
      * Get input from response.
      *
@@ -16,6 +25,6 @@ class LaravelInput implements InputInterface
      */
     public function get($parameter)
     {
-        return Input::get($parameter);
+        return $this->request->input($parameter);
     }
 }

@@ -2,11 +2,18 @@
 
 namespace Omniphx\Forrest\Providers\Laravel;
 
+use Illuminate\Routing\Redirector;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Redirect;
 
 class LaravelRedirect implements RedirectInterface
 {
+    protected $redirector;
+
+    public function __construct(Redirector $redirector)
+    {
+        $this->redirector = $redirector;
+    }
+
     /**
      * Redirect to new url.
      *
@@ -16,6 +23,6 @@ class LaravelRedirect implements RedirectInterface
      */
     public function to($parameter)
     {
-        return Redirect::to($parameter);
+        return $this->redirector->to($parameter);
     }
 }
