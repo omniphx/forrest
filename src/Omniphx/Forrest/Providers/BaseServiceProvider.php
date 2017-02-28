@@ -65,9 +65,9 @@ abstract class BaseServiceProvider extends ServiceProvider
 
             // Dependencies
             $client = $this->getClient();
-            $input = new LaravelInput();
+            $input = new LaravelInput(app('request'));
             $event = new LaravelEvent(app('events'));
-            $redirect = new LaravelRedirect();
+            $redirect = new LaravelRedirect(app('redirect'));
 
             switch ($storageType) {
                 case 'session':
