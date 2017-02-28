@@ -2,11 +2,18 @@
 
 namespace Omniphx\Forrest\Providers\Laravel;
 
-use Illuminate\Support\Facades\Event;
+use Illuminate\Contracts\Events\Dispatcher;
 use Omniphx\Forrest\Interfaces\EventInterface;
 
 class LaravelEvent implements EventInterface
 {
+    protected $event;
+
+    public function __construct(Dispatcher $event)
+    {
+        $this->event = $event;
+    }
+
     /**
      * Fire an event and call the listeners.
      *
@@ -18,6 +25,6 @@ class LaravelEvent implements EventInterface
      */
     public function fire($event, $payload = [], $halt = false)
     {
-        return Event::fire($event, $payload, $halt);
+        return $this->event->fire($event, $payload, $halt);
     }
 }

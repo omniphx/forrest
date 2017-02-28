@@ -4,6 +4,8 @@ namespace Omniphx\Forrest\Providers;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
+use Omniphx\Forrest\Authentications\WebServer;
+use Omniphx\Forrest\Authentications\UserPassword;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
 use Omniphx\Forrest\Providers\Laravel\LaravelInput;
@@ -12,13 +14,6 @@ use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 
 abstract class BaseServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if the application is laravel/lumen.
-     *
-     * @var bool
-     */
-    protected $is_laravel = true;
-
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -34,19 +29,24 @@ abstract class BaseServiceProvider extends ServiceProvider
     abstract protected function getConfigPath();
 
     /**
+     * Returns client implementation
+     *
+     * @return GuzzleHttp\Client
+     */
+    protected abstract function getClient();
+
+    /**
      * Bootstrap the application events.
      *
      * @return void
      */
     public function boot()
     {
-        if (method_exists($this, 'getConfigPath')) {
-            $this->publishes(
-                [
-                __DIR__.'/../../../config/config.php' => $this->getConfigPath(),
-                ]
-            );
-        }
+        if (!method_exists($this, 'getConfigPath')) return;
+
+        $this->publishes([
+            __DIR__.'/../../../config/config.php' => $this->getConfigPath(),
+        ]);
     }
 
     /**
@@ -56,39 +56,43 @@ abstract class BaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(
-            'forrest', function ($app) {
+        $this->app->singleton('forrest', function ($app) {
 
-                // Config options
-                $settings           = config('forrest');
-                $storageType        = config('forrest.storage.type');
-                $authenticationType = config('forrest.authentication');
+            // Config options
+            $settings           = config('forrest');
+            $storageType        = config('forrest.storage.type');
+            $authenticationType = config('forrest.authentication');
 
-                // Determine showing HTTP errors
-                $http_errors = $this->is_laravel || $this->is_lumen ? true : false;
+            // Dependencies
+            $client = $this->getClient();
+            $input = new LaravelInput();
+            $event = new LaravelEvent(app('events'));
+            $redirect = new LaravelRedirect();
 
-                // Dependencies
-                $client = new Client(['http_errors' => $http_errors]);
-                $input = new LaravelInput();
-                $event = new LaravelEvent();
-                $redirect = new LaravelRedirect();
-
-                switch ($storageType) {
+            switch ($storageType) {
                 case 'session':
                     $storage = new LaravelSession(app('config'), app('request')->session());
-break;
+                    break;
                 case 'cache':
                     $storage = new LaravelCache(app('config'), app('cache'));
-break;
+                    break;
                 default:
                     $storage = new LaravelSession(app('config'), app('request')->session());
-                }
-
-                // Class namespace
-                $forrest = "\\Omniphx\\Forrest\\Authentications\\$authenticationType";
-
-                return new $forrest($client, $event, $input, $redirect, $storage, $settings);
             }
-        );
+
+            switch ($authenticationType) {
+                case 'WebServer':
+                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    break;
+                case 'UserPassword':
+                    $forrest = new UserPassword($client, $event, $input, $redirect, $storage, $settings);
+                    break;
+                default:
+                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    break;
+            }
+
+            return $forrest;
+        });
     }
 }

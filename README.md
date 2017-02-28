@@ -13,43 +13,42 @@ While this package is built for Laravel, it has been decoupled so that it can be
 >If you are upgrading to Version 2.0, be sure to re-publish your config file.
 
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
-
-    "omniphx/forrest": "2.*"
-
+```php
+"omniphx/forrest": "2.*"
+```
 Next run `composer update` from the command line to install the package.
 
 ### Laravel Installation
 
-add the service provider and alias to your `config/app.php` file:
+Add the service provider and alias to your `config/app.php` file:
 
-    Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
-
-    'Forrest' => Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
+```php
+Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
+'Forrest' => Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
+```
 
 >For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
 
+### Lumen Installation 
 
+```php
+class_alias('Omniphx\Forrest\Providers\Laravel\Facades\Forrest', 'Forrest');
+$app->register(Omniphx\Forrest\Providers\Lumen\ForrestServiceProvider::class);
+$app->configure('forrest');
+$app->withFacades();
+```
+Then you'll utilize the Lumen service provider by registering it in the `bootstrap/app.php` file.
+
+### Configuration
 You will need a configuration file to add your credentials. Publish a config file using the `artisan` command:
 ```bash
 php artisan vendor:publish
 ```
 You can find the config file in: `config/forrest.php`
 
+>For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application. 
+
 >For Laravel 4, run `php artisan config:publish omniphx/forrest`. It will be found in `app/config/omniphx/forrest/config.php`
-
-### Lumen Installation
-
-You should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
-
-Then you'll utilize the Lumen service provider by registering it in the `bootstrap/app.php` file.
-
-```
-class_alias('Omniphx\Forrest\Providers\Laravel\Facades\Forrest', 'Forrest');
-$app->register(Omniphx\Forrest\Providers\Lumen\ForrestServiceProvider::class);
-$app->configure('forrest');
-$app->withFacades();
-
-```
 
 ## Getting Started
 ### Setting up a Connected App
@@ -321,4 +320,4 @@ Event::listen('forrest.response', function($request, $response) {
 });
 ```
 
-For more information about Guzzle responses and event listeners, refer to their [documentation](http://guzzle.readthedocs.org/en/latest/http-messages.html#responses).
+For more information about Guzzle responses and event listeners, refer to their [documentation](http://guzzle.readthedocs.org).

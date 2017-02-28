@@ -6,6 +6,13 @@ use Omniphx\Forrest\Interfaces\RedirectInterface;
 
 class LaravelRedirect implements RedirectInterface
 {
+    protected $redirect;
+
+    public function __construct()
+    {
+        $this->redirect = app('redirect');
+    }
+
     /**
      * Redirect to new url.
      *
@@ -15,9 +22,6 @@ class LaravelRedirect implements RedirectInterface
      */
     public function to($parameter)
     {
-        if (function_exists('redirect')) {
-            return redirect($parameter);
-        }
-        return Redirect::to($parameter);
+        return $this->redirect->to($parameter);
     }
 }

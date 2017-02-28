@@ -3,16 +3,10 @@
 namespace Omniphx\Forrest\Providers\Laravel;
 
 use Omniphx\Forrest\Providers\BaseServiceProvider;
+use GuzzleHttp\Client;
 
 class ForrestServiceProvider extends BaseServiceProvider
 {
-    /**
-     * Indicates if the application is laravel/lumen.
-     *
-     * @var bool
-     */
-    protected $is_laravel = true;
-
     /**
      * Returns the location of the package config file.
      *
@@ -21,5 +15,10 @@ class ForrestServiceProvider extends BaseServiceProvider
     protected function getConfigPath()
     {
         return config_path('forrest.php');
+    }
+
+    protected function getClient()
+    {
+        return new Client(['http_errors' => true]);
     }
 }
