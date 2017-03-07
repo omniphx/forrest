@@ -709,7 +709,7 @@ abstract class Client
         return $options;
     }
 
-    private function setArgument($argument, $options) {
+    private function setArgument($argument, &$options) {
         if (!isset($argument)) return;
         if (!is_array($argument)) return;
         foreach ($argument as $key => $value) {
