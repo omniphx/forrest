@@ -703,8 +703,8 @@ abstract class Client
         $options = [];
         if (empty($arguments)) return $options;
 
-        $this->setArgument($arguments[0], $options);
-        $this->setArgument($arguments[1], $options);
+        $options = $this->setArgument($arguments[0], $options);
+        $options = $this->setArgument($arguments[1], $options);
 
         return $options;
     }
@@ -715,6 +715,7 @@ abstract class Client
         foreach ($argument as $key => $value) {
             $options[$key] = $value;
         }
+        return $options;
     }
 
     /**
