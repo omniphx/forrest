@@ -703,8 +703,12 @@ abstract class Client
         $options = [];
         if (empty($arguments)) return $options;
 
-        $this->setArgument($arguments[0], $options);
-        $this->setArgument($arguments[1], $options);
+        if(!empty($arguments[0])) {
+            $this->setArgument($arguments[0], $options);
+        }
+        if(!empty($arguments[1])) {
+            $this->setArgument($arguments[1], $options);
+        }
 
         return $options;
     }
