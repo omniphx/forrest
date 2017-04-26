@@ -1,22 +1,22 @@
 <?php
 
-namespace spec\Omniphx\Forrest\Providers\Laravel;
+namespace spec\Omniphx\Forrest\Providers\Lumen;
 
-use Illuminate\Routing\Redirector;
+use Laravel\Lumen\Http\Redirector;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
-class LaravelRedirectSpec extends ObjectBehavior
+class LumenRedirectSpec extends ObjectBehavior
 {
     public function let(Redirector $redirector)
     {
         $this->beConstructedWith($redirector);
     }
 
-    public function it_is_initializable()
+    function it_is_initializable()
     {
-        $this->shouldHaveType('Omniphx\Forrest\Providers\Laravel\LaravelRedirect');
+        $this->shouldHaveType('Omniphx\Forrest\Providers\Lumen\LumenRedirect');
     }
 
     public function it_should_allow_a_redirect(Redirector $redirector)

@@ -4,6 +4,7 @@ namespace spec\Omniphx\Forrest\Providers\Laravel;
 
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Session\Session as Session;
+
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 

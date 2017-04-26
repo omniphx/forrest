@@ -8,6 +8,7 @@ use Omniphx\Forrest\Authentications\WebServer;
 use Omniphx\Forrest\Authentications\UserPassword;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
+use Omniphx\Forrest\Providers\Laravel\LaravelEncryptor;
 use Omniphx\Forrest\Providers\Laravel\LaravelInput;
 use Omniphx\Forrest\Providers\Laravel\LaravelRedirect;
 use Omniphx\Forrest\Providers\Laravel\LaravelSession;
@@ -34,6 +35,13 @@ abstract class BaseServiceProvider extends ServiceProvider
      * @return GuzzleHttp\Client
      */
     protected abstract function getClient();
+
+    /**
+     * Returns client implementation
+     *
+     * @return GuzzleHttp\Client
+     */
+    protected abstract function getRedirect();
 
     /**
      * Bootstrap the application events.
@@ -64,31 +72,43 @@ abstract class BaseServiceProvider extends ServiceProvider
             $authenticationType = config('forrest.authentication');
 
             // Dependencies
-            $client = $this->getClient();
-            $input = new LaravelInput(app('request'));
-            $event = new LaravelEvent(app('events'));
-            $redirect = new LaravelRedirect(app('redirect'));
-
-            switch ($storageType) {
-                case 'session':
-                    $storage = new LaravelSession(app('config'), app('request')->session());
-                    break;
-                case 'cache':
-                    $storage = new LaravelCache(app('config'), app('cache'));
-                    break;
-                default:
-                    $storage = new LaravelSession(app('config'), app('request')->session());
-            }
+            $client    = $this->getClient();
+            $input     = new LaravelInput(app('request'));
+            $event     = new LaravelEvent(app('events'));
+            $encryptor = new LaravelEncryptor(app('encrypter'));
+            $redirect  = $this->getRedirect();
+            $storage   = $this->getStorage();
 
             switch ($authenticationType) {
                 case 'WebServer':
-                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    $forrest = new WebServer(
+                        $client,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $storage,
+                        $settings);
                     break;
                 case 'UserPassword':
-                    $forrest = new UserPassword($client, $event, $input, $redirect, $storage, $settings);
+                    $forrest = new UserPassword(
+                        $client,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $storage,
+                        $settings);
                     break;
                 default:
-                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    $forrest = new WebServer(
+                        $client,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $storage,
+                        $settings);
                     break;
             }
 

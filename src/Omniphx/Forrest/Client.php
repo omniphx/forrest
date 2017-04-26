@@ -8,6 +8,7 @@ use GuzzleHttp\Message\ResponseInterface;
 use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
+use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -101,6 +102,13 @@ abstract class Client
     protected $input;
 
     /**
+     * Inteface for Input calls.
+     *
+     * @var \Omniphx\Forrest\Interfaces\EncryptorInterface
+     */
+    protected $encryptor;
+
+    /**
      * Authentication credentials.
      *
      * @var array
@@ -130,18 +138,20 @@ abstract class Client
 
     public function __construct(
         ClientInterface $httpClient,
+        EncryptorInterface $encryptor,
         EventInterface $event,
         InputInterface $input,
         RedirectInterface $redirect,
         StorageInterface $storage,
         $settings
     ) {
-        $this->httpClient = $httpClient;
-        $this->storage = $storage;
-        $this->redirect = $redirect;
-        $this->input = $input;
-        $this->event = $event;
-        $this->settings = $settings;
+        $this->httpClient  = $httpClient;
+        $this->event       = $event;
+        $this->input       = $input;
+        $this->redirect    = $redirect;
+        $this->storage     = $storage;
+        $this->encryptor   = $encryptor;
+        $this->settings    = $settings;
         $this->credentials = $settings['credentials'];
     }
 
@@ -718,20 +728,6 @@ abstract class Client
     }
 
     /**
-     * Get token.
-     *
-     * @return array
-     */
-    public function getTokenData()
-    {
-        if (empty($this->tokenData)) {
-            $this->tokenData = (array) $this->storage->getTokenData();
-        }
-
-        return $this->tokenData;
-    }
-
-    /**
      * Refresh authentication token.
      *
      * @return mixed $response
@@ -849,4 +845,64 @@ abstract class Client
             throw new SalesforceException('Invalid request: %s', $e);
         }
     }
+
+    /**
+     * Encrypt authentication token and store it in session.
+     *
+     * @param array $token
+     *
+     * @return void
+     */
+    public function putTokenData($token)
+    {
+        $encryptedToken = $this->encryptor->encrypt($token);
+
+        return $this->put('token', $encryptedToken);
+    }
+
+    /**
+     * Get token from the session and decrypt it.
+     *
+     * @return mixed
+     */
+    public function getTokenData()
+    {
+        if(!$this->has('token')) {
+            throw new MissingTokenException(sprintf('No token available in \''.Config::get('forrest.storage.type').'\' storage'));
+        }
+
+        $token = $this->get('token');
+
+        return $this->encryptor->decrypt($token);
+    }
+
+    /**
+     * Encrypt refresh token and pass into session.
+     *
+     * @param array $token
+     *
+     * @return void
+     */
+    public function putRefreshToken($token)
+    {
+        $encryptedToken = $this->encryptor->encrypt($token);
+
+        return $this->put('refresh_token', $encryptedToken);
+    }
+
+    /**
+     * Get refresh token from session and decrypt it.
+     *
+     * @return mixed
+     */
+    public function getRefreshToken()
+    {
+        if ($this->has('refresh_token')) {
+            $token = $this->get('refresh_token');
+
+            return $this->encryptor->decrypt($token);
+        }
+
+        throw new MissingRefreshTokenException(sprintf('No refresh token stored in current session. Verify you have added refresh_token to your scope items on your connected app settings in Salesforce.'));
+    } 
 }

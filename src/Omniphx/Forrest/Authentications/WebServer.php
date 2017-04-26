@@ -6,6 +6,7 @@ use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Client;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
 use Omniphx\Forrest\Interfaces\EventInterface;
+use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
@@ -22,13 +23,14 @@ class WebServer extends Client implements WebServerInterface
 
     public function __construct(
         ClientInterface $httpClient,
+        EncryptorInterface $encryptor,
         EventInterface $event,
         InputInterface $input,
         RedirectInterface $redirect,
         StorageInterface $storage,
         $settings
     ) {
-        parent::__construct($httpClient, $event, $input, $redirect, $storage, $settings);
+        parent::__construct($httpClient, $encryptor, $event, $input, $redirect, $storage, $settings);
         $this->parameters = $this->settings['parameters'];
     }
 
