@@ -31,36 +31,4 @@ interface StorageInterface
      * @return bool
      */
     public function has($key);
-
-    /**
-     * Encrypt authentication token and store it in storage.
-     *
-     * @param array $token
-     *
-     * @return void
-     */
-    public function putTokenData($token);
-
-    /**
-     * Get token from the storage and decrypt it.
-     *
-     * @return mixed
-     */
-    public function getTokenData();
-
-    /**
-     * Encrypt refresh token and pass into storage.
-     *
-     * @param array $token
-     *
-     * @return void
-     */
-    public function putRefreshToken($token);
-
-    /**
-     * Get refresh token from storage and decrypt it.
-     *
-     * @return mixed
-     */
-    public function getRefreshToken();
 }

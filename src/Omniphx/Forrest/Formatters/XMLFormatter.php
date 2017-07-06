@@ -1,10 +1,10 @@
 <?php
 
-namespace Omniphx\Forrest\RequestFormatters;
+namespace Omniphx\Forrest\Formatters;
 
-use Omniphx\Forrest\Interfaces\RequestFormatterInterface;
+use Omniphx\Forrest\Interfaces\FormatterInterface;
 
-class XMLFormatter implements RequestFormatterInterface
+class XMLFormatter implements FormatterInterface
 {
     public function setHeaders()
     {

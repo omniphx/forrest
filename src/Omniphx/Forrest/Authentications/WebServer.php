@@ -44,7 +44,6 @@ class WebServer extends Client implements WebServerInterface
      */
     public function authenticate($url = null, $stateOptions = [])
     {
-        
         $loginURL = $url === null ? $this->credentials['loginURL'] : $url;
         $stateOptions['loginUrl'] = $loginURL;
 
@@ -99,7 +98,7 @@ class WebServer extends Client implements WebServerInterface
         // Encrypt token and store token in storage.
         $this->storage->putTokenData($response);
         if (isset($response['refresh_token'])) {
-            $this->storage->putRefreshToken($response['refresh_token']);
+            $this->refreshTokenRepo->put($response['refresh_token']);
         }
 
         // Store resources into the storage.
@@ -116,7 +115,7 @@ class WebServer extends Client implements WebServerInterface
      */
     public function refresh()
     {
-        $refreshToken = $this->storage->getRefreshToken();
+        $refreshToken = $this->refreshTokenRepo->get();
         $tokenURL = $this->getLoginURL();
         $tokenURL .= '/services/oauth2/token';
 

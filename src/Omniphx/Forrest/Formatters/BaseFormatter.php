@@ -1,10 +1,10 @@
 <?php
 
-namespace Omniphx\Forrest\RequestFormatters;
+namespace Omniphx\Forrest\Formatters;
 
-use Omniphx\Forrest\Interfaces\RequestFormatterInterface;
+use Omniphx\Forrest\Interfaces\FormatterInterface;
 
-class JSONFormatter implements RequestFormatterInterface
+class BaseFormatter implements FormatterInterface
 {
     public function setHeaders()
     {
@@ -21,6 +21,7 @@ class JSONFormatter implements RequestFormatterInterface
 
     public function formatResponse($response)
     {
+        print_r($response>getBody());
         return json_decode($response->getBody(), true);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Omniphx\Forrest\Interfaces;
 
-interface RequestFormatterInterface
+interface FormatterInterface
 {
     public function setHeaders();
     public function setBody($data);

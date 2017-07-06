@@ -21,7 +21,7 @@ class LaravelCacheSpec extends ObjectBehavior
         $this->shouldHaveType('Omniphx\Forrest\Interfaces\StorageInterface');
     }
 
-    public function it_should_allow_a_get(Cache $cache, Config $cache)
+    public function it_should_allow_a_get(Cache $cache, Config $config)
     {
         $cache->has(Argument::any())->shouldBeCalled()->willReturn(true);
         $cache->get(Argument::any())->shouldBeCalled()->willReturn('morty');

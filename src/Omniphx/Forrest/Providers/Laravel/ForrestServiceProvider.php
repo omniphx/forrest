@@ -29,7 +29,7 @@ class ForrestServiceProvider extends BaseServiceProvider
         return new LaravelRedirect(app('redirect'));
     }
 
-    protected function getStorage()
+    protected function getStorage($storageType)
     {
         switch ($storageType) {
             case 'session':

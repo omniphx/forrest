@@ -13,6 +13,17 @@ use Omniphx\Forrest\Providers\Laravel\LaravelInput;
 use Omniphx\Forrest\Providers\Laravel\LaravelRedirect;
 use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 
+use Omniphx\Forrest\Formatters\JSONFormatter;
+use Omniphx\Forrest\Formatters\URLEncodedFormatter;
+use Omniphx\Forrest\Formatters\XMLFormatter;
+
+use Omniphx\Forrest\Repositories\InstanceURLRepository;
+use Omniphx\Forrest\Repositories\RefreshTokenRepository;
+use Omniphx\Forrest\Repositories\ResourceRepository;
+use Omniphx\Forrest\Repositories\TokenRepository;
+use Omniphx\Forrest\Repositories\VersionRepository;
+
+
 abstract class BaseServiceProvider extends ServiceProvider
 {
     /**
@@ -72,41 +83,70 @@ abstract class BaseServiceProvider extends ServiceProvider
             $authenticationType = config('forrest.authentication');
 
             // Dependencies
-            $client    = $this->getClient();
+            $httpClient    = $this->getClient();
             $input     = new LaravelInput(app('request'));
             $event     = new LaravelEvent(app('events'));
             $encryptor = new LaravelEncryptor(app('encrypter'));
             $redirect  = $this->getRedirect();
-            $storage   = $this->getStorage();
+            $storage   = $this->getStorage($storageType);
+
+            $refreshTokenRepo = new RefreshTokenRepository($encryptor, $storage);
+            $tokenRepo = new TokenRepository($encryptor, $storage);
+
+            $resourceRepo = new ResourceRepository($storage);
+
+            $versionRepo = new VersionRepository($storage);
+
+            $instanceURLRepo = new InstanceURLRepository($tokenRepo, $settings);
+
+            $formatter = new JSONFormatter($tokenRepo, $settings);
 
             switch ($authenticationType) {
                 case 'WebServer':
                     $forrest = new WebServer(
-                        $client,
+                        $httpClient,
                         $encryptor,
                         $event,
                         $input,
                         $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
                         $storage,
                         $settings);
                     break;
                 case 'UserPassword':
                     $forrest = new UserPassword(
-                        $client,
+                        $httpClient,
                         $encryptor,
                         $event,
                         $input,
                         $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
                         $storage,
                         $settings);
                     break;
                 default:
                     $forrest = new WebServer(
-                        $client,
+                        $httpClient,
                         $encryptor,
                         $event,
                         $input,
                         $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
                         $storage,
                         $settings);
                     break;

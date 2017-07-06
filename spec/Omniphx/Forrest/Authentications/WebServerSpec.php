@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
+use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
@@ -26,8 +27,35 @@ class WebServerSpec extends ObjectBehavior
 
     protected $responseXML = "<meseek><intro>I'm Mr. Meseeks, look at me!</intro><role>Get 2 strokes off Gary's golf swing</role><solution>Has he tried keeping his shoulder's square?</solution></meseek>";
 
+    protected $token = [
+        'access_token'  => 'xxxxaccess.tokenxxxx',
+        'id'            => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
+        'instance_url'  => 'https://na00.salesforce.com',
+        'token_type'    => 'Bearer',
+        'refresh_token' => 'xxxxrefresh.tokenxxxx',
+    ];
+
+    protected $resources = [
+        'sobjects'     => '/services/data/v30.0/sobjects',
+        'connect'      => '/services/data/v30.0/connect',
+        'query'        => '/services/data/v30.0/query',
+        'theme'        => '/services/data/v30.0/theme',
+        'queryAll'     => '/services/data/v30.0/queryAll',
+        'tooling'      => '/services/data/v30.0/tooling',
+        'chatter'      => '/services/data/v30.0/chatter',
+        'analytics'    => '/services/data/v30.0/analytics',
+        'recent'       => '/services/data/v30.0/recent',
+        'process'      => '/services/data/v30.0/process',
+        'identity'     => 'https://login.salesforce.com/id/00D',
+        'flexiPage'    => '/services/data/v30.0/flexiPage',
+        'search'       => '/services/data/v30.0/search',
+        'quickActions' => '/services/data/v30.0/quickActions',
+        'appMenu'      => '/services/data/v30.0/appMenu',
+    ];
+
     public function let(
         ClientInterface $mockedClient,
+        EncryptorInterface $mockedEncryptor,
         EventInterface $mockedEvent,
         InputInterface $mockedInput,
         RedirectInterface $mockedRedirect,
@@ -36,60 +64,39 @@ class WebServerSpec extends ObjectBehavior
         StorageInterface $mockedStorage
     ) {
         $settings = [
+            'authentication' => 'WebServer',
             'credentials'        => [
                 'consumerKey'    => 'testingClientId',
                 'consumerSecret' => 'testingClientSecret',
                 'callbackURI'    => 'callbackURL',
                 'loginURL'       => 'https://login.salesforce.com',
             ],
-            'authenticationFlow' => 'WebServer',
-            'parameters'         => [
-                'display'   => 'popup',
-                'immediate' => 'false',
+            'parameters'     => [
+                'display'   => '',
+                'immediate' => false,
                 'state'     => '',
                 'scope'     => '',
                 'prompt'    => '',
             ],
-            'instanceURL'        => '',
-            'authRedirect'       => 'redirectURL',
-            'version'            => '30.0',
-            'defaults'           => [
+            'defaults'       => [
                 'method'          => 'get',
                 'format'          => 'json',
                 'compression'     => false,
                 'compressionType' => 'gzip',
             ],
-            'language'           => 'en_US',
-        ];
-
-        $token = [
-            'access_token'  => 'xxxxaccess.tokenxxxx',
-            'id'            => 'https://login.salesforce.com/id/00Di0000000XXXXXX/005i0000000xxxxXXX',
-            'instance_url'  => 'https://na##.salesforce.com',
-            'token_type'    => 'Bearer',
-            'refresh_token' => 'xxxxrefresh.tokenxxxx',
-        ];
-
-        $resources = [
-            'sobjects'     => '/services/data/v30.0/sobjects',
-            'connect'      => '/services/data/v30.0/connect',
-            'query'        => '/services/data/v30.0/query',
-            'theme'        => '/services/data/v30.0/theme',
-            'queryAll'     => '/services/data/v30.0/queryAll',
-            'tooling'      => '/services/data/v30.0/tooling',
-            'chatter'      => '/services/data/v30.0/chatter',
-            'analytics'    => '/services/data/v30.0/analytics',
-            'recent'       => '/services/data/v30.0/recent',
-            'process'      => '/services/data/v30.0/process',
-            'identity'     => 'https://login.salesforce.com/id/00D',
-            'flexiPage'    => '/services/data/v30.0/flexiPage',
-            'search'       => '/services/data/v30.0/search',
-            'quickActions' => '/services/data/v30.0/quickActions',
-            'appMenu'      => '/services/data/v30.0/appMenu',
+            'storage'        => [
+                'type'          => 'session',
+                'path'          => 'forrest_',
+                'expire_in'     => 60,
+                'store_forever' => false,
+            ],
+            'version'        => '',
+            'instanceURL'    => '',
+            'language'       => 'en_US',
         ];
 
         //Storage stubs
-        $mockedStorage->get('resources')->willReturn($resources);
+        $mockedStorage->get('resources')->willReturn($this->resources);
         $mockedStorage->get('version')->willReturn([
             'url'     => '/services/data/v35.0',
             'version' => '35.0', ]);
@@ -102,6 +109,7 @@ class WebServerSpec extends ObjectBehavior
 
         $this->beConstructedWith(
             $mockedClient,
+            $mockedEncryptor,
             $mockedEvent,
             $mockedInput,
             $mockedRedirect,

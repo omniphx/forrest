@@ -21,7 +21,7 @@ class LaravelEncryptor implements EncryptorInterface
      * @return string
      */
     public function encrypt($value) {
-        $this->encryptor->encrypt($value);
+        return $this->encryptor->encrypt($value);
     }
 
     /**
@@ -31,6 +31,6 @@ class LaravelEncryptor implements EncryptorInterface
      * @return string
      */
     public function decrypt($payload) {
-        $this->encryptor->decrypt($payload);
+        return $this->encryptor->decrypt($payload);
     }
 }
