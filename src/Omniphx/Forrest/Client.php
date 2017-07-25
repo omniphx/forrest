@@ -68,6 +68,8 @@ abstract class Client
 
     protected $resourceRepo;
 
+    protected $stateRepo;
+
     protected $tokenRepo;
 
     protected $versionRepo;
@@ -146,19 +148,21 @@ abstract class Client
         RepositoryInterface $instanceURLRepo,
         RepositoryInterface $refreshTokenRepo,
         ResourceRepositoryInterface $resourceRepo,
+        RepositoryInterface $stateRepo,
         RepositoryInterface $tokenRepo,
         RepositoryInterface $versionRepo,
         FormatterInterface $formatter,
-        $settings
-    ) {
+        $settings)
+    {
         $this->httpClient       = $httpClient;
         $this->encryptor        = $encryptor;
         $this->event            = $event;
         $this->input            = $input;
         $this->redirect         = $redirect;
-        $this->refreshTokenRepo = $refreshTokenRepo;
         $this->instanceURLRepo  = $instanceURLRepo;
+        $this->refreshTokenRepo = $refreshTokenRepo;
         $this->resourceRepo     = $resourceRepo;
+        $this->stateRepo        = $stateRepo;
         $this->tokenRepo        = $tokenRepo;
         $this->versionRepo      = $versionRepo;
         $this->formatter        = $formatter;

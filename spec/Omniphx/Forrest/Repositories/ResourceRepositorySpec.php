@@ -28,15 +28,18 @@ class ResourceRepositorySpec extends ObjectBehavior
 
     function it_should_get_resource($mockedStorage) {
         $mockedStorage->has('resources')->shouldBeCalled()->willReturn(true);
-        $mockedStorage->get('resources')->shouldBeCalled()->willReturn('resources');
+        $mockedStorage
+            ->get('resources')
+            ->shouldBeCalled()
+            ->willReturn(['resource' => 'resources']);
 
-        $this->get()->shouldReturn('resources');
+        $this->get('resource')->shouldReturn('resources');
     }
 
     function it_should_throw_exception_if_resource_doesnt_exist($mockedStorage) {
         $mockedStorage->has('resources')->shouldBeCalled()->willReturn(false);
         $missingResourcesException = new MissingResourceException('No resources available');
 
-        $this->shouldThrow($missingResourcesException)->duringGet();
+        $this->shouldThrow($missingResourcesException)->duringGet('resource');
     }
 }

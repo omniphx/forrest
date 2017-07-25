@@ -17,7 +17,7 @@ class UserPassword extends BaseAuthentication implements UserPasswordInterface
 
         $this->tokenRepo->put($authToken);
 
-        // Store resources into the storage.
+        // Store resources into the storage
         $this->storeResources();
     }
 

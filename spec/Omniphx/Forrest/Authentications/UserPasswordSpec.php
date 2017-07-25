@@ -14,7 +14,6 @@ use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\FormatterInterface;
 use Omniphx\Forrest\Interfaces\RepositoryInterface;
 use Omniphx\Forrest\Interfaces\ResourceRepositoryInterface;
-use Omniphx\Forrest\Interfaces\StorageInterface;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
@@ -104,10 +103,26 @@ class UserPasswordSpec extends ObjectBehavior
         RepositoryInterface $mockedInstanceURLRepo,
         RepositoryInterface $mockedRefreshTokenRepo,
         ResourceRepositoryInterface $mockedResourceRepo,
+        RepositoryInterface $mockedStateRepo,
         RepositoryInterface $mockedTokenRepo,
         RepositoryInterface $mockedVersionRepo,
         FormatterInterface $mockedFormatter)
     {
+        $this->beConstructedWith(
+            $mockedHttpClient,
+            $mockedEncryptor,
+            $mockedEvent,
+            $mockedInput,
+            $mockedRedirect,
+            $mockedInstanceURLRepo,
+            $mockedRefreshTokenRepo,
+            $mockedResourceRepo,
+            $mockedStateRepo,
+            $mockedTokenRepo,
+            $mockedVersionRepo,
+            $mockedFormatter,
+            $this->settings);
+
         $mockedInstanceURLRepo->get()->willReturn('https://instance.salesforce.com');
 
         $mockedResourceRepo->get(Argument::any())->willReturn('/services/data/v30.0/resource');
@@ -128,20 +143,6 @@ class UserPasswordSpec extends ObjectBehavior
         ]);
 
         $mockedFormatter->formatResponse($mockedResponse)->willReturn(['foo' => 'bar']);
-
-        $this->beConstructedWith(
-            $mockedHttpClient,
-            $mockedEncryptor,
-            $mockedEvent,
-            $mockedInput,
-            $mockedRedirect,
-            $mockedInstanceURLRepo,
-            $mockedRefreshTokenRepo,
-            $mockedResourceRepo,
-            $mockedTokenRepo,
-            $mockedVersionRepo,
-            $mockedFormatter,
-            $this->settings);
     }
 
     public function it_is_initializable()

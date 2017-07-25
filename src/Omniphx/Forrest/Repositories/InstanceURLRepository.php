@@ -15,7 +15,7 @@ class InstanceURLRepository implements RepositoryInterface {
     }
 
     public function put($instanceURL) {
-        $this->settings['instanceURL'] = $instanceURL;
+        return;
     }
 
     /**
@@ -25,10 +25,8 @@ class InstanceURLRepository implements RepositoryInterface {
      */
     public function get()
     {
-        $url = $this->settings['instanceURL'];
-
-        if(!empty($url)) {
-            return $url;
+        if (isset($this->settings['instanceURL'])) {
+            return $this->settings['instanceURL'];
         } else {
             return $this->tokenRepo->get()['instance_url'];
         }
