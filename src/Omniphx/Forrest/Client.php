@@ -163,6 +163,8 @@ abstract class Client
         } catch (TokenExpiredException $e) {
             $this->refresh();
 
+            $this->tokenData = [];
+
             return $this->formatRequest();
         }
     }
