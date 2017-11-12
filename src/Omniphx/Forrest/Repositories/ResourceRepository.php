@@ -19,6 +19,11 @@ class ResourceRepository implements ResourceRepositoryInterface
         $this->storage->put('resources', $resource);
     }
 
+    public function has()
+    {
+        return $this->storage->has('resources');
+    }
+
     public function get($resource) {
         $this->verify();
 

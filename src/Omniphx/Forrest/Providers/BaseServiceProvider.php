@@ -20,6 +20,7 @@ use Omniphx\Forrest\Formatters\XMLFormatter;
 use Omniphx\Forrest\Repositories\InstanceURLRepository;
 use Omniphx\Forrest\Repositories\RefreshTokenRepository;
 use Omniphx\Forrest\Repositories\ResourceRepository;
+use Omniphx\Forrest\Repositories\StateRepository;
 use Omniphx\Forrest\Repositories\TokenRepository;
 use Omniphx\Forrest\Repositories\VersionRepository;
 
@@ -91,13 +92,11 @@ abstract class BaseServiceProvider extends ServiceProvider
             $storage   = $this->getStorage($storageType);
 
             $refreshTokenRepo = new RefreshTokenRepository($encryptor, $storage);
-            $tokenRepo = new TokenRepository($encryptor, $storage);
-
-            $resourceRepo = new ResourceRepository($storage);
-
-            $versionRepo = new VersionRepository($storage);
-
-            $instanceURLRepo = new InstanceURLRepository($tokenRepo, $settings);
+            $tokenRepo        = new TokenRepository($encryptor, $storage);
+            $resourceRepo     = new ResourceRepository($storage);
+            $versionRepo      = new VersionRepository($storage);
+            $instanceURLRepo  = new InstanceURLRepository($tokenRepo, $settings);
+            $stateRepo        = new StateRepository($storage);
 
             $formatter = new JSONFormatter($tokenRepo, $settings);
 
@@ -112,10 +111,10 @@ abstract class BaseServiceProvider extends ServiceProvider
                         $instanceURLRepo,
                         $refreshTokenRepo,
                         $resourceRepo,
+                        $stateRepo,
                         $tokenRepo,
                         $versionRepo,
                         $formatter,
-                        $storage,
                         $settings);
                     break;
                 case 'UserPassword':
@@ -128,10 +127,10 @@ abstract class BaseServiceProvider extends ServiceProvider
                         $instanceURLRepo,
                         $refreshTokenRepo,
                         $resourceRepo,
+                        $stateRepo,
                         $tokenRepo,
                         $versionRepo,
                         $formatter,
-                        $storage,
                         $settings);
                     break;
                 default:
@@ -144,10 +143,10 @@ abstract class BaseServiceProvider extends ServiceProvider
                         $instanceURLRepo,
                         $refreshTokenRepo,
                         $resourceRepo,
+                        $stateRepo,
                         $tokenRepo,
                         $versionRepo,
                         $formatter,
-                        $storage,
                         $settings);
                     break;
             }

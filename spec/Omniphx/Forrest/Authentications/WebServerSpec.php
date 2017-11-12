@@ -173,11 +173,13 @@ class WebServerSpec extends ObjectBehavior
         ClientInterface $mockedHttpClient,
         InputInterface $mockedInput,
         RepositoryInterface $mockedInstanceURLRepo,
-        RepositoryInterface $mockedTokenRepo,   
+        RepositoryInterface $mockedTokenRepo,
+        ResourceRepositoryInterface $mockedResourceRepo,  
         ResponseInterface $mockedResponse,
         ResponseInterface $resourceResponse,
+        ResponseInterface $versionResponse,
         ResponseInterface $tokenResponse,
-        ResponseInterface $versionsResponse,
+        ResponseInterface $mockedVersionRepo,
         FormatterInterface $mockedFormatter)
     {
         $mockedInput->get('code')->shouldBeCalled()->willReturn('callbackCode');
@@ -199,10 +201,28 @@ class WebServerSpec extends ObjectBehavior
 
         $tokenResponse->getBody()->shouldBeCalled()->willReturn($this->tokenJSON);
         $mockedTokenRepo->put($this->token)->shouldBeCalled();
+        $mockedVersionRepo->has()->shouldBeCalled()->willReturn(false);
+        $mockedVersionRepo->put(["label" => "Winter 16", "url" => "/services/data/v35.0", "version" => "35.0"])->shouldBeCalled();
+        $mockedInstanceURLRepo->get()->shouldBeCalled()->willReturn('https://instance.salesforce.com');
+ 
+        $mockedHttpClient->request(
+            'get',
+            'https://instance.salesforce.com/services/data',
+            ['headers' => [
+                'Authorization' => 'Oauth accessToken',
+                'Accept'        => 'application/json',
+                'Content-Type'  => 'application/json'
+            ]])
+            ->shouldBeCalled()
+            ->willReturn($versionResponse);
+
+        $mockedFormatter->formatResponse($versionResponse)->shouldBeCalled()->willReturn($this->versionArray);
+
+        $mockedVersionRepo->get()->shouldBeCalled()->willReturn(['url' => '/services/data/v35.0']);
 
         $mockedHttpClient->request(
             'get',
-            'https://instance.salesforce.com',
+            'https://instance.salesforce.com/services/data/v35.0',
             ['headers' => [
                 'Authorization' => 'Oauth accessToken',
                 'Accept'        => 'application/json',

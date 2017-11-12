@@ -85,7 +85,7 @@ class WebServer extends Client implements WebServerInterface
             $this->refreshTokenRepo->put($response['refresh_token']);
         }
 
-        // Store resources into the storage.
+        $this->storeVersion();
         $this->storeResources();
 
         // Return settings

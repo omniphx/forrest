@@ -275,7 +275,7 @@ class UserPasswordSpec extends ObjectBehavior
         ResponseInterface $mockedResponse,
         FormatterInterface $mockedFormatter)
     {
-        $mockedHttpClient->request('get', 'https://instance.salesforce.com/services/data/', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
+        $mockedHttpClient->request('get', 'https://instance.salesforce.com/services/data', ['headers' => ['Authorization' => 'Oauth accessToken', 'Accept' => 'application/json', 'Content-Type' => 'application/json']])->shouldBeCalled()->willReturn($mockedResponse);
 
         $versionArray = json_decode($this->versionJSON, true);
 

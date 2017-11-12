@@ -29,7 +29,12 @@ class VersionRepository implements RepositoryInterface {
         $this->verify();
 
         return $this->storage->get('version');
-    } 
+    }
+
+    public function has()
+    {
+        return $this->storage->has('version');
+    }
 
     private function verify() {
         if ($this->storage->has('version')) return;

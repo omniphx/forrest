@@ -31,6 +31,11 @@ class RefreshTokenRepository implements RepositoryInterface {
         $this->storage->put('refresh_token', $encryptedToken);
     }
 
+    public function has()
+    {
+        return $this->storage->has('refresh_token');
+    }
+
     /**
      * Get refresh token from session and decrypt it.
      *

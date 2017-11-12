@@ -82,13 +82,6 @@ abstract class Client
     protected $settings;
 
     /**
-     * Token data.
-     *
-     * @var array
-     */
-    protected $tokenData;
-
-    /**
      * Redirect handler.
      *
      * @var RedirectInterface
@@ -206,9 +199,11 @@ abstract class Client
             $this->assignExceptions($ex);
         }
 
-        $this->event->fire('forrest.response', [$response]);
+        $formattedResponse = $this->formatter->formatResponse($response);
 
-        return $this->formatter->formatResponse($response);
+        $this->event->fire('forrest.response', [$formattedResponse]);
+
+        return $formattedResponse;
     }
 
     /**
@@ -331,7 +326,7 @@ abstract class Client
     public function versions($options = [])
     {
         $url = $this->instanceURLRepo->get();
-        $url .= '/services/data/';
+        $url .= '/services/data';
 
         $versions = $this->request($url, $options);
 
@@ -351,7 +346,6 @@ abstract class Client
     public function resources($options = [])
     {
         $url = $this->getBaseUrl();
-
         $resources = $this->request($url, $options);
 
         return $resources;
@@ -685,16 +679,15 @@ abstract class Client
 
     private function setOptions($arguments) {
         $options = [];
-        if (empty($arguments)) return $options;
 
-        $this->setArgument($arguments[0], $options);
-        $this->setArgument($arguments[1], $options);
+        foreach ($arguments as $argument) {
+            $this->setArgument($argument, $options);
+        }
 
         return $options;
     }
 
     private function setArgument($argument, $options) {
-        if (!isset($argument)) return;
         if (!is_array($argument)) return;
         foreach ($argument as $key => $value) {
             $options[$key] = $value;
@@ -737,7 +730,8 @@ abstract class Client
 
         $this->storeConfiguredVersion($versions);
 
-        if($this->versionRepo->get() !== null) return;
+        if($this->versionRepo->has()) return;
+
         $this->storeLatestVersion($versions);
     }
 
@@ -772,12 +766,6 @@ abstract class Client
      */
     protected function storeResources()
     {
-        try {
-            $this->versionRepo->get();
-        } catch (MissingVersionException $ex) {
-            $this->storeVersion();
-        }
-
         $resources = $this->resources(['format' => 'json']);
         $this->resourceRepo->put($resources);
     }

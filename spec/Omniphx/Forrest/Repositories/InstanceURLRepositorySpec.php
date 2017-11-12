@@ -25,8 +25,10 @@ class InstanceURLRepositorySpec extends ObjectBehavior
         $mockedTokenRepo->get()->willReturn(['instance_url' => 'tokenInstanceURL']);
     }
 
-    public function it_should_return_when_put()
+    public function it_should_return_when_put(RepositoryInterface $mockedTokenRepo)
     {
+        $mockedTokenRepo->get()->shouldBeCalled()->willReturn([]);
+        $mockedTokenRepo->put(['instance_url'=>'this'])->shouldBeCalled();
         $this->put('this')->shouldReturn(null);
     }
 

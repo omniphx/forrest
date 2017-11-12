@@ -23,7 +23,11 @@ class StateRepository implements RepositoryInterface {
         $this->verify();
 
         return $this->storage->get('stateOptions');
-    } 
+    }
+
+    public function has() {
+        return $this->storage->has('stateOptions');
+    }
 
     private function verify() {
         if ($this->storage->has('stateOptions')) return;
