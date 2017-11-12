@@ -8,9 +8,22 @@ use Omniphx\Forrest\Authentications\WebServer;
 use Omniphx\Forrest\Authentications\UserPassword;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
+use Omniphx\Forrest\Providers\Laravel\LaravelEncryptor;
 use Omniphx\Forrest\Providers\Laravel\LaravelInput;
 use Omniphx\Forrest\Providers\Laravel\LaravelRedirect;
 use Omniphx\Forrest\Providers\Laravel\LaravelSession;
+
+use Omniphx\Forrest\Formatters\JSONFormatter;
+use Omniphx\Forrest\Formatters\URLEncodedFormatter;
+use Omniphx\Forrest\Formatters\XMLFormatter;
+
+use Omniphx\Forrest\Repositories\InstanceURLRepository;
+use Omniphx\Forrest\Repositories\RefreshTokenRepository;
+use Omniphx\Forrest\Repositories\ResourceRepository;
+use Omniphx\Forrest\Repositories\StateRepository;
+use Omniphx\Forrest\Repositories\TokenRepository;
+use Omniphx\Forrest\Repositories\VersionRepository;
+
 
 abstract class BaseServiceProvider extends ServiceProvider
 {
@@ -34,6 +47,13 @@ abstract class BaseServiceProvider extends ServiceProvider
      * @return GuzzleHttp\Client
      */
     protected abstract function getClient();
+
+    /**
+     * Returns client implementation
+     *
+     * @return GuzzleHttp\Client
+     */
+    protected abstract function getRedirect();
 
     /**
      * Bootstrap the application events.
@@ -64,31 +84,70 @@ abstract class BaseServiceProvider extends ServiceProvider
             $authenticationType = config('forrest.authentication');
 
             // Dependencies
-            $client = $this->getClient();
-            $input = new LaravelInput(app('request'));
-            $event = new LaravelEvent(app('events'));
-            $redirect = new LaravelRedirect(app('redirect'));
+            $httpClient    = $this->getClient();
+            $input     = new LaravelInput(app('request'));
+            $event     = new LaravelEvent(app('events'));
+            $encryptor = new LaravelEncryptor(app('encrypter'));
+            $redirect  = $this->getRedirect();
+            $storage   = $this->getStorage($storageType);
 
-            switch ($storageType) {
-                case 'session':
-                    $storage = new LaravelSession(app('config'), app('request')->session());
-                    break;
-                case 'cache':
-                    $storage = new LaravelCache(app('config'), app('cache'));
-                    break;
-                default:
-                    $storage = new LaravelSession(app('config'), app('request')->session());
-            }
+            $refreshTokenRepo = new RefreshTokenRepository($encryptor, $storage);
+            $tokenRepo        = new TokenRepository($encryptor, $storage);
+            $resourceRepo     = new ResourceRepository($storage);
+            $versionRepo      = new VersionRepository($storage);
+            $instanceURLRepo  = new InstanceURLRepository($tokenRepo, $settings);
+            $stateRepo        = new StateRepository($storage);
+
+            $formatter = new JSONFormatter($tokenRepo, $settings);
 
             switch ($authenticationType) {
                 case 'WebServer':
-                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    $forrest = new WebServer(
+                        $httpClient,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $stateRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
+                        $settings);
                     break;
                 case 'UserPassword':
-                    $forrest = new UserPassword($client, $event, $input, $redirect, $storage, $settings);
+                    $forrest = new UserPassword(
+                        $httpClient,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $stateRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
+                        $settings);
                     break;
                 default:
-                    $forrest = new WebServer($client, $event, $input, $redirect, $storage, $settings);
+                    $forrest = new WebServer(
+                        $httpClient,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $stateRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
+                        $settings);
                     break;
             }
 

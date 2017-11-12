@@ -25,6 +25,6 @@ class LaravelEvent implements EventInterface
      */
     public function fire($event, $payload = [], $halt = false)
     {
-        return $this->event->fire($event, $payload, $halt);
+        return $this->event->dispatch($event, $payload, $halt);
     }
 }

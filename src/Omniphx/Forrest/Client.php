@@ -8,14 +8,15 @@ use GuzzleHttp\Message\ResponseInterface;
 use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
+use Omniphx\Forrest\Exceptions\MissingVersionException;
+
+use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Omniphx\Forrest\Interfaces\RequestFormatterInterface;
-use Omniphx\Forrest\Interfaces\StorageInterface;
-use Omniphx\Forrest\RequestFormatters\JSONFormatter;
-use Omniphx\Forrest\RequestFormatters\URLEncodedFormatter;
-use Omniphx\Forrest\RequestFormatters\XMLFormatter;
+use Omniphx\Forrest\Interfaces\FormatterInterface;
+use Omniphx\Forrest\Interfaces\RepositoryInterface;
+use Omniphx\Forrest\Interfaces\ResourceRepositoryInterface;
 
 /**
  * API resources.
@@ -65,26 +66,20 @@ abstract class Client
      */
     protected $event;
 
+    protected $resourceRepo;
+
+    protected $stateRepo;
+
+    protected $tokenRepo;
+
+    protected $versionRepo;
+
     /**
      * Config options.
      *
      * @var array
      */
     protected $settings;
-
-    /**
-     * Storage handler.
-     *
-     * @var Interfaces\StorageInterface
-     */
-    protected $storage;
-
-    /**
-     * Token data.
-     *
-     * @var array
-     */
-    protected $tokenData;
 
     /**
      * Redirect handler.
@@ -99,6 +94,15 @@ abstract class Client
      * @var \Omniphx\Forrest\Interfaces\InputInterface
      */
     protected $input;
+
+    /**
+     * Inteface for Input calls.
+     *
+     * @var \Omniphx\Forrest\Interfaces\EncryptorInterface
+     */
+    protected $encryptor;
+
+    protected $formatter;
 
     /**
      * Authentication credentials.
@@ -130,19 +134,33 @@ abstract class Client
 
     public function __construct(
         ClientInterface $httpClient,
+        EncryptorInterface $encryptor,
         EventInterface $event,
         InputInterface $input,
         RedirectInterface $redirect,
-        StorageInterface $storage,
-        $settings
-    ) {
-        $this->httpClient = $httpClient;
-        $this->storage = $storage;
-        $this->redirect = $redirect;
-        $this->input = $input;
-        $this->event = $event;
-        $this->settings = $settings;
-        $this->credentials = $settings['credentials'];
+        RepositoryInterface $instanceURLRepo,
+        RepositoryInterface $refreshTokenRepo,
+        ResourceRepositoryInterface $resourceRepo,
+        RepositoryInterface $stateRepo,
+        RepositoryInterface $tokenRepo,
+        RepositoryInterface $versionRepo,
+        FormatterInterface $formatter,
+        $settings)
+    {
+        $this->httpClient       = $httpClient;
+        $this->encryptor        = $encryptor;
+        $this->event            = $event;
+        $this->input            = $input;
+        $this->redirect         = $redirect;
+        $this->instanceURLRepo  = $instanceURLRepo;
+        $this->refreshTokenRepo = $refreshTokenRepo;
+        $this->resourceRepo     = $resourceRepo;
+        $this->stateRepo        = $stateRepo;
+        $this->tokenRepo        = $tokenRepo;
+        $this->versionRepo      = $versionRepo;
+        $this->formatter        = $formatter;
+        $this->settings         = $settings;
+        $this->credentials      = $settings['credentials'];
     }
 
     /**
@@ -159,73 +177,33 @@ abstract class Client
         $this->options = array_replace_recursive($this->settings['defaults'], $options);
 
         try {
-            return $this->formatRequest();
+            return $this->handleRequest();
         } catch (TokenExpiredException $e) {
             $this->refresh();
 
-            return $this->formatRequest();
+            return $this->handleRequest();
         }
     }
 
-    private function formatRequest()
+    private function handleRequest()
     {
-        switch ($this->options['format']) {
-            case 'json':
-                return $this->handleRequest(new JSONFormatter());
-                break;
+        $this->parameters['headers'] = $this->formatter->setHeaders();
 
-            case 'xml':
-                return $this->handleRequest(new XMLFormatter());
-                break;
-
-            case 'urlencoded':
-                return $this->handleRequest(new URLEncodedFormatter());
-                break;
-
-            default:
-                return $this->handleRequest(new JSONFormat());
-                break;
+        if (isset($this->options['body'])) {
+            $this->parameters['body'] = $this->formatter->setBody($this->options['body']);
         }
-    }
-
-    private function handleRequest(RequestFormatterInterface $requestFormatter)
-    {
-        $this->headers = $requestFormatter->setHeaders();
-        $this->setAuthorizationHeaders();
-        $this->setCompression();
-
-        $this->parameters['headers'] = $this->headers;
-
-        if (isset($this->options['body']))
-            $this->parameters['body'] = $requestFormatter->setBody($this->options['body']);
 
         try {
             $response = $this->httpClient->request($this->options['method'], $this->url, $this->parameters);
-        } catch (RequestException $e) {
-            $this->assignExceptions($e);
+        } catch (RequestException $ex) {
+            $this->assignExceptions($ex);
         }
 
-        $this->event->fire('forrest.response', [$response]);
+        $formattedResponse = $this->formatter->formatResponse($response);
 
-        return $requestFormatter->formatResponse($response);
-    }
+        $this->event->fire('forrest.response', [$formattedResponse]);
 
-    private function setAuthorizationHeaders()
-    {
-        $authToken = $this->getTokenData();
-
-        $accessToken = $authToken['access_token'];
-        $tokenType   = $authToken['token_type'];
-
-        $this->headers['Authorization'] = "$tokenType $accessToken";
-    }
-
-    private function setCompression()
-    {
-        if (!$this->options['compression']) return;
-
-        $this->headers['Accept-Encoding']  = $this->options['compressionType'];
-        $this->headers['Content-Encoding'] = $this->options['compressionType'];
+        return $formattedResponse;
     }
 
     /**
@@ -324,12 +302,13 @@ abstract class Client
      */
     private function sendRequest($path, $requestBody, $options, $method)
     {
-        $url = $this->getInstanceUrl();
+        $url = $this->instanceURLRepo->get();
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = $method;
-        if (!empty($requestBody))
+        if (!empty($requestBody)) {
             $options['body'] = $requestBody;
+        }
 
         return $this->request($url, $options);
     }
@@ -346,8 +325,8 @@ abstract class Client
      */
     public function versions($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= '/services/data/';
+        $url = $this->instanceURLRepo->get();
+        $url .= '/services/data';
 
         $versions = $this->request($url, $options);
 
@@ -367,7 +346,6 @@ abstract class Client
     public function resources($options = [])
     {
         $url = $this->getBaseUrl();
-
         $resources = $this->request($url, $options);
 
         return $resources;
@@ -382,7 +360,7 @@ abstract class Client
      */
     public function identity($options = [])
     {
-        $token = $this->getTokenData();
+        $token = $this->tokenRepo->get();
         $accessToken = $token['access_token'];
         $url = $token['id'];
 
@@ -440,8 +418,8 @@ abstract class Client
      */
     public function query($query, $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['query'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('query');
         $url .= '?q=';
         $url .= urlencode($query);
 
@@ -460,7 +438,7 @@ abstract class Client
      */
     public function next($nextUrl, $options = [])
     {
-        $url = $this->getInstanceUrl();
+        $url = $this->instanceURLRepo->get();
         $url .= $nextUrl;
 
         $queryResults = $this->request($url, $options);
@@ -479,8 +457,8 @@ abstract class Client
      */
     public function queryExplain($query, $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['query'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('query');
         $url .= '?explain=';
         $url .= urlencode($query);
 
@@ -501,8 +479,8 @@ abstract class Client
      */
     public function queryAll($query, $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['queryAll'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('queryAll');
         $url .= '?q=';
         $url .= urlencode($query);
 
@@ -521,8 +499,8 @@ abstract class Client
      */
     public function search($query, $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['search'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('search');
         $url .= '?q=';
         $url .= urlencode($query);
 
@@ -544,8 +522,8 @@ abstract class Client
      */
     public function scopeOrder($options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['search'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('search');
         $url .= '/scopeOrder';
 
         $scopeOrder = $this->request($url, $options);
@@ -563,8 +541,8 @@ abstract class Client
      */
     public function searchLayouts($objectList, $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['search'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('search');
         $url .= '/layout/?q=';
         $url .= urlencode($objectList);
 
@@ -586,8 +564,8 @@ abstract class Client
      */
     public function suggestedArticles($query, $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['search'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('search');
         $url .= '/suggestTitleMatches?q=';
         $url .= urlencode($query);
 
@@ -620,8 +598,8 @@ abstract class Client
      */
     public function suggestedQueries($query, $options = [])
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')['search'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get('search');
         $url .= '/suggestSearchQueries?q=';
         $url .= urlencode($query);
 
@@ -647,7 +625,7 @@ abstract class Client
      */
     public function custom($customURI, $options = [])
     {
-        $url = $this->getInstanceUrl();
+        $url = $this->instanceURLRepo->get();
         $url .= '/services/apexrest';
         $url .= $customURI;
 
@@ -664,7 +642,7 @@ abstract class Client
     /**
      * Public accessor to the Guzzle Client Object.
      *
-     * @return ClientInterface
+     * @return HttpClientInterface
      */
     public function getClient()
     {
@@ -684,8 +662,8 @@ abstract class Client
      */
     public function __call($name, $arguments)
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('resources')[$name];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->resourceRepo->get($name);
         $url .= $this->appendURL($arguments);
 
         $options = $this->setOptions($arguments);
@@ -702,38 +680,19 @@ abstract class Client
 
     private function setOptions($arguments) {
         $options = [];
-        if (empty($arguments)) return $options;
 
-        if(!empty($arguments[0])) {
-            $this->setArgument($arguments[0], $options);
-        }
-        if(!empty($arguments[1])) {
-            $this->setArgument($arguments[1], $options);
+        foreach ($arguments as $argument) {
+            $this->setArgument($argument, $options);
         }
 
         return $options;
     }
 
-    private function setArgument($argument, &$options) {
-        if (!isset($argument)) return;
+    private function setArgument($argument, $options) {
         if (!is_array($argument)) return;
         foreach ($argument as $key => $value) {
             $options[$key] = $value;
         }
-    }
-
-    /**
-     * Get token.
-     *
-     * @return array
-     */
-    public function getTokenData()
-    {
-        if (empty($this->tokenData)) {
-            $this->tokenData = (array) $this->storage->getTokenData();
-        }
-
-        return $this->tokenData;
     }
 
     /**
@@ -750,24 +709,10 @@ abstract class Client
      */
     abstract public function revoke();
 
-    /**
-     * Get the instance URL.
-     *
-     * @return string
-     */
-    protected function getInstanceUrl()
-    {
-        $url = $this->settings['instanceURL'];
-        if (empty($url))
-            $url = $this->getTokenData()['instance_url'];
-
-        return $url;
-    }
-
     protected function getBaseUrl()
     {
-        $url = $this->getInstanceUrl();
-        $url .= $this->storage->get('version')['url'];
+        $url = $this->instanceURLRepo->get();
+        $url .= $this->versionRepo->get()['url'];
 
         return $url;
     }
@@ -783,9 +728,11 @@ abstract class Client
     protected function storeVersion()
     {
         $versions = $this->versions();
+
         $this->storeConfiguredVersion($versions);
 
-        if($this->storage->has('version')) return;
+        if($this->versionRepo->has()) return;
+
         $this->storeLatestVersion($versions);
     }
 
@@ -794,20 +741,21 @@ abstract class Client
         $configVersion = $this->settings['version'];
         if (empty($configVersion)) return;
 
-        foreach($versions as $version)
+        foreach($versions as $version) {
             $this->determineIfConfiguredVersionExists($version, $configVersion);
+        }
     }
 
     private function determineIfConfiguredVersionExists($version, $configVersion)
     {
         if ($version['version'] !== $configVersion) return;
-        $this->storage->put('version', $version);
+        $this->versionRepo->put($version);
     }
 
     private function storeLatestVersion($versions)
     {
         $latestVersion = end($versions);
-        $this->storage->put('version', $latestVersion);
+        $this->versionRepo->put($latestVersion);
     }
 
     /**
@@ -819,39 +767,33 @@ abstract class Client
      */
     protected function storeResources()
     {
-        try {
-            $this->storage->get('version');
-        } catch (\Exception $e) {
-            $this->storeVersion();
-        }
-
         $resources = $this->resources(['format' => 'json']);
-        $this->storage->put('resources', $resources);
+        $this->resourceRepo->put($resources);
     }
 
     protected function handleAuthenticationErrors(array $response)
     {
-        if (isset($response['error'])) {
-            throw new InvalidLoginCreditialsException($response['error_description']);
-        }
+        if (!isset($response['error'])) return;
+
+        throw new InvalidLoginCreditialsException($response['error_description']);
     }
 
     /**
      * Method will elaborate on RequestException.
      *
-     * @param RequestException $e
+     * @param RequestException $ex
      *
      * @throws SalesforceException
      * @throws TokenExpiredException
      */
-    private function assignExceptions(RequestException $e)
+    private function assignExceptions(RequestException $ex)
     {
-        if ($e->hasResponse() && $e->getResponse()->getStatusCode() == 401) {
-            throw new TokenExpiredException('Salesforce token has expired', $e);
-        } elseif ($e->hasResponse()) {
-            throw new SalesforceException('Salesforce response error', $e);
+        if ($ex->hasResponse() && $ex->getResponse()->getStatusCode() == 401) {
+            throw new TokenExpiredException('Salesforce token has expired', $ex);
+        } elseif ($ex->hasResponse()) {
+            throw new SalesforceException('Salesforce response error', $ex);
         } else {
-            throw new SalesforceException('Invalid request: %s', $e);
+            throw new SalesforceException('Invalid request: %s', $ex);
         }
     }
 }
