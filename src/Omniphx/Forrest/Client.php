@@ -393,18 +393,19 @@ abstract class Client
     /**
      * Describes all global objects available in the organization.
      *
+     * @param string $object_name
      * @param array $options
-     *
      * @return array
      */
-    public function describe($options = [])
+    public function describe($object_name = null, $options = [])
     {
-        $url = $this->getBaseUrl();
-        $url .= '/sobjects';
+        $url = sprintf('%s/sobjects', $this->getBaseUrl());
+        
+        if ( ! empty($object_name)) {
+            $url .= sprintf('/%s/describe', $object_name);
+        }
 
-        $describe = $this->request($url, $options);
-
-        return $describe;
+        return $this->request($url, $options);
     }
 
     /**
