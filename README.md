@@ -191,7 +191,7 @@ Forrest::sobjects('Account/001i000000xxx', ['method' => 'delete']);
 Change the request/response format to XML with the `format` key or make it default in your config file.
 
 ```php
-Forrest::describe('Account',['format'=>'xml']);
+Forrest::sobjects('Account',['format'=>'xml']);
 ```
 
 ## API Requests
