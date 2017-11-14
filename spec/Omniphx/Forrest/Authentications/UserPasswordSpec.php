@@ -39,6 +39,24 @@ class UserPasswordSpec extends ObjectBehavior
         }
     ]';
 
+    protected $versionArray = [
+        [
+            "label"   => "Spring 15",
+            "url"     => "/services/data/v33.0",
+            "version" => "33.0"
+        ],
+        [
+            "label"   => "Summer 15",
+            "url"     => "/services/data/v34.0",
+            "version" => "34.0"
+        ],
+        [
+            "label"   => "Winter 16",
+            "url"     => "/services/data/v35.0",
+            "version" => "35.0"
+        ]
+    ];
+
     protected $authenticationJSON = '{
         "access_token": "00Do0000000secret",
         "id": "https://login.salesforce.com/id/00Do0000000xxxxx/005o0000000xxxxx",
@@ -138,9 +156,7 @@ class UserPasswordSpec extends ObjectBehavior
             'Content-Type'  => 'application/json',
         ]);
 
-        $mockedVersionRepo->get()->willReturn([
-            'url' => '/resources'
-        ]);
+        $mockedVersionRepo->get()->willReturn(['url' => '/resources']);
 
         $mockedFormatter->formatResponse($mockedResponse)->willReturn(['foo' => 'bar']);
     }
@@ -150,7 +166,12 @@ class UserPasswordSpec extends ObjectBehavior
         $this->shouldHaveType('Omniphx\Forrest\Authentications\UserPassword');
     }
 
-    public function it_should_authenticate(ClientInterface $mockedHttpClient, ResponseInterface $mockedResponse)
+    public function it_should_authenticate(
+        ClientInterface $mockedHttpClient,
+        ResponseInterface $mockedResponse,
+        ResponseInterface $mockedVersionRepo,
+        FormatterInterface $mockedFormatter,
+        ResponseInterface $versionResponse)
     {
         $mockedHttpClient->request(
             'post',
@@ -177,6 +198,22 @@ class UserPasswordSpec extends ObjectBehavior
             ->willReturn($mockedResponse);
 
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->authenticationJSON);
+
+        $mockedHttpClient->request(
+            'get',
+            'https://instance.salesforce.com/services/data',
+            ['headers' => [
+                'Authorization' => 'Oauth accessToken',
+                'Accept'        => 'application/json',
+                'Content-Type'  => 'application/json'
+            ]])
+            ->shouldBeCalled()
+            ->willReturn($versionResponse);
+
+        $mockedFormatter->formatResponse($versionResponse)->shouldBeCalled()->willReturn($this->versionArray);
+
+        $mockedVersionRepo->has()->willReturn(false);
+        $mockedVersionRepo->put(["label" => "Winter 16", "url" => "/services/data/v35.0", "version" => "35.0"])->shouldBeCalled();
 
         $this->authenticate('url')->shouldReturn(null);
     }
