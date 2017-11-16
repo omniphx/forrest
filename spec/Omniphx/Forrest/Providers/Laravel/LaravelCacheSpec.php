@@ -12,7 +12,7 @@ class LaravelCacheSpec extends ObjectBehavior
 {
     public function let(Cache $cache, Config $config)
     {
-        $this->beConstructedWith($cache, $config);
+        $this->beConstructedWith($config, $cache);
     }
 
     public function it_is_initializable(Config $config)
