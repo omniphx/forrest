@@ -13,7 +13,7 @@ class LaravelCache extends LaravelStorageProvider
     protected $minutes = 20;
     protected $storeForever;
 
-    public function __construct(Cache $cache, Config $config)
+    public function __construct(Config $config, Cache $cache)
     {
         $this->cache            = $cache;
         $this->path             = $config->get('forrest.storage.path');
