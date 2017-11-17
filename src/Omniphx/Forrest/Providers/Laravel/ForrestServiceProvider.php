@@ -36,7 +36,7 @@ class ForrestServiceProvider extends BaseServiceProvider
                 $storage = new LaravelSession(app('config'), app('request')->session());
                 break;
             case 'cache':
-                $storage = new LaravelCache(app('config'), app('cache'));
+                $storage = new LaravelCache(app('config'), app('cache')->store());
                 break;
             default:
                 $storage = new LaravelSession(app('config'), app('request')->session());
