@@ -688,7 +688,7 @@ abstract class Client
         return $options;
     }
 
-    private function setArgument($argument, $options) {
+    private function setArgument($argument, &$options) {
         if (!is_array($argument)) return;
         foreach ($argument as $key => $value) {
             $options[$key] = $value;
