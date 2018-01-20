@@ -126,7 +126,7 @@ class WebServer extends Client implements WebServerInterface
      */
     public function revoke()
     {
-        $accessToken = $this->getTokenData()['access_token'];
+        $accessToken = $this->tokenRepo->get()['access_token'];
         $url = $this->getLoginURL();
         $url .= '/services/oauth2/revoke';
 
