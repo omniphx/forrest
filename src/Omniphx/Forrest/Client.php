@@ -730,9 +730,6 @@ abstract class Client
         $versions = $this->versions();
 
         $this->storeConfiguredVersion($versions);
-
-        if($this->versionRepo->has()) return;
-
         $this->storeLatestVersion($versions);
     }
 
