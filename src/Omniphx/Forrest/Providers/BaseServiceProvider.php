@@ -76,6 +76,10 @@ abstract class BaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        if (str_contains($this->app->version(), 'Lumen')) {
+            $this->app->configure('forrest');
+        }
+        
         $this->app->singleton('forrest', function ($app) {
 
             // Config options
