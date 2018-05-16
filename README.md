@@ -7,7 +7,7 @@
 
 Salesforce/Force.com REST API client for Laravel. While it acts as more of a wrapper of the API methods, it should provide you with all the flexibility you will need to interact with the REST service.
 
-While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application. Currently the only support is for Larevel 4, 5 and Lumen.
+While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application. Currently the only support is for Laravel 4, 5 and Lumen.
 
 ## Installation
 >If you are upgrading to Version 2.0, be sure to re-publish your config file.
