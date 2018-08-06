@@ -174,7 +174,7 @@ class WebServerSpec extends ObjectBehavior
         InputInterface $mockedInput,
         RepositoryInterface $mockedInstanceURLRepo,
         RepositoryInterface $mockedTokenRepo,
-        ResourceRepositoryInterface $mockedResourceRepo,  
+        ResourceRepositoryInterface $mockedResourceRepo,
         ResponseInterface $mockedResponse,
         ResponseInterface $resourceResponse,
         ResponseInterface $versionResponse,
@@ -201,7 +201,6 @@ class WebServerSpec extends ObjectBehavior
 
         $tokenResponse->getBody()->shouldBeCalled()->willReturn($this->tokenJSON);
         $mockedTokenRepo->put($this->token)->shouldBeCalled();
-        $mockedVersionRepo->has()->shouldBeCalled()->willReturn(false);
         $mockedVersionRepo->put(["label" => "Winter 16", "url" => "/services/data/v35.0", "version" => "35.0"])->shouldBeCalled();
         $mockedInstanceURLRepo->get()->shouldBeCalled()->willReturn('https://instance.salesforce.com');
  
