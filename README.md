@@ -1,9 +1,14 @@
-# Salesforce REST API Client for Laravel 5
+
+# Salesforce REST API Client for Laravel 5 <img align="right" src="https://raw.githubusercontent.com/omniphx/images/master/Forrest.png">
+
 [![Laravel](https://img.shields.io/badge/Laravel-5.5-orange.svg?style=flat-square)](http://laravel.com)
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Total Downloads](https://img.shields.io/packagist/dt/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![License](https://img.shields.io/packagist/l/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Build Status](https://img.shields.io/travis/omniphx/forrest.svg?style=flat-square)](https://travis-ci.org/omniphx/forrest)
+
+
+
 
 Salesforce/Force.com REST API client for Laravel. While it acts as more of a wrapper of the API methods, it should provide you with all the flexibility you will need to interact with the REST service.
 
