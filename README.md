@@ -9,6 +9,8 @@ Salesforce/Force.com REST API client for Laravel. While it acts as more of a wra
 
 While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application. Currently the only support is for Laravel 4, 5 and Lumen.
 
+Interested in Eloquent Salesforce Models? Check out [@roblesterjr04](https://github.com/roblesterjr04)'s [EloquentSalesForce](https://github.com/roblesterjr04/EloquentSalesForce) project that utilizes Forrest as it's API layer.
+
 ## Installation
 >If you are upgrading to Version 2.0, be sure to re-publish your config file.
 
