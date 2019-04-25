@@ -1,7 +1,7 @@
 
 # Salesforce REST API Client for Laravel 5 <img align="right" src="https://raw.githubusercontent.com/omniphx/images/master/Forrest.png">
 
-[![Laravel](https://img.shields.io/badge/Laravel-5.5-orange.svg?style=flat-square)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-5.8-orange.svg?style=flat-square)](http://laravel.com)
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Total Downloads](https://img.shields.io/packagist/dt/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![License](https://img.shields.io/packagist/l/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
@@ -12,7 +12,7 @@
 
 Salesforce/Force.com REST API client for Laravel. While it acts as more of a wrapper of the API methods, it should provide you with all the flexibility you will need to interact with the REST service.
 
-While this package is built for Laravel, it has been decoupled so that it can be extended into any framework or vanilla PHP application. Currently the only support is for Laravel 4, 5 and Lumen.
+Currently the only support is for Laravel 4, 5 and Lumen.
 
 Interested in Eloquent Salesforce Models? Check out [@roblesterjr04](https://github.com/roblesterjr04)'s [EloquentSalesForce](https://github.com/roblesterjr04/EloquentSalesForce) project that utilizes Forrest as it's API layer.
 
@@ -51,11 +51,21 @@ You will need a configuration file to add your credentials. Publish a config fil
 ```bash
 php artisan vendor:publish
 ```
-You can find the config file in: `config/forrest.php`
+This will publish a `config/forrest.php` file that can switch between authentication types as well as other settings.
+
+After adding the config file, update your `.env` to include the following values (details for getting a consumer key and secret are outlined below):
+```
+CONSUMER_KEY=123455
+CONSUMER_SECRET=ABCDEF
+CALLBACK_URI=https://test.app/callback
+LOGIN_URL=https://login.salesforce.com
+USERNAME=mattjmitchener@gmail.com
+PASSWORD=password123
+```
 
 >For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application. 
 
->For Laravel 4, run `php artisan config:publish omniphx/forrest`. It will be found in `app/config/omniphx/forrest/config.php`
+>For Laravel 4, run `php artisan config:publish omniphx/forrest` which create `app/config/omniphx/forrest/config.php`
 
 ## Getting Started
 ### Setting up a Connected App
@@ -122,8 +132,8 @@ After authentication, your app will store an encrypted authentication token whic
 ```php
 Forrest::query('SELECT Id FROM Account');
 ```
-Result:
-```JavaScript
+Sample result:
+```JSON
 {
     "totalSize": 2,
     "done": true,
@@ -146,8 +156,10 @@ Result:
 }
 ```
 If you are querying more than 2000 records, you response will include:
-```
-"nextRecordsUrl" : "/services/data/v20.0/query/01gD0000002HU6KIAW-2000"
+```JSON
+{
+    "nextRecordsUrl" : "/services/data/v20.0/query/01gD0000002HU6KIAW-2000"
+}
 ```
 
 Simply, call `Forrest::next($nextRecordsUrl)` to return the next 2000 records.
@@ -155,36 +167,39 @@ Simply, call `Forrest::next($nextRecordsUrl)` to return the next 2000 records.
 ### Create a new record
 Records can be created using the following format.
 ```php
-$body = ['Name' => 'New Account'];
+$body = ;
 Forrest::sobjects('Account',[
     'method' => 'post',
-    'body'   => $body]);
+    'body'   => ['Name' => 'Dunder Mifflin']
+]);
 ```
 
 ### Update a record
 Update a record with the PUT method.
 
 ```php
-$body = [
-    'Name'  => 'Acme'
-    'Phone' => '555-555-5555'];
-
 Forrest::sobjects('Account/001i000000xxx',[
     'method' => 'put',
-    'body'   => $body]);
+    'body'   => [
+        'Name'  => 'Acme',
+        'Phone' => '555-555-5555'
+    ]
+]);
 ```
 
 ### Upsert a record
 Update a record with the PATCH method and if the external Id doesn't exist, it will insert a new record.
 
 ```php
-$body = [
-    'Phone' => '555-555-5555',
-    'External_Id__c' => 'XYZ1234'];
+$externalId = 'XYZ1234';
 
-Forrest::sobjects('Account',[
+Forrest::sobjects('Account/External_Id__c/' + $externalId, [
     'method' => 'patch',
-    'body'   => $body]);
+    'body'   => [
+        'Name'  => 'Acme',
+        'Phone' => '555-555-5555'
+    ]
+]);
 ```
 
 ### Delete a record
