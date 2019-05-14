@@ -167,7 +167,6 @@ Simply, call `Forrest::next($nextRecordsUrl)` to return the next 2000 records.
 ### Create a new record
 Records can be created using the following format.
 ```php
-$body = ;
 Forrest::sobjects('Account',[
     'method' => 'post',
     'body'   => ['Name' => 'Dunder Mifflin']
@@ -181,7 +180,7 @@ Update a record with the PUT method.
 Forrest::sobjects('Account/001i000000xxx',[
     'method' => 'put',
     'body'   => [
-        'Name'  => 'Acme',
+        'Name'  => 'Dunder Mifflin',
         'Phone' => '555-555-5555'
     ]
 ]);
@@ -196,7 +195,7 @@ $externalId = 'XYZ1234';
 Forrest::sobjects('Account/External_Id__c/' + $externalId, [
     'method' => 'patch',
     'body'   => [
-        'Name'  => 'Acme',
+        'Name'  => 'Dunder Mifflin',
         'Phone' => '555-555-5555'
     ]
 ]);
@@ -209,6 +208,22 @@ Delete a record with the DELETE method.
 Forrest::sobjects('Account/001i000000xxx', ['method' => 'delete']);
 ```
 
+### Setting headers
+Sometimes you need the ability to set custom headers (e.g., creating a Lead with an assignment rule)
+```php
+Forrest::sobjects('Lead',[
+    'method' => 'post',
+    'body' => [
+        'Company' => 'Dunder Mifflin',
+        'LastName' => 'Scott'
+    ],
+    'headers' => [
+        'Sforce-Auto-Assign' => '01Q1N000000yMQZUA2'
+    ]
+]);
+```
+>To disable assignment rules, use `'Sforce-Auto-Assign' => 'false'`
+
 ### XML format
 Change the request/response format to XML with the `format` key or make it default in your config file.
 
@@ -220,11 +235,11 @@ Forrest::sobjects('Account',['format'=>'xml']);
 
 With the exception of the `search` and `query` resources, all resources are requested dynamically using method overloading.
 
-First, determine which resources you have access to by calling:
+You can determine which resources you have access to by calling with the resource method
 ```php
 Forrest::resources();
 ```
-Result:
+This sample output shows the resourses available to call via the API:
 ```php
 Array
 (
@@ -245,21 +260,21 @@ Array
     [appMenu] => /services/data/v30.0/appMenu
 )
 ```
-Next, call resources by referring to the specified key. For instance:
+From the list above, I can call resources by referring to the specified key.
 ```php
 Forrest::theme();
 ```
-or
+Or...
 ```php
 Forrest::appMenu();
 ```
 
-Resource urls can be extended by passing additional parameters into the first argument:
+Additional resource url parameters can also be passed in
 ```php
 Forrest::sobjects('Account/describe/approvalLayouts/');
 ```
 
-You can also add optional parameters to requests:
+As well as new formatting options, headers or other configurations
 ```php
 Forrest::theme(['format'=>'xml']);
 ```
