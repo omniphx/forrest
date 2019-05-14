@@ -187,7 +187,11 @@ abstract class Client
 
     private function handleRequest()
     {
-        $this->parameters['headers'] = $this->formatter->setHeaders();
+        if (isset($this->options['headers'])) {
+            $this->parameters['headers'] = array_replace_recursive($this->formatter->setHeaders(), $this->options['headers']);
+        } else {
+            $this->parameters['headers'] = $this->formatter->setHeaders();
+        }
 
         if (isset($this->options['body'])) {
             $this->parameters['body'] = $this->formatter->setBody($this->options['body']);
