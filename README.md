@@ -36,7 +36,7 @@ Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
 
 >For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
 
-### Lumen Installation 
+### Lumen Installation
 
 ```php
 class_alias('Omniphx\Forrest\Providers\Laravel\Facades\Forrest', 'Forrest');
@@ -63,7 +63,7 @@ USERNAME=mattjmitchener@gmail.com
 PASSWORD=password123
 ```
 
->For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application. 
+>For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
 
 >For Laravel 4, run `php artisan config:publish omniphx/forrest` which create `app/config/omniphx/forrest/config.php`
 
@@ -118,8 +118,9 @@ Route::get('/authenticate', function()
 
 1. Salesforce allows individual logins via a SOAP Login
 2. The Bearer access token returned from the SOAP login can be used similar to Oauth key
-3. Update your config file with values for `loginURL`, `username`, and `password`.
-With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method.
+3. Update your config file and set the `authentication` value to `UserPasswordSoap`
+4. Update your config file with values for `loginURL`, `username`, and `password`.
+With the Username Password SOAP flow, you can directly authenticate with the `Forrest::authenticate()` method.
 
 >To use this authentication you can add your username, and password to the config file. Security token might need to be ammended to your password unless your IP address is whitelisted.
 
@@ -131,7 +132,7 @@ Route::get('/authenticate', function()
 });
 ```
 
-If your application requires logging in to salesforce as different users, you can alternatively pass in the login url, username and password to the authenticateUser call.
+If your application requires logging in to salesforce as different users, you can alternatively pass in the login url, username, and password to the `Forrest::authenticateUser()` method.
 
 >Security token might need to be ammended to your password unless your IP address is whitelisted.
 
