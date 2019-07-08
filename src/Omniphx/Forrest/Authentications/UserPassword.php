@@ -4,13 +4,12 @@ namespace Omniphx\Forrest\Authentications;
 
 use Omniphx\Forrest\Client as BaseAuthentication;
 use Omniphx\Forrest\Interfaces\UserPasswordInterface;
-use Psr\Http\Message\ResponseInterface;
 
 class UserPassword extends BaseAuthentication implements UserPasswordInterface
 {
     public function authenticate($url = null)
     {
-        $loginURL = $url === null ? $this->credentials['loginURL'] : $url;
+        $loginURL = null === $url ? $this->credentials['loginURL'] : $url;
         $loginURL .= '/services/oauth2/token';
 
         $authToken = $this->getAuthToken($loginURL);
