@@ -364,7 +364,6 @@ abstract class Client
      */
     public function identity($options = [])
     {
-        //$url = $this->resourceRepo->get('identity');
         $token = $this->tokenRepo->get();
         $url = $token['id'];
         $accessToken = $token['access_token'];

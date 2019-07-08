@@ -133,6 +133,22 @@ abstract class BaseServiceProvider extends ServiceProvider
                         $formatter,
                         $settings);
                     break;
+                case 'UserPasswordSoap':
+                    $forrest = new UserPasswordSoap(
+                        $httpClient,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $stateRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
+                        $settings);
+                    break;
                 default:
                     $forrest = new WebServer(
                         $httpClient,
