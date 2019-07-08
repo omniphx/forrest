@@ -1,10 +1,28 @@
 <?php
+/**
+ * UserPasswordSoap - Authenticate a user via SOAP call instead of OAuth.
+ *
+ * Client apps must log in using valid credentials. After validating, the server stores
+ * a token object in storage, for automatic reference on subsequent calls.
+ *
+ * This module provides the standard authenticate method, as well as a new authenticateUser
+ * method for specifying the username and password at runtime, and not from config.
+ *
+ * Salesforce supports only the Transport Layer Security (TLS) protocol and frontdoor.jsp.
+ * Ciphers must have a key length of at least 128 bits.
+ *
+ *
+ * @version    SVN: $Id$
+ */
 
 namespace Omniphx\Forrest\Authentications;
 
 use Omniphx\Forrest\Client as BaseAuthentication;
 use Omniphx\Forrest\Interfaces\UserPasswordSoapInterface;
 
+/**
+ * UserPasswordSoap class.
+ */
 class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInterface
 {
     public function authenticate($url = null)
@@ -44,6 +62,8 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
     }
 
     /**
+     * Perform the actual SOAP login.
+     *
      * @param string $tokenURL
      * @param string $username
      * @param string $password
@@ -52,10 +72,10 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
      */
     private function getAuthUser($url, $username, $password)
     {
-        /******************************************************************
+        /*
         SOAP Login method - Does not require a connected/defined application
         https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_login.htm
-        ******************************************************************/
+        */
 
         // Required to avoid a 500 error on invalid login and guzzle unhandled error
         $parameters['http_errors'] = false;
@@ -135,7 +155,7 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
 
         // Create an empty response Object, then pick and choose items to insert from XML,
         $tokenResponse = [];
-        $tokenResponse['signature'] = "SOAPHasNoSecretSig";
+        $tokenResponse['signature'] = 'SOAPHasNoSecretSig';
         // $tokenResponse['issued_at'] = time(); // including this causes phpspec to fail
 
         // Handle errors from Login
@@ -153,13 +173,12 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
             // Forrest is looking for id.  SOAP doesnt return this, so build it
             // based on well known format.
             // https://login.salesforce.com/id/<organizationId>/<userId>
-            if($data->sandbox == "false") {
-                $base = "https://login.salesforce.com";
+            if ('false' == $data->sandbox) {
+                $base = 'https://login.salesforce.com';
+            } else {
+                $base = 'https://test.salesforce.com';
             }
-            else {
-                $base = "https://test.salesforce.com";
-            }
-            $tokenResponse['id'] = $base."/id/".$data->userInfo->organizationId."/".$data->userId;
+            $tokenResponse['id'] = $base.'/id/'.$data->userInfo->organizationId.'/'.$data->userId;
         }
         // The SOAP session id is what you put in the REST calls header
         // as "Authorization: Bearer <access_token>"
@@ -175,6 +194,7 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
             $url = substr($data->serverUrl, 0, $servicesPosition);
             $tokenResponse['instance_url'] = $url;
         }
+
         return $tokenResponse;
     }
 }
