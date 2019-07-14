@@ -4,15 +4,14 @@
  * Configuration options for Salesforce Oath settings and REST API defaults.
  */
 return [
-
     /*
-     * Options include WebServer or UserPassword
+     * Options include WebServer, UserPassword, and UserPasswordSoap
      */
     'authentication' => 'WebServer',
 
     /*
      * Enter your credentials
-     * Username and Password are only necessary for UserPassword flow.
+     * Username and Password are only necessary for UserPassword & UserPasswordSoap flows.
      * Likewise, callbackURI is only necessary for WebServer flow.
      */
     'credentials'    => [

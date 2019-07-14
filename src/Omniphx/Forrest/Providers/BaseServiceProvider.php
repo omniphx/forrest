@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
 use Omniphx\Forrest\Authentications\WebServer;
 use Omniphx\Forrest\Authentications\UserPassword;
-use Omniphx\Forrest\Providers\Laravel\LaravelCache;
+use Omniphx\Forrest\Authentications\UserPasswordSoap;
 use Omniphx\Forrest\Providers\Laravel\LaravelEvent;
 use Omniphx\Forrest\Providers\Laravel\LaravelEncryptor;
 use Omniphx\Forrest\Providers\Laravel\LaravelInput;
@@ -42,27 +42,27 @@ abstract class BaseServiceProvider extends ServiceProvider
     abstract protected function getConfigPath();
 
     /**
-     * Returns client implementation
+     * Returns client implementation.
      *
      * @return GuzzleHttp\Client
      */
-    protected abstract function getClient();
+    abstract protected function getClient();
 
     /**
-     * Returns client implementation
+     * Returns client implementation.
      *
      * @return GuzzleHttp\Client
      */
-    protected abstract function getRedirect();
+    abstract protected function getRedirect();
 
     /**
      * Bootstrap the application events.
-     *
-     * @return void
      */
     public function boot()
     {
-        if (!method_exists($this, 'getConfigPath')) return;
+        if (!method_exists($this, 'getConfigPath')) {
+            return;
+        }
 
         $this->publishes([
             __DIR__.'/../../../config/config.php' => $this->getConfigPath(),
@@ -119,6 +119,22 @@ abstract class BaseServiceProvider extends ServiceProvider
                     break;
                 case 'UserPassword':
                     $forrest = new UserPassword(
+                        $httpClient,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $stateRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
+                        $settings);
+                    break;
+                case 'UserPasswordSoap':
+                    $forrest = new UserPasswordSoap(
                         $httpClient,
                         $encryptor,
                         $event,

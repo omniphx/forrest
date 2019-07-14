@@ -4,30 +4,43 @@ namespace Omniphx\Forrest\Repositories;
 
 use Omniphx\Forrest\Interfaces\RepositoryInterface;
 
-class InstanceURLRepository implements RepositoryInterface {
-
+class InstanceURLRepository implements RepositoryInterface
+{
     protected $tokenRepo;
     protected $settings;
 
-    public function __construct(RepositoryInterface $tokenRepo, $settings) {
+    public function __construct(RepositoryInterface $tokenRepo, $settings)
+    {
         $this->tokenRepo = $tokenRepo;
-        $this->settings  = $settings;
+        $this->settings = $settings;
     }
 
-    public function put($instanceURL) {
+    /**
+     * Store the instance URL.
+     *
+     * @parameter $instanceURL   Override the instance URL returned from authentication
+     */
+    public function put($instanceURL)
+    {
         $token = $this->tokenRepo->get();
         $token['instance_url'] = $instanceURL;
         $this->tokenRepo->put($token);
     }
 
-    public function has() {
+    /**
+     * Is there a Token Repo?
+     *
+     * @return bool
+     */
+    public function has()
+    {
         return $this->tokenRepo->has();
     }
 
     /**
-     * Get version
+     * Get Instance URL.
      *
-     * @return mixed
+     * @return string
      */
     public function get()
     {
@@ -36,5 +49,5 @@ class InstanceURLRepository implements RepositoryInterface {
         } else {
             return $this->tokenRepo->get()['instance_url'];
         }
-    } 
+    }
 }
