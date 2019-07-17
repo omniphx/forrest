@@ -1,6 +1,6 @@
 {
     "name": "omniphx/forrest",
-    "description": "Salesforce / Force.com REST API Client for Laravel 5",
+    "description": "A Laravel library for Salesforce",
     "license":"MIT",
     "keywords":["salesforce", "laravel", "rest", "force.com", "force"],
     "authors": [
