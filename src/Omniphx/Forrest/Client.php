@@ -735,8 +735,8 @@ abstract class Client
     {
         $versions = $this->versions();
 
-        $this->storeConfiguredVersion($versions);
         $this->storeLatestVersion($versions);
+        $this->storeConfiguredVersion($versions);
     }
 
     private function storeConfiguredVersion($versions)
