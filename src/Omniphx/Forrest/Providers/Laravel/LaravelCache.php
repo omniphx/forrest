@@ -35,7 +35,9 @@ class LaravelCache extends LaravelStorageProvider
         if ($this->storeForever) {
             return $this->cache->forever($this->path.$key, $value);
         } else {
-            return $this->cache->put($this->path.$key, $value, $this->minutes);
+            // RE: Laravel 5.0 docs, cache put accepts a Carbon object, so lets use now() + the configured minutes, so 5.8
+            //     can read it as seconds.
+            return $this->cache->put($this->path.$key, $value, now()->addMinutes($this->minutes));
         }
     }
 
