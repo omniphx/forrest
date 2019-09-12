@@ -5,6 +5,7 @@ namespace Omniphx\Forrest\Providers\Laravel;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Config\Repository as Config;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
+use Carbon\Carbon;
 
 class LaravelCache extends LaravelStorageProvider
 {
@@ -37,7 +38,7 @@ class LaravelCache extends LaravelStorageProvider
         } else {
             // RE: Laravel 5.0 docs, cache put accepts a Carbon object, so lets use now() + the configured minutes, so 5.8
             //     can read it as seconds.
-            return $this->cache->put($this->path.$key, $value, \now()->addMinutes($this->minutes));
+            return $this->cache->put($this->path.$key, $value, Carbon::now()->addMinutes($this->minutes));
         }
     }
 
