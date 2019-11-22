@@ -6,10 +6,12 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 
 class XMLFormatter implements FormatterInterface
 {
+    const MIME_TYPE = 'application/xml';
+
     public function setHeaders()
     {
-        $headers['Accept'] = 'application/xml';
-        $headers['Content-Type'] = 'application/xml';
+        $headers['Accept'] = $this->getDefaultMIMEType();
+        $headers['Content-Type'] = $this->getDefaultMIMEType();
 
         return $headers;
     }
@@ -26,5 +28,10 @@ class XMLFormatter implements FormatterInterface
         $decodedXML = simplexml_load_string($contents);
 
         return $decodedXML;
+    }
+
+    public function getDefaultMIMEType()
+    {
+        return MIME_TYPE;
     }
 }

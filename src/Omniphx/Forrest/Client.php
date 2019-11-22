@@ -194,7 +194,11 @@ abstract class Client
         }
 
         if (isset($this->options['body'])) {
-            $this->parameters['body'] = $this->formatter->setBody($this->options['body']);
+            if ($this->parameters['headers']['Content-Type'] == $this->formatter->getDefaultMIMEType()) {
+                $this->parameters['body'] = $this->formatter->setBody($this->options['body']);
+            } else {
+                $this->parameters['body'] = $this->options['body'];
+            }
         } else {
             unset($this->parameters['body']);
         }

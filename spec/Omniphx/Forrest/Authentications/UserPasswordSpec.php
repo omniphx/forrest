@@ -155,6 +155,7 @@ class UserPasswordSpec extends ObjectBehavior
             'Accept'        => 'application/json',
             'Content-Type'  => 'application/json',
         ]);
+        $mockedFormatter->getDefaultMIMEType()->willReturn('application/json');
 
         $mockedVersionRepo->get()->willReturn(['url' => '/resources']);
 
@@ -800,5 +801,34 @@ class UserPasswordSpec extends ObjectBehavior
         $mockedEvent->fire('forrest.response', Argument::any())->shouldBeCalled();
 
         $this->versions();
+    }
+
+    public function it_should_not_encode_body_if_a_custom_header_is_used(
+        ClientInterface $mockedHttpClient,
+        ResponseInterface $mockedResponse,
+        FormatterInterface $mockedFormatter)
+    {
+        $mockedHttpClient->request('put',
+            'https://instance.salesforce.com/services/data/v30.0/resource/ingest/123/batches',
+            [
+                'headers' => [
+                    'Authorization'    => 'Oauth accessToken',
+                    'Accept'           => 'application/json',
+                    'Content-Type'     => 'text/csv'
+                ],
+                'body' => "id,name\r\n0010000000AAA,Rick Sanchez"
+            ])
+            ->shouldBeCalled()
+            ->willReturn($mockedResponse);
+
+        $mockedFormatter->formatResponse($mockedResponse)->shouldBeCalled()->willReturn($this->decodedResponse);
+
+        $this->jobs('ingest/123/batches', [
+            'method' => 'put',
+            'headers' => [
+                'Content-Type' => 'text/csv'
+            ],
+            'body' => "id,name\r\n0010000000AAA,Rick Sanchez"
+        ])->shouldReturn($this->decodedResponse);
     }
 }
