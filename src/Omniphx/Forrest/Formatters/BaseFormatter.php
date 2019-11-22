@@ -6,10 +6,12 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 
 class BaseFormatter implements FormatterInterface
 {
+    const MIME_TYPE = 'application/json';
+
     public function setHeaders()
     {
-        $headers['Accept'] = 'application/json';
-        $headers['Content-Type'] = 'application/json';
+        $headers['Accept'] = $this->getDefaultMIMEType();
+        $headers['Content-Type'] = $this->getDefaultMIMEType();
 
         return $headers;
     }
@@ -23,5 +25,10 @@ class BaseFormatter implements FormatterInterface
     {
         print_r($response>getBody());
         return json_decode($response->getBody(), true);
+    }
+
+    public function getDefaultMIMEType()
+    {
+        return MIME_TYPE;
     }
 }

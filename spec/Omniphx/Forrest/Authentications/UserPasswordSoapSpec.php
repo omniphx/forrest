@@ -158,9 +158,8 @@ class UserPasswordSoapSpec extends ObjectBehavior
             'Accept'        => 'application/json',
             'Content-Type'  => 'application/json',
         ]);
-
+        $mockedFormatter->getDefaultMIMEType()->willReturn('application/json');
         $mockedVersionRepo->get()->willReturn(['url' => '/resources']);
-
         $mockedFormatter->formatResponse($mockedResponse)->willReturn(['foo' => 'bar']);
     }
 

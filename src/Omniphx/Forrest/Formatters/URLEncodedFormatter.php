@@ -6,10 +6,12 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 
 class URLEncodedFormatter implements FormatterInterface
 {
+    const MIME_TYPE = 'application/x-www-form-urlencoded';
+
     public function setHeaders()
     {
-        $headers['Accept'] = 'application/x-www-form-urlencoded';
-        $headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        $headers['Accept'] = $this->getDefaultMIMEType();
+        $headers['Content-Type'] = $this->getDefaultMIMEType();
 
         return $headers;
     }
@@ -22,5 +24,10 @@ class URLEncodedFormatter implements FormatterInterface
     public function formatResponse($response)
     {
         return $response->getBody();
+    }
+
+    public function getDefaultMIMEType()
+    {
+        return MIME_TYPE;
     }
 }

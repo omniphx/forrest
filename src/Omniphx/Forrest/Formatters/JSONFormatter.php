@@ -10,10 +10,11 @@ class JSONFormatter implements FormatterInterface
     protected $tokenRepository;
     protected $settings;
     protected $headers;
+    const MIME_TYPE = 'application/json';
 
     public function __construct(RepositoryInterface $tokenRepository, $settings) {
         $this->tokenRepository = $tokenRepository;
-        $this->settings        = $settings;
+        $this->settings = $settings;
     }
 
     public function setHeaders()
@@ -21,8 +22,8 @@ class JSONFormatter implements FormatterInterface
         $accessToken = $this->tokenRepository->get()['access_token'];
         $tokenType   = $this->tokenRepository->get()['token_type'];
 
-        $this->headers['Accept']        = 'application/json';
-        $this->headers['Content-Type']  = 'application/json';
+        $this->headers['Accept']        = $this->getDefaultMIMEType();
+        $this->headers['Content-Type']  = $this->getDefaultMIMEType();
         $this->headers['Authorization'] = "$tokenType $accessToken";
 
         $this->setCompression();
@@ -46,5 +47,10 @@ class JSONFormatter implements FormatterInterface
     public function formatResponse($response)
     {
         return json_decode($response->getBody(), true);
+    }
+
+    public function getDefaultMIMEType()
+    {
+        return MIME_TYPE;
     }
 }
