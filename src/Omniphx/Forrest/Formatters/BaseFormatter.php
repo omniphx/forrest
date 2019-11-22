@@ -6,7 +6,7 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 
 class BaseFormatter implements FormatterInterface
 {
-    const MIME_TYPE = 'application/json';
+    protected $mimeType = 'application/json';
 
     public function setHeaders()
     {
@@ -29,6 +29,6 @@ class BaseFormatter implements FormatterInterface
 
     public function getDefaultMIMEType()
     {
-        return MIME_TYPE;
+        return $this->mimeType;
     }
 }
