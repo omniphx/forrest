@@ -1,5 +1,5 @@
 
-# Salesforce REST API Client for Laravel 5 <img align="right" src="https://raw.githubusercontent.com/omniphx/images/master/Forrest.png">
+# Salesforce REST API Client for Laravel <img align="right" src="https://raw.githubusercontent.com/omniphx/images/master/Forrest.png">
 
 [![Laravel](https://img.shields.io/badge/Laravel-6.0-orange.svg?style=flat-square)](http://laravel.com)
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
