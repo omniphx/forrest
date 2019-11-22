@@ -6,7 +6,7 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 
 class URLEncodedFormatter implements FormatterInterface
 {
-    const MIME_TYPE = 'application/x-www-form-urlencoded';
+    protected $mimeType = 'application/x-www-form-urlencoded';
 
     public function setHeaders()
     {
@@ -28,6 +28,6 @@ class URLEncodedFormatter implements FormatterInterface
 
     public function getDefaultMIMEType()
     {
-        return MIME_TYPE;
+        return $this->mimeType;
     }
 }

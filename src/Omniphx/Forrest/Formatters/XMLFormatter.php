@@ -6,7 +6,7 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 
 class XMLFormatter implements FormatterInterface
 {
-    const MIME_TYPE = 'application/xml';
+    protected $mimeType = 'application/xml';
 
     public function setHeaders()
     {
@@ -32,6 +32,6 @@ class XMLFormatter implements FormatterInterface
 
     public function getDefaultMIMEType()
     {
-        return MIME_TYPE;
+        return $this->mimeType;
     }
 }

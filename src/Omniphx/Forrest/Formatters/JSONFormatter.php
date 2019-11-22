@@ -10,7 +10,7 @@ class JSONFormatter implements FormatterInterface
     protected $tokenRepository;
     protected $settings;
     protected $headers;
-    const MIME_TYPE = 'application/json';
+    protected $mimeType = 'application/json';
 
     public function __construct(RepositoryInterface $tokenRepository, $settings) {
         $this->tokenRepository = $tokenRepository;
@@ -51,6 +51,6 @@ class JSONFormatter implements FormatterInterface
 
     public function getDefaultMIMEType()
     {
-        return MIME_TYPE;
+        return $this->mimeType;
     }
 }
