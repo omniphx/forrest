@@ -3,14 +3,14 @@
 
 After you've forked the repo, clone forrest into a new Laravel application or existing project. I recommend creating a new directory to store this project to seperate it from the rest of your codebase. This guide will assume it is named `library` but you can call it anything you like.
 
-`git clone git@github.com:<username>/forrest.git library/forrest`
+`git clone git@github.com:<username>/forrest.git libraries/forrest`
 
 Next, update your `composer.json` to include the psr-4 auto-loader location. Your should already see the `App\\` namespace unless you've named it something else:
 ```
 "autoload": {
     "psr-4": {
         "App\\": "app/",
-        "Omniphx\\Forrest\\": "library/forrest/"
+        "Omniphx\\Forrest\\": "libraries/forrest/"
     },
     "classmap": [
         "database/seeds",
