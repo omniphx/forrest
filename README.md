@@ -311,6 +311,70 @@ As well as new formatting options, headers or other configurations
 Forrest::theme(['format'=>'xml']);
 ```
 
+### Upsert multiple records (Bulk API 2.0)
+
+Bulk API requests are especially handy when you need to quickly load large amounts of data into your Salesforce org. The key differences is that it requires at least three separate requests (Create, Add, Close), and the data being loaded is sent in a CSV format.
+
+To illustrate, following are three requests to upsert a CSV of `Contacts` records.
+
+#### Create
+
+Create a bulk upload job with the POST method, the body contains the following job properties:
+
+- `object` is the type of objects you're loading (they must all be the same type per job)
+- `externalIdFieldName` is the external ID, if this exists it'll update and if it doesn't a new record will be inserted. Only needed for upsert operations.
+- `contentType` is CSV, this is currently the only valid value.
+- `operation` is set to `upsert` to both add and update records.
+
+We're storing the response in `$bulkJob` in order to reference the unique Job ID in the Add and Close requests below.
+
+> See [Create a Job](https://developer.salesforce.com/docs/atlas.en-us.api_bulk_v2.meta/api_bulk_v2/create_job.htm) for the full list of options available here.
+
+```php
+$bulkJob = Forrest::jobs('ingest', [
+    'method' => 'post',
+    'body' => [
+        "object" => "Contact",
+        "externalIdFieldName" => "externalId",
+        "contentType" => "CSV",
+        "operation" => "upsert"
+    ]
+]);
+```
+
+#### Add Data
+
+Using the Job ID from the Create POST request, you then send the CSV data to be processed using a PUT request. This assumes you've loaded your CSV contents to `$csv`
+
+> See [Prepare CSV Files](https://developer.salesforce.com/docs/atlas.en-us.api_bulk_v2.meta/api_bulk_v2/datafiles_prepare_csv.htm) for details on how it should be formatted.
+
+```php
+Forrest::jobs('ingest/' . $bulkJob['id'] . '/batches', [
+    'method' => 'put',
+    'headers' => [
+        'Content-Type' => 'text/csv'
+    ],
+    'body' => $csv
+]);
+```
+
+#### Close
+
+You must close the job before the records can be processed, to do so you send an `UploadComplete` state using a PATCH request to the Job ID.
+
+> See [Close or Abort a Job](https://developer.salesforce.com/docs/atlas.en-us.api_bulk_v2.meta/api_bulk_v2/close_job.htm) for more options and details on how to abort a job.
+
+```php
+$response = Forrest::jobs('ingest/' . $bulkJob['id'] . '/', [
+    'method' => 'patch',
+    'body' => [
+        "state" => "UploadComplete"
+    ]
+]);
+```
+
+> **Bulk API 2.0 is available in API version 41.0 and later**. For more information on Salesforce Bulk API, check out the [official documentation](https://developer.salesforce.com/docs/atlas.en-us.api_bulk_v2.meta/api_bulk_v2/introduction_bulk_api_2.htm) and [this tutorial](https://trailhead.salesforce.com/en/content/learn/modules/api_basics/api_basics_bulk) on how to perform a successful Bulk Upload.
+
 ### Additional API Requests
 
 #### Refresh
