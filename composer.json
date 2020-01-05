@@ -29,5 +29,15 @@
             "Omniphx\\Forrest\\": "src/Omniphx/Forrest/"
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Omniphx\\Forrest\\Providers\\Laravel\\ForrestServiceProvider"
+            ],
+            "aliases": {
+                "Forrest": "Omniphx\\Forrest\\Providers\\Laravel\\Facades\\Forrest"
+            }
+        }
+    }
 }

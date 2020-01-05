@@ -27,7 +27,7 @@ Next run `composer update` from the command line to install the package.
 
 ### Laravel Installation
 
-Add the service provider and alias to your `config/app.php` file:
+The package will automatically register the service provider and `Forrest` alias for Laravel `>=5.5`. For earlier versions, add the service provider and alias to your `config/app.php` file:
 
 ```php
 Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
