@@ -6,14 +6,36 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 
 class BaseFormatter implements FormatterInterface
 {
-    protected $mimeType = 'application/json';
+    protected $tokenRepository;
+    protected $settings;
+    protected $headers;
+    protected $mimeType = 'application/blob';
+
+    public function __construct($tokenRepository, $settings) {
+        $this->tokenRepository = $tokenRepository;
+        $this->settings = $settings;
+    }
 
     public function setHeaders()
     {
-        $headers['Accept'] = $this->getDefaultMIMEType();
-        $headers['Content-Type'] = $this->getDefaultMIMEType();
+        $accessToken = $this->tokenRepository->get()['access_token'];
+        $tokenType   = $this->tokenRepository->get()['token_type'];
 
-        return $headers;
+        $this->headers['Accept']        = $this->getDefaultMIMEType();
+        $this->headers['Content-Type']  = $this->getDefaultMIMEType();
+        $this->headers['Authorization'] = "$tokenType $accessToken";
+
+        $this->setCompression();
+
+        return $this->headers;
+    }
+
+    private function setCompression()
+    {
+        if (!$this->settings['defaults']['compression']) return;
+
+        $this->headers['Accept-Encoding']  = $this->settings['defaults']['compressionType'];
+        $this->headers['Content-Encoding'] = $this->settings['defaults']['compressionType'];
     }
 
     public function setBody($data)
@@ -23,8 +45,9 @@ class BaseFormatter implements FormatterInterface
 
     public function formatResponse($response)
     {
-        print_r($response>getBody());
-        return json_decode($response->getBody(), true);
+        $body = $response->getBody();
+        $contents = (string) $body;
+        return $contents;
     }
 
     public function getDefaultMIMEType()
