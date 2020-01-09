@@ -763,10 +763,6 @@ abstract class Client
     {
         if ($formatter === 'json') {
             $this->formatter = new JSONFormatter($this->tokenRepo, $this->settings);
-        } else if ($formatter === 'xml') {
-            $this->formatter = new XMLFormatter($this->tokenRepo, $this->settings);
-        } else if ($formatter === 'urlencoded') {
-            $this->formatter = new URLEncodedFormatter($this->tokenRepo, $this->settings);
         } else if ($formatter === 'none') {
             $this->formatter = new BaseFormatter($this->tokenRepo, $this->settings);
         }
