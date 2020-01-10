@@ -527,10 +527,12 @@ class UserPasswordSoapSpec extends ObjectBehavior
 
     public function it_returns_a_xml_resource(
         ClientInterface $mockedHttpClient,
-        RequestInterface $mockedRequest,
         ResponseInterface $mockedResponse,
         FormatterInterface $mockedFormatter)
     {
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseXML);
+
         $mockedHttpClient
             ->request('get',
                 'uri',
