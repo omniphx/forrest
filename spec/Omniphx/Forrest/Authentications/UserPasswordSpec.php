@@ -73,6 +73,8 @@ class UserPasswordSpec extends ObjectBehavior
             <solution>Have you tried squring your shoulders, Gary?</solution>
         </meseek>';
 
+    protected $responseNone = 'A non formatted response';
+
     protected $token = [
         'access_token' => '00Do0000000secret',
         'instance_url' => 'https://na17.salesforce.com',
@@ -610,7 +612,28 @@ class UserPasswordSpec extends ObjectBehavior
 
         $this->request('uri', ['format' => 'xml'])->shouldReturnAnInstanceOf('SimpleXMLElement');
     }
-    
+
+    public function it_returns_an_unformatted_resource(
+        ClientInterface $mockedHttpClient,
+        ResponseInterface $mockedResponse,
+        FormatterInterface $mockedFormatter)
+    {
+
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseNone);
+
+        $mockedHttpClient
+            ->request('get',
+                'uri',
+                Argument::type('array'))
+            ->shouldBeCalled()
+            ->willReturn($mockedResponse);
+
+        $mockedFormatter->formatResponse($mockedResponse)->shouldBeCalled()->willReturn($this->responseNone);
+
+        $this->request('uri', ['format' => 'none'])->shouldReturn($this->responseNone);
+
+    }
+
     public function it_should_format_header(
         ClientInterface $mockedHttpClient,
         ResponseInterface $mockedResponse,
