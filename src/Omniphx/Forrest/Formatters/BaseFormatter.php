@@ -40,7 +40,7 @@ class BaseFormatter implements FormatterInterface
 
     public function setBody($data)
     {
-        return json_encode($data);
+        return $data;
     }
 
     public function formatResponse($response)
