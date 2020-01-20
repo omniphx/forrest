@@ -594,10 +594,8 @@ class UserPasswordSpec extends ObjectBehavior
 
     public function it_returns_a_xml_resource(
         ClientInterface $mockedHttpClient,
-        ResponseInterface $mockedResponse,
-        FormatterInterface $mockedFormatter)
+        ResponseInterface $mockedResponse)
     {
-
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseXML);
 
         $mockedHttpClient
@@ -607,18 +605,13 @@ class UserPasswordSpec extends ObjectBehavior
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
 
-        $decodedXML = simplexml_load_string($this->responseXML);
-        $mockedFormatter->formatResponse($mockedResponse)->shouldBeCalled()->willReturn($decodedXML);
-
         $this->request('uri', ['format' => 'xml'])->shouldReturnAnInstanceOf('SimpleXMLElement');
     }
 
     public function it_returns_an_unformatted_resource(
         ClientInterface $mockedHttpClient,
-        ResponseInterface $mockedResponse,
-        FormatterInterface $mockedFormatter)
+        ResponseInterface $mockedResponse)
     {
-
         $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseNone);
 
         $mockedHttpClient
@@ -628,10 +621,7 @@ class UserPasswordSpec extends ObjectBehavior
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
 
-        $mockedFormatter->formatResponse($mockedResponse)->shouldBeCalled()->willReturn($this->responseNone);
-
         $this->request('uri', ['format' => 'none'])->shouldReturn($this->responseNone);
-
     }
 
     public function it_should_format_header(
