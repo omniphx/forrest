@@ -18,6 +18,11 @@ use Omniphx\Forrest\Interfaces\FormatterInterface;
 use Omniphx\Forrest\Interfaces\RepositoryInterface;
 use Omniphx\Forrest\Interfaces\ResourceRepositoryInterface;
 
+use Omniphx\Forrest\Formatters\JSONFormatter;
+use Omniphx\Forrest\Formatters\URLEncodedFormatter;
+use Omniphx\Forrest\Formatters\XMLFormatter;
+use Omniphx\Forrest\Formatters\BaseFormatter;
+
 /**
  * API resources.
  *
@@ -192,7 +197,7 @@ abstract class Client
         } else {
             $this->parameters['headers'] = $this->formatter->setHeaders();
         }
-
+        
         if (isset($this->options['body'])) {
             if ($this->parameters['headers']['Content-Type'] == $this->formatter->getDefaultMIMEType()) {
                 $this->parameters['body'] = $this->formatter->setBody($this->options['body']);
@@ -201,6 +206,10 @@ abstract class Client
             }
         } else {
             unset($this->parameters['body']);
+        }
+
+        if ($this->options['format'] !== $this->settings['defaults']['format']) { 
+            $this->setFormatter($this->options['format']);
         }
 
         try {
@@ -743,6 +752,22 @@ abstract class Client
 
         $this->storeLatestVersion($versions);
         $this->storeConfiguredVersion($versions);
+    }
+
+    /**
+     * Overrides the default formatter set during register.
+     *
+     * @param string $formatter - Name of the formatter to use
+     */
+    protected function setFormatter($formatter)
+    {
+        if ($formatter === 'json') {
+            $this->formatter = new JSONFormatter($this->tokenRepo, $this->settings);
+        } else if ($formatter === 'xml') {
+            $this->formatter = new XMLFormatter($this->tokenRepo, $this->settings);
+        } else if ($formatter === 'none') {
+            $this->formatter = new BaseFormatter($this->tokenRepo, $this->settings);
+        }
     }
 
     private function storeConfiguredVersion($versions)

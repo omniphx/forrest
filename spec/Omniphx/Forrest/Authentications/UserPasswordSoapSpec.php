@@ -84,6 +84,8 @@ class UserPasswordSoapSpec extends ObjectBehavior
             <solution>Have you tried squring your shoulders, Gary?</solution>
         </meseek>';
 
+    protected $responseNone = 'A non formatted response';
+
     protected $decodedResponse = ['foo' => 'bar'];
 
     protected $settings = [
@@ -527,10 +529,10 @@ class UserPasswordSoapSpec extends ObjectBehavior
 
     public function it_returns_a_xml_resource(
         ClientInterface $mockedHttpClient,
-        RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse,
-        FormatterInterface $mockedFormatter)
+        ResponseInterface $mockedResponse)
     {
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseXML);
+
         $mockedHttpClient
             ->request('get',
                 'uri',
@@ -538,10 +540,23 @@ class UserPasswordSoapSpec extends ObjectBehavior
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
 
-        $decodedXML = simplexml_load_string($this->responseXML);
-        $mockedFormatter->formatResponse($mockedResponse)->shouldBeCalled()->willReturn($decodedXML);
-
         $this->request('uri', ['format' => 'xml'])->shouldReturnAnInstanceOf('SimpleXMLElement');
+    }
+
+    public function it_returns_an_unformatted_resource(
+        ClientInterface $mockedHttpClient,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->responseNone);
+
+        $mockedHttpClient
+            ->request('get',
+                'uri',
+                Argument::type('array'))
+            ->shouldBeCalled()
+            ->willReturn($mockedResponse);
+
+        $this->request('uri', ['format' => 'none'])->shouldReturn($this->responseNone);
     }
 
     public function it_should_format_header(
