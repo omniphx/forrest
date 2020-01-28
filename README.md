@@ -55,12 +55,12 @@ This will publish a `config/forrest.php` file that can switch between authentica
 
 After adding the config file, update your `.env` to include the following values (details for getting a consumer key and secret are outlined below):
 ```
-CONSUMER_KEY=123455
-CONSUMER_SECRET=ABCDEF
-CALLBACK_URI=https://test.app/callback
-LOGIN_URL=https://login.salesforce.com
-USERNAME=mattjmitchener@gmail.com
-PASSWORD=password123
+SF_CONSUMER_KEY=123455
+SF_CONSUMER_SECRET=ABCDEF
+SF_CALLBACK_URI=https://test.app/callback
+SF_LOGIN_URL=https://login.salesforce.com
+SF_USERNAME=mattjmitchener@gmail.com
+SF_PASSWORD=password123
 ```
 
 >For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
