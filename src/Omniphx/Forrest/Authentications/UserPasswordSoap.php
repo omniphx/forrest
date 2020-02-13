@@ -159,17 +159,17 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
         // $tokenResponse['issued_at'] = time(); // including this causes phpspec to fail
 
         // Handle errors from Login
-        if (array_key_exists('faultcode', $data)) {
+        if (isset($data->faultcode)) {
             // Forrest is looking for error
             $tokenResponse['error'] = $data->faultcode;
         }
-        if (array_key_exists('faultstring', $data)) {
+        if (isset($data->faultstring)) {
             // Forrest is looking for error_description
             $tokenResponse['error_description'] = $data->faultstring;
         }
 
         // Handle successful SOAP login
-        if (array_key_exists('userId', $data)) {
+        if (isset($data->userId)) {
             // Forrest is looking for id.  SOAP doesnt return this, so build it
             // based on well known format.
             // https://login.salesforce.com/id/<organizationId>/<userId>
@@ -182,12 +182,12 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
         }
         // The SOAP session id is what you put in the REST calls header
         // as "Authorization: Bearer <access_token>"
-        if (array_key_exists('sessionId', $data)) {
+        if (isset($data->sessionId)) {
             // Forrest is looking for access_token
             $tokenResponse['access_token'] = $data->sessionId;
             $tokenResponse['token_type'] = 'Bearer';
         }
-        if (array_key_exists('serverUrl', $data)) {
+        if (isset($data->serverUrl)) {
             // Forrest is looking for instance_url
             // Extract the base URI
             $servicesPosition = strpos($data->serverUrl, '/services');
