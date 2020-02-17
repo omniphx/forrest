@@ -50,6 +50,11 @@ return [
         'compression'     => false,
         'compressionType' => 'gzip',
     ],
+    
+    'client'    =>  [
+        'http_errors' => true,
+        'verify'    => false,
+    ],
 
     /*
      * Where do you want to store access tokens fetched from Salesforce
