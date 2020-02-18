@@ -21,7 +21,8 @@ class ForrestServiceProvider extends BaseServiceProvider
 
     protected function getClient()
     {
-        return new Client(['http_errors' => true]);
+        $client_config = app('config')->get('forrest.client', []);
+        return new Client($client_config);
     }
 
     protected function getRedirect()
