@@ -164,28 +164,38 @@ After authentication, your app will store an encrypted authentication token whic
 ```php
 Forrest::query('SELECT Id FROM Account');
 ```
-Sample result:
+Sample result (shown using print_r()):
 ```JSON
-{
-    "totalSize": 2,
-    "done": true,
-    "records": [
-        {
-            "attributes": {
-                "type": "Account",
-                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxx"
-            },
-            "Id": "001i000000xxx"
-        },
-        {
-            "attributes": {
-                "type": "Account",
-                "url": "\/services\/data\/v30.0\/sobjects\/Account\/001i000000xxx"
-            },
-            "Id": "001i000000xxx"
-        }
-    ]
-}
+(
+    [totalSize] => 2
+    [done] => 1
+    [records] => Array
+        (
+            [0] => Array
+                (
+                    [attributes] => Array
+                        (
+                            [type] => Account
+                            [url] => /services/data/v48.0/sobjects/Account/0013I000004zuIXQAY
+                        )
+
+                    [Id] => 0013I000004zuIXQAY
+                )
+
+            [1] => Array
+                (
+                    [attributes] => Array
+                        (
+                            [type] => Account
+                            [url] => /services/data/v48.0/sobjects/Account/0013I000004zuIcQAI
+                        )
+
+                    [Id] => 0013I000004zuIcQAI
+                )
+
+        )
+
+)
 ```
 If you are querying more than 2000 records, you response will include:
 ```JSON
@@ -224,7 +234,7 @@ Update a record with the PATCH method and if the external Id doesn't exist, it w
 ```php
 $externalId = 'XYZ1234';
 
-Forrest::sobjects('Account/External_Id__c/' + $externalId, [
+Forrest::sobjects('Account/External_Id__c/' . $externalId, [
     'method' => 'patch',
     'body'   => [
         'Name'  => 'Dunder Mifflin',
