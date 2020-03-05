@@ -10,9 +10,7 @@
 
 
 
-Salesforce/Force.com REST API client for Laravel. While it acts as more of a wrapper of the API methods, it should provide you with all the flexibility you will need to interact with the REST service.
-
-Currently the only support is for Laravel and Lumen.
+Forrest is a Salesforce/Force.com REST API client for Laravel and Lumen.
 
 Interested in Eloquent Salesforce Models? Check out [@roblesterjr04](https://github.com/roblesterjr04)'s [EloquentSalesForce](https://github.com/roblesterjr04/EloquentSalesForce) project that utilizes Forrest as it's API layer.
 
@@ -164,8 +162,8 @@ After authentication, your app will store an encrypted authentication token whic
 ```php
 Forrest::query('SELECT Id FROM Account');
 ```
-Sample result (shown using print_r()):
-```JSON
+Sample result:
+```php
 (
     [totalSize] => 2
     [done] => 1
@@ -189,19 +187,16 @@ Sample result (shown using print_r()):
                             [type] => Account
                             [url] => /services/data/v48.0/sobjects/Account/0013I000004zuIcQAI
                         )
-
                     [Id] => 0013I000004zuIcQAI
                 )
-
         )
-
 )
 ```
-If you are querying more than 2000 records, you response will include:
-```JSON
-{
-    "nextRecordsUrl" : "/services/data/v20.0/query/01gD0000002HU6KIAW-2000"
-}
+If you are querying more than 2000 records, your response will include:
+```php
+(
+    [nextRecordsUrl] => /services/data/v20.0/query/01gD0000002HU6KIAW-2000
+)
 ```
 
 Simply, call `Forrest::next($nextRecordsUrl)` to return the next 2000 records.
