@@ -5,9 +5,9 @@ namespace Omniphx\Forrest\Providers\Lumen;
 use Illuminate\Cache\CacheManager as Cache;
 use Illuminate\Contracts\Config\Repository as Config;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
-use Omniphx\Forrest\Providers\Laravel\LaravelStorageProvider as StorageProvider;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 
-class LumenCache extends StorageProvider
+class LumenCache implements StorageInterface
 {
     protected $cache;
     protected $path;

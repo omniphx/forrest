@@ -453,4 +453,25 @@ Event::listen('forrest.response', function($request, $response) {
 });
 ```
 
+### Creating multiple instances of Forrest
+There might be situations where you need to make calls to multiple Salesforce orgs. This can only be achieved only with the UserPassword flows.
+
+1. Set storage = `object` in the config file. This will store the token inside the object instance:
+```php
+'storage'=> [
+    'type' => 'object'
+],
+```
+
+2. Create a multiple instance with the laravel `app()->make()` helper function:
+```php
+$forrest1 = app()->make('forrest');
+$forrest1->setCredentials(['username' => 'user@email.com.org1', 'password'=> '1234']);
+$forrest1->authenticate();
+
+$forrest2 = app()->make('forrest');
+$forrest2->setCredentials(['username' => 'user@email.com.org2', 'password'=> '1234']);
+$forrest2->authenticate();
+```
+
 For more information about Guzzle responses and event listeners, refer to their [documentation](http://guzzle.readthedocs.org).

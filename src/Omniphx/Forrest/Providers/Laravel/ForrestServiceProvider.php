@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Omniphx\Forrest\Providers\BaseServiceProvider;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelSession;
+use Omniphx\Forrest\Providers\ObjectStorage;
 
 class ForrestServiceProvider extends BaseServiceProvider
 {
@@ -33,15 +34,13 @@ class ForrestServiceProvider extends BaseServiceProvider
     {
         switch ($storageType) {
             case 'session':
-                $storage = new LaravelSession(app('config'), app('request')->session());
-                break;
+                return new LaravelSession(app('config'), app('request')->session());
             case 'cache':
-                $storage = new LaravelCache(app('config'), app('cache')->store());
-                break;
+                return new LaravelCache(app('config'), app('cache')->store());
+            case 'object':
+                return new ObjectStorage();
             default:
-                $storage = new LaravelSession(app('config'), app('request')->session());
+                return new LaravelSession(app('config'), app('request')->session());
         }
-
-        return $storage;
     }
 }

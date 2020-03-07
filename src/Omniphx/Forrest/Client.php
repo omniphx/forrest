@@ -190,6 +190,10 @@ abstract class Client
         }
     }
 
+    public function setCredentials($credentials) {
+        $this->credentials = array_replace_recursive($this->credentials, $credentials);
+    }
+
     private function handleRequest()
     {
         if (isset($this->options['headers'])) {
