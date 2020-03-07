@@ -29,8 +29,13 @@ class ForrestServiceProvider extends BaseServiceProvider
         return new LumenRedirect(redirect());
     }
 
-    protected function getStorage()
+    protected function getStorage($storageType)
     {
-        return new LumenCache(app('cache'), app('config'));
+        switch ($storageType) {
+            case 'object':
+                return new ObjectStorage();
+            default:
+                return new LumenCache(app('config'), app('request')->session());
+        }
     }
 }

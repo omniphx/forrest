@@ -5,8 +5,9 @@ namespace Omniphx\Forrest\Providers\Laravel;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Session\Session as Session;
 use Omniphx\Forrest\Exceptions\MissingKeyException;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 
-class LaravelSession extends LaravelStorageProvider
+class LaravelSession implements StorageInterface
 {
     public $path;
 

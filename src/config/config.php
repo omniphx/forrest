@@ -57,10 +57,12 @@ return [
     ],
 
     /*
-     * Where do you want to store access tokens fetched from Salesforce
+     * Where do you want to store access tokens fetched from Salesforce. The type of storage will persist
+     * Salesforce token when user refreshes the page. If you choose 'object', the token is stored on the object
+     * instance and will persist as long as the object remains in memory.
      */
     'storage'        => [
-        'type'          => 'session', // 'session' or 'cache' are the two options
+        'type'          => 'session', // Options include: 'session', 'cache', 'object'
         'path'          => 'forrest_', // unique storage path to avoid collisions
         'expire_in'     => 60, // number of minutes to expire cache/session
         'store_forever' => false, // never expire cache/session
@@ -70,15 +72,15 @@ return [
      * If you'd like to specify an API version manually it can be done here.
      * Format looks like '32.0'
      */
-    'version'        => '',
+    'version' => '',
 
     /*
      * Optional (and not recommended) if you need to override the instance_url returned from Saleforce
      */
-    'instanceURL'    => '',
+    'instanceURL' => '',
 
     /*
      * Language
      */
-    'language'       => 'en_US',
+    'language' => 'en_US',
 ];
