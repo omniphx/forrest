@@ -23,7 +23,7 @@ class URLEncodedFormatter implements FormatterInterface
 
     public function formatResponse($response)
     {
-        return $response->getBody();
+        return $response->getBody()->getContents();
     }
 
     public function getDefaultMIMEType()
