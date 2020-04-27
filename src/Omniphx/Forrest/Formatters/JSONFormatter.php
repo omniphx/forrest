@@ -46,7 +46,7 @@ class JSONFormatter implements FormatterInterface
 
     public function formatResponse($response)
     {
-        return json_decode($response->getBody(), true);
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     public function getDefaultMIMEType()

@@ -51,7 +51,7 @@ class UserPassword extends BaseAuthentication implements UserPasswordInterface
         // \Psr\Http\Message\ResponseInterface
         $response = $this->httpClient->request('post', $url, $parameters);
 
-        $authTokenDecoded = json_decode($response->getBody(), true);
+        $authTokenDecoded = json_decode($response->getBody()->getContents(), true);
 
         $this->handleAuthenticationErrors($authTokenDecoded);
 

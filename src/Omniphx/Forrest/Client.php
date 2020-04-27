@@ -829,7 +829,8 @@ abstract class Client
         if ($ex->hasResponse() && 401 == $ex->getResponse()->getStatusCode()) {
             throw new TokenExpiredException('Salesforce token has expired', $ex);
         } elseif ($ex->hasResponse()) {
-            $error = json_decode($ex->getResponse()->getBody(), true);
+            $error = json_decode($ex->getResponse()->getBody()->getContents(), true);
+            $ex->getResponse()->getBody()->rewind();
             $jsonError = json_encode($error,JSON_PRETTY_PRINT);
             throw new SalesforceException($jsonError, $ex);
         } else {

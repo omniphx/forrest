@@ -6,6 +6,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Stream;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
@@ -174,7 +175,8 @@ class UserPasswordSpec extends ObjectBehavior
         ResponseInterface $mockedResponse,
         ResponseInterface $mockedVersionRepo,
         FormatterInterface $mockedFormatter,
-        ResponseInterface $versionResponse)
+        ResponseInterface $versionResponse,
+        Stream $body)
     {
         $mockedHttpClient->request(
             'post',
@@ -199,8 +201,9 @@ class UserPasswordSpec extends ObjectBehavior
             ]])
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
-
-        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->authenticationJSON);
+        
+        $body->getContents()->shouldBeCalled()->willReturn($this->authenticationJSON);
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($body);
 
         $mockedHttpClient->request(
             'get',
@@ -221,7 +224,7 @@ class UserPasswordSpec extends ObjectBehavior
         $this->authenticate('url')->shouldReturn(null);
     }
 
-    public function it_should_refresh(ClientInterface $mockedHttpClient, ResponseInterface $mockedResponse)
+    public function it_should_refresh(ClientInterface $mockedHttpClient, ResponseInterface $mockedResponse, Stream $body)
     {
         $mockedHttpClient->request(
             'post',
@@ -234,8 +237,9 @@ class UserPasswordSpec extends ObjectBehavior
                 'password'      => 'mypassword']])
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
-
-        $mockedResponse->getBody()->shouldBeCalled()->willReturn($this->authenticationJSON);
+        
+        $body->getContents()->shouldBeCalled()->willReturn($this->authenticationJSON);
+        $mockedResponse->getBody()->shouldBeCalled()->willReturn($body);
 
         $this->refresh()->shouldReturn(null);
     }
@@ -261,7 +265,8 @@ class UserPasswordSpec extends ObjectBehavior
     public function it_should_refresh_the_token_if_token_expired_exception_is_thrown(
         ClientInterface $mockedHttpClient,
         RequestInterface $mockedRequest,
-        ResponseInterface $mockedResponse)
+        ResponseInterface $mockedResponse,
+        Stream $body)
     {
         $failedRequest = new Request('GET', 'fakeurl');
         $failedResponse = new Response(401);
@@ -273,7 +278,8 @@ class UserPasswordSpec extends ObjectBehavior
         //Authenticates with refresh method
         $mockedHttpClient->request('post', 'https://login.salesforce.com/services/oauth2/token', ['form_params' => ['grant_type' => 'password', 'client_id' => 'testingClientId', 'client_secret' => 'testingClientSecret', 'username' => 'user@email.com', 'password' => 'mypassword']])->shouldBeCalled()->willReturn($mockedResponse);
 
-        $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($this->authenticationJSON);
+        $body->getContents()->shouldBeCalled()->willReturn($this->authenticationJSON);
+        $mockedResponse->getBody()->shouldBeCalled(1)->willReturn($body);
 
         //This might seem counter-intuitive. We are throwing an exception with the send() method, but we can't stop it. Since we are calling the send() method twice, the behavior is correct for it to throw an exception. Actual behavior would never throw the exception, it would return a response.
         $tokenException = new TokenExpiredException(
