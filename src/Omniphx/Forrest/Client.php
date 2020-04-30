@@ -6,6 +6,8 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Message\ResponseInterface;
 use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
+use Omniphx\Forrest\Exceptions\MissingResourceException;
+use Omniphx\Forrest\Exceptions\MissingTokenException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Exceptions\MissingVersionException;
@@ -443,11 +445,17 @@ abstract class Client
      */
     public function query($query, $options = [])
     {
-        $url = $this->instanceURLRepo->get();
-        $url .= $this->resourceRepo->get('query');
+        try {
+            $url = $this->instanceURLRepo->get();
+            $url .= $this->resourceRepo->get('query');
+        } catch (MissingTokenException | MissingResourceException $e) {
+            $this->authenticate();
+            $url = $this->instanceURLRepo->get();
+            $url .= $this->resourceRepo->get('query');
+        }
+
         $url .= '?q=';
         $url .= urlencode($query);
-
         $queryResults = $this->request($url, $options);
 
         return $queryResults;
@@ -687,10 +695,16 @@ abstract class Client
      */
     public function __call($name, $arguments)
     {
-        $url = $this->instanceURLRepo->get();
-        $url .= $this->resourceRepo->get($name);
-        $url .= $this->appendURL($arguments);
+        try {
+            $url = $this->instanceURLRepo->get();
+            $url .= $this->resourceRepo->get($name);
+        } catch (MissingTokenException | MissingResourceException $e) {
+            $this->authenticate();
+            $url = $this->instanceURLRepo->get();
+            $url .= $this->resourceRepo->get($name);
+        }
 
+        $url .= $this->appendURL($arguments);
         $options = $this->setOptions($arguments);
 
         return $this->request($url, $options);
