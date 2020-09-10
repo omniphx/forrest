@@ -4,40 +4,27 @@ namespace Omniphx\Forrest\Authentications;
 
 use Firebase\JWT\JWT;
 use Omniphx\Forrest\Client as BaseAuthentication;
-use Omniphx\Forrest\Interfaces\UserPasswordInterface;
 
 class OAuth2 extends BaseAuthentication
 {
     public function authenticate($url = null)
     {
         $domain = $url ?? $this->credentials['loginURL'];
-
-        $authToken = $this->getAuthToken($domain);
-
-        $this->tokenRepo->put($authToken);
-
-        $this->storeVersion();
-        $this->storeResources();
-    }
-
-    /**
-     * @param  String $domain
-     * @return String
-     */
-    private function getAuthToken($domain)
-    {
         $username = $this->credentials['username'];
+        // OAuth Client ID
         $consumerKey = $this->credentials['consumerKey'];
+        // Private Key
         $privateKey = $this->credentials['consumerSecret'];
 
+        $header = ['alg' => 'RS256'];
         $payload = [
             'iss' => $consumerKey,
-            'sub' => $username,
             'aud' => $domain,
+            'sub' => $username,
             'exp' => now()->addMinutes(3)->timestamp
         ];
 
-        $assertion = JWT::encode($payload, $privateKey, 'RS256');
+        $assertion = JWT::encode($payload, $privateKey, 'RS256', $header);
 
         $parameters = [
             'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
@@ -47,10 +34,13 @@ class OAuth2 extends BaseAuthentication
         // \Psr\Http\Message\ResponseInterface
         $response = $this->httpClient->request('post', $domain, $parameters);
 
-        $authTokenDecoded = json_decode($response->getBody()->getContents(), true);
+        $authToken = json_decode($response->getBody()->getContents(), true);
 
-        $this->handleAuthenticationErrors($authTokenDecoded);
+        $this->handleAuthenticationErrors($authToken);
 
-        return $authTokenDecoded;
+        $this->tokenRepo->put($authToken);
+
+        $this->storeVersion();
+        $this->storeResources();
     }
 }
