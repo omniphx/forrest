@@ -4,6 +4,7 @@ namespace Omniphx\Forrest\Providers;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
+use Omniphx\Forrest\Authentications\OAuth2;
 use Omniphx\Forrest\Authentications\WebServer;
 use Omniphx\Forrest\Authentications\UserPassword;
 use Omniphx\Forrest\Authentications\UserPasswordSoap;
@@ -101,6 +102,22 @@ abstract class BaseServiceProvider extends ServiceProvider
             $formatter = new JSONFormatter($tokenRepo, $settings);
 
             switch ($authenticationType) {
+                case 'OAuth2':
+                    $forrest = new OAuth2(
+                        $httpClient,
+                        $encryptor,
+                        $event,
+                        $input,
+                        $redirect,
+                        $instanceURLRepo,
+                        $refreshTokenRepo,
+                        $resourceRepo,
+                        $stateRepo,
+                        $tokenRepo,
+                        $versionRepo,
+                        $formatter,
+                        $settings);
+                    break;
                 case 'WebServer':
                     $forrest = new WebServer(
                         $httpClient,

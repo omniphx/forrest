@@ -5,7 +5,7 @@
  */
 return [
     /*
-     * Options include WebServer, UserPassword, and UserPasswordSoap
+     * Options include OAuth2, WebServer, UserPassword, and UserPasswordSoap
      */
     'authentication' => 'WebServer',
 
@@ -50,7 +50,7 @@ return [
         'compression'     => false,
         'compressionType' => 'gzip',
     ],
-    
+
     'client'    =>  [
         'http_errors' => true,
         'verify'    => false,
