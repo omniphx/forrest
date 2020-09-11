@@ -4,8 +4,9 @@ namespace Omniphx\Forrest\Authentications;
 
 use Firebase\JWT\JWT;
 use Omniphx\Forrest\Client as BaseAuthentication;
+use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 
-class OAuth2 extends BaseAuthentication
+class OAuth2 extends BaseAuthentication implements AuthenticationInterface
 {
     public function authenticate($url = null)
     {
@@ -42,5 +43,15 @@ class OAuth2 extends BaseAuthentication
 
         $this->storeVersion();
         $this->storeResources();
+    }
+
+    public function refresh()
+    {
+        $this->authenticate();
+    }
+
+    public function revoke()
+    {
+        // Not supported for this option
     }
 }
