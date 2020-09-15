@@ -10,7 +10,7 @@ class OAuth2 extends BaseAuthentication implements AuthenticationInterface
 {
     public function authenticate($url = null)
     {
-        $domain = $url ?? $this->credentials['loginURL'];
+        $domain = $url ?? $this->credentials['loginURL'] . '/services/oauth2/token';
         $username = $this->credentials['username'];
         // OAuth Client ID
         $consumerKey = $this->credentials['consumerKey'];
@@ -22,7 +22,7 @@ class OAuth2 extends BaseAuthentication implements AuthenticationInterface
             'iss' => $consumerKey,
             'aud' => $domain,
             'sub' => $username,
-            'exp' => now()->addMinutes(3)->timestamp
+            'exp' => time() + 180
         ];
 
         $assertion = JWT::encode($payload, $privateKey, 'RS256', $header);
@@ -33,11 +33,12 @@ class OAuth2 extends BaseAuthentication implements AuthenticationInterface
         ];
 
         // \Psr\Http\Message\ResponseInterface
-        $response = $this->httpClient->request('post', $domain, $parameters);
+        $response = $this->httpClient->request('post', $domain, ['form_params' => $parameters]);
 
         $authToken = json_decode($response->getBody()->getContents(), true);
 
         $this->handleAuthenticationErrors($authToken);
+
 
         $this->tokenRepo->put($authToken);
 
