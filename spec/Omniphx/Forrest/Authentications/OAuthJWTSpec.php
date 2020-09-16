@@ -301,4 +301,23 @@ jrskEKQvdXS8iJl4zv2NtM5sCmHBrEzuIu0Hm5Mkp3IeDpi+TPtE
         $this->refresh()->shouldReturn(null);
     }
 
+    public function it_should_revoke_the_authentication_token(
+        ClientInterface $mockedHttpClient,
+        ResponseInterface $mockedResponse)
+    {
+        $mockedHttpClient->request(
+            'post',
+            'https://login.salesforce.com/services/oauth2/revoke',
+            [
+                'headers' => [
+                    'content-type' => 'application/x-www-form-urlencoded'
+                ],
+                'form_params' => [
+                    'token' => $this->token
+                ]
+            ])
+            ->shouldBeCalled()
+            ->willReturn($mockedResponse);
+        $this->revoke()->shouldReturn($mockedResponse);
+    }
 }

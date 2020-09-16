@@ -58,6 +58,12 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
 
     public function revoke()
     {
-        // Not supported for this option
+        $accessToken = $this->tokenRepo->get();
+        $url = $this->credentials['loginURL'].'/services/oauth2/revoke';
+
+        $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
+        $options['form_params']['token'] = $accessToken;
+
+        return $this->httpClient->request('post', $url, $options);
     }
 }
