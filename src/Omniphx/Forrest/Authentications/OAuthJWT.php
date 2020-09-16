@@ -2,12 +2,26 @@
 
 namespace Omniphx\Forrest\Authentications;
 
+use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Omniphx\Forrest\Client as BaseAuthentication;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 
 class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
 {
+    public static function getJWT($iss, $aud, $sub, $privateKey)
+    {
+        $header = ['alg' => 'RS256'];
+        $payload = [
+            'iss' => $iss,
+            'aud' => $aud,
+            'sub' => $sub,
+            'exp' => Carbon::now()->addMinutes(3)->timestamp
+        ];
+
+        return JWT::encode($payload, $privateKey, 'RS256', $header);
+    }
+
     public function authenticate($url = null)
     {
         $domain = $url ?? $this->credentials['loginURL'] . '/services/oauth2/token';
@@ -17,16 +31,8 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         // Private Key
         $privateKey = $this->credentials['consumerSecret'];
 
-        $header = ['alg' => 'RS256'];
-        $payload = [
-            'iss' => $consumerKey,
-            'aud' => $domain,
-            'sub' => $username,
-            'exp' => time() + 180
-        ];
-
-        $assertion = JWT::encode($payload, $privateKey, 'RS256', $header);
-
+        // Generate the form parameters
+        $assertion = static::getJWT($consumerKey, $domain, $username, $privateKey);
         $parameters = [
             'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
             'assertion' => $assertion
@@ -38,7 +44,6 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         $authToken = json_decode($response->getBody()->getContents(), true);
 
         $this->handleAuthenticationErrors($authToken);
-
 
         $this->tokenRepo->put($authToken);
 
