@@ -5,9 +5,9 @@
  */
 return [
     /*
-     * Options include OAuth2, WebServer, UserPassword, and UserPasswordSoap
+     * Options include WebServer, UserPassword, UserPasswordSoap, and OAuthJWT
      */
-    'authentication' => 'WebServer',
+    'authentication' => env('SF_AUTH_METHOD', 'WebServer'),
 
     /*
      * Enter your credentials
@@ -17,6 +17,7 @@ return [
     'credentials'    => [
         //Required:
         'consumerKey'    => env('SF_CONSUMER_KEY'),
+        // Consumer Secret or Private Key (if using OAuthJWT)
         'consumerSecret' => env('SF_CONSUMER_SECRET'),
         'callbackURI'    => env('SF_CALLBACK_URI'),
         'loginURL'       => env('SF_LOGIN_URL'),
