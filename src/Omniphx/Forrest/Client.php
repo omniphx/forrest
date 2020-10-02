@@ -194,6 +194,10 @@ abstract class Client
 
     private function handleRequest()
     {
+        if ($this->options['format'] !== $this->settings['defaults']['format']) {
+            $this->setFormatter($this->options['format']);
+        }
+        
         if (isset($this->options['headers'])) {
             $this->parameters['headers'] = array_replace_recursive($this->formatter->setHeaders(), $this->options['headers']);
         } else {
@@ -208,10 +212,6 @@ abstract class Client
             }
         } else {
             unset($this->parameters['body']);
-        }
-
-        if ($this->options['format'] !== $this->settings['defaults']['format']) { 
-            $this->setFormatter($this->options['format']);
         }
 
         try {
