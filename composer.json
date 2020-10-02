@@ -30,6 +30,12 @@
             "Omniphx\\Forrest\\": "src/Omniphx/Forrest/"
         }
     },
+    "scripts": {
+        "test": "vendor/bin/phpspec run"
+    },
+    "config": {
+        "sort-packages": true
+    },
     "minimum-stability": "stable",
     "extra": {
         "laravel": {
