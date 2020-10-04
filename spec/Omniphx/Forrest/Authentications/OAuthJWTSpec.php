@@ -67,7 +67,7 @@ class OAuthJWTSpec extends ObjectBehavior
         'authenticationFlow' => 'OAuthJWT',
         'credentials' => [
             'consumerKey'    => 'testingClientId',
-            'consumerSecret' => '-----BEGIN RSA PRIVATE KEY-----
+            'privateKey' => '-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAxxceYYRDCpErWPqwLE9DjvAmTDoIKmX1PxawLPLY9TPeFgrG
 FHEuf/BjP30z3RUcHclCYsNeMT33Ou/T7QHpgPG6b5Er2X0+xjj89YUhLj5T3tWG
 vUGtfpuortbLDdFKgVSZYk24P0L/pgRMOTmDSEMh+rLueio0YiGFc4aE0IEWNqOL
@@ -197,10 +197,7 @@ jrskEKQvdXS8iJl4zv2NtM5sCmHBrEzuIu0Hm5Mkp3IeDpi+TPtE
         $mockedHttpClient->request(
             'post',
             $url,
-            ['form_params' => [
-                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                'assertion' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6eyJhbGciOiJSUzI1NiJ9fQ.eyJpc3MiOiJ0ZXN0aW5nQ2xpZW50SWQiLCJhdWQiOiJ1cmwiLCJzdWIiOiJ1c2VyQGVtYWlsLmNvbSIsImV4cCI6MTU3Nzg1ODU4MH0.ZVUg0DnDPwbevGBhxNn3q7WPXeJxp53Jls3I8e3TLq4JxPJbQ0KH9YagHK0rrVxtBzfxLbXJZ_EHPBGAfrj2Th1RfURFvs_padt6a1CgKiOaEqzNBNJPquGDm2I06afJsbcTXurD7BRmWWRqbW5Qd1jCyX0Lr_YZiynBoQ91N82ZEAn_IkJ6l9Yr50sMxkgunW9iB66Ah4Xj8RmQ743BNpeUUZXUMGPKJ63jwRlU-wrMyn5MGSb7iYBESvWbwTtR-EOPGBk7HWo__dRS-1J3xF5PdP41UZSPUV_mwLYyM42suTvf9H_tfbDnh6ggQQGKpJdgJOGbpSlNZOreJK7pwA'
-            ]])
+            Argument::any())
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
 
@@ -255,10 +252,7 @@ jrskEKQvdXS8iJl4zv2NtM5sCmHBrEzuIu0Hm5Mkp3IeDpi+TPtE
         $mockedHttpClient->request(
             'post',
             $url,
-            ['form_params' => [
-                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                'assertion' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6eyJhbGciOiJSUzI1NiJ9fQ.eyJpc3MiOiJ0ZXN0aW5nQ2xpZW50SWQiLCJhdWQiOiJodHRwczpcL1wvbG9naW4uc2FsZXNmb3JjZS5jb21cL3NlcnZpY2VzXC9vYXV0aDJcL3Rva2VuIiwic3ViIjoidXNlckBlbWFpbC5jb20iLCJleHAiOjE1Nzc4NTg1ODB9.ldMUERKDZhZX9gSB8huX0Odqqs6EpOmB6Ow5URKxa6V65fOZ3fEVPrjSxTmzyIfDAShKfxFeuLIXHSanPYJzQ3C5bhP7S_HAFDHJnQFbVKPYp9IcmdJOj2U-JnMv7oDc5ejXMxF-CNzRQYN4ZOwONH7pEmW1-8QTwdFUck7QHdglWF1C6K6BLN0boyjCdrrdFCGtB-XfmxxJSfiT8MZY7uS3rWBXBLDNUx4Nn9qKiJQr5kxVY3g2zjzevR1xJgmrXZFZpw__SuQpY5F4CuLfPwcc7x9HPJCVdKsdnJKpZ4jkzb4zMocarN19bp_L2tPmjNVBQDyW6V16o1LN1pSbOg'
-            ]])
+            Argument::any())
             ->shouldBeCalled()
             ->willReturn($mockedResponse);
 

@@ -17,14 +17,11 @@ Next, update your `composer.json` to include the psr-4 auto-loader location. You
 },
 ```
 
-Also add `"guzzlehttp/guzzle": ">6.0"` to the required section:
+Add required dependencies:
 ```
 "require": {
-    "php": "^7.1.3",
-    "fideloper/proxy": "^4.0",
-    "laravel/framework": "5.8.*",
-    "laravel/tinker": "^1.0",
-    "guzzlehttp/guzzle": ">6.0"
+    "firebase/php-jwt": "^5.2",
+    "nesbot/carbon": "^2.0"
 },
 ```
 
@@ -51,4 +48,4 @@ You'll also need to be in the forrest directory, not your root/project directory
 
 All test are located in the `spec` folder and have a similar namespace to the files in our `src` folder.
 
-If you add new test methods, please use descriptive method naming. For instance, `it_should_not_call_refresh_method_if_there_is_no_token` is a lot more helpful than `test1`
+If you add new test methods, please use descriptive method naming. For instance, `it_should_not_call_refresh_method_if_there_is_no_token`

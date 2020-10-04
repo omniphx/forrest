@@ -18,7 +18,6 @@ return [
     'credentials'    => [
         //Required:
         'consumerKey'    => env('SF_CONSUMER_KEY'),
-        // Consumer Secret or Private Key (if using OAuthJWT)
         'consumerSecret' => env('SF_CONSUMER_SECRET'),
         'callbackURI'    => env('SF_CALLBACK_URI'),
         'loginURL'       => env('SF_LOGIN_URL'),
@@ -27,6 +26,8 @@ return [
         'username'       => env('SF_USERNAME'),
         // Security token might need to be ammended to password unless IP Address is whitelisted
         'password'       => env('SF_PASSWORD'),
+        // Only required for OAuthJWT authentication:
+        'privateKey'     => '',
     ],
 
     /*
