@@ -29,7 +29,7 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         // OAuth Client ID
         $consumerKey = $this->credentials['consumerKey'];
         // Private Key
-        $privateKey = $this->credentials['consumerSecret'];
+        $privateKey = $this->credentials['privateKey'];
 
         // Generate the form parameters
         $assertion = static::getJWT($consumerKey, $domain, $username, $privateKey);

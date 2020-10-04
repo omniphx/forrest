@@ -5,7 +5,7 @@
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Total Downloads](https://img.shields.io/packagist/dt/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![License](https://img.shields.io/packagist/l/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
-[![Build Status](https://img.shields.io/travis/omniphx/forrest.svg?style=flat-square)](https://travis-ci.org/omniphx/forrest)
+[![Actions Status](https://github.com/omniphx/forrest/workflows/Tests/badge.svg)](https://github.com/omniphx/forrest/actions)
 
 
 
@@ -85,7 +85,7 @@ After saving, you will now be given a Consumer Key and Consumer Secret. Update y
 ### Setup
 Creating authentication routes
 
-##### Web Server authentication flow
+#### Web Server authentication flow
 ```php
 Route::get('/authenticate', function()
 {
@@ -99,7 +99,8 @@ Route::get('/callback', function()
     return Redirect::to('/');
 });
 ```
-##### Username-Password authentication flow
+
+#### Username-Password authentication flow
 With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method.
 
 >To use this authentication you must add your username, and password to the config file. Security token might need to be ammended to your password unless your IP address is whitelisted.
@@ -111,7 +112,8 @@ Route::get('/authenticate', function()
     return Redirect::to('/');
 });
 ```
-##### SOAP authentication flow
+
+#### SOAP authentication flow
 (When you cannot create a connected App in Salesforce)
 
 1. Salesforce allows individual logins via a SOAP Login
@@ -142,7 +144,36 @@ Route::Post('/authenticate', function(Request $request)
 });
 ```
 
+#### JWT authentication flow
+Initial setup
+1. Set `authentication` to `OAuthJWT` in `config/forrest.php`
+2. Generate a key and cert: `openssl req -newkey rsa:2048 -nodes -keyout server.key -x509 -days 365 -out server.crt`
+3. Configure private key in `config/forrest.php` (e.g., `file_get_contents('./../server.key'),`)
 
+Setting up a Connected App
+1. App Manager > Create Connected App
+2. Enable Oauth Settings
+3. Check "Use digital signatures"
+4. Add `server.crt` or whatever you choose to name it
+5. Scope must includes "refresh_token, offline_access"
+6. Click Save
+
+Next you need to pre-authorize a profile (As of now, can only do this step in Classic but it's important)
+1. Manage Apps > Connected Apps
+2. Click 'Edit' next to your application
+3. Set 'Permitted Users' = 'Admin approved users are pre-authorized'
+4. Save
+5. Go to Settings > Manage Users > Profiles and edit the profile of the associated user (i.e., Salesforce Administrator)
+6. Under 'Connected App Access' check the corresponding app name
+
+The implementation is exactly the same as UserPassword
+```php
+Route::get('/authenticate', function()
+{
+    Forrest::authenticate();
+    return Redirect::to('/');
+});
+```
 
 #### Custom login urls
 Sometimes users will need to connect to a sandbox or custom url. To do this, simply pass the url as an argument for the authenticatation method:
