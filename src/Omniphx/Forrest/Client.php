@@ -194,8 +194,10 @@ abstract class Client
 
     private function handleRequest()
     {
-        if ($this->options['format'] !== $this->settings['defaults']['format']) {
+        if (isset($this->options['format'])) {
             $this->setFormatter($this->options['format']);
+        } else {
+            $this->setFormatter($this->settings['defaults']['format']);
         }
         
         if (isset($this->options['headers'])) {
@@ -763,11 +765,11 @@ abstract class Client
      */
     protected function setFormatter($formatter)
     {
-        if ($formatter === 'json') {
+        if ($formatter === 'json' && strpos(get_class($this->formatter), 'JSONFormatter') === false) {
             $this->formatter = new JSONFormatter($this->tokenRepo, $this->settings);
-        } else if ($formatter === 'xml') {
+        } else if ($formatter === 'xml' && strpos(get_class($this->formatter), 'XMLFormatter') === false) {
             $this->formatter = new XMLFormatter($this->tokenRepo, $this->settings);
-        } else if ($formatter === 'none') {
+        } else if ($formatter === 'none' && strpos(get_class($this->formatter), 'BaseFormatter') === false) {
             $this->formatter = new BaseFormatter($this->tokenRepo, $this->settings);
         }
     }
