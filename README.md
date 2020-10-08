@@ -69,8 +69,8 @@ SF_PASSWORD=password123
 ### Setting up a Connected App
 1. Log into to your Salesforce org
 2. Click on Setup in the upper right-hand menu
-3. Under Build click `Create > Apps`
-4. Scroll to the bottom and click `New` under Connected Apps.
+3. Search App in quick find box, and select `App Manager`
+4. Click New Connected App.
 5. Enter the following details for the remote application:
     * Connected App Name
     * API Name
