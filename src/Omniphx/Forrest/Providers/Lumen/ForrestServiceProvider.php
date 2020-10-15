@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Omniphx\Forrest\Providers\BaseServiceProvider;
 use Omniphx\Forrest\Providers\Lumen\LumenRedirect;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
+use Omniphx\Forrest\Providers\ObjectStorage;
 
 class ForrestServiceProvider extends BaseServiceProvider
 {
