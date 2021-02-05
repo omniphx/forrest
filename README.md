@@ -57,8 +57,8 @@ SF_CONSUMER_KEY=123455
 SF_CONSUMER_SECRET=ABCDEF
 SF_CALLBACK_URI=https://test.app/callback
 
-SF_LOGIN_URL=https://test.salesforce.com # For Salesforce Sandbox
-SF_LOGIN_URL=https://login.salesforce.com # For Salesforce Production
+SF_LOGIN_URL=https://login.salesforce.com
+# For sandbox: SF_LOGIN_URL=https://test.salesforce.com
 
 SF_USERNAME=mattjmitchener@gmail.com
 SF_PASSWORD=password123
