@@ -675,6 +675,21 @@ abstract class Client
     }
 
     /**
+     * Accessor to get instance URL
+     *
+     * @param bool $withVersion
+     * @return string
+     */
+    public function instanceURL($withVersion = false)
+    {
+        if ($withVersion) {
+            return $this->getBaseUrl();
+        }
+
+        return $this->instanceURLRepo->get();
+    }
+
+    /**
      * Returns any resource that is available to the authenticated
      * user. Reference Force.com's REST API guide to read about more
      * methods that can be called or refence them by calling the
