@@ -456,7 +456,7 @@ Forrest::getBaseUrl(); // https://my-instance.my.salesforce.com/services/data/v5
 #### Instance URL
 Returns the URL of the Salesforce instance.
 ```php
-Forrest::getBaseUrl(); // https://my-instance.my.salesforce.com
+Forrest::getInstanceURL(); // https://my-instance.my.salesforce.com
 ```
 
 For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
