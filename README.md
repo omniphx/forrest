@@ -447,6 +447,18 @@ Returns information about the logged-in user.
 Forrest::identity();
 ```
 
+#### Base URL
+Returns the URL of the Salesforce instance with api info.
+```php
+Forrest::getBaseUrl(); // https://my-instance.my.salesforce.com/services/data/v50.0
+```
+
+#### Instance URL
+Returns the URL of the Salesforce instance.
+```php
+Forrest::getInstanceURL(); // https://my-instance.my.salesforce.com
+```
+
 For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
 
 ### Custom Apex endpoints

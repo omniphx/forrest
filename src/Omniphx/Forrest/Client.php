@@ -675,6 +675,16 @@ abstract class Client
     }
 
     /**
+     * Accessor to get instance URL
+     *
+     * @return string
+     */
+    public function getInstanceURL()
+    {
+        return $this->instanceURLRepo->get();
+    }
+
+    /**
      * Returns any resource that is available to the authenticated
      * user. Reference Force.com's REST API guide to read about more
      * methods that can be called or refence them by calling the
@@ -734,7 +744,7 @@ abstract class Client
      */
     abstract public function revoke();
 
-    protected function getBaseUrl()
+    public function getBaseUrl()
     {
         $url = $this->instanceURLRepo->get();
         $url .= $this->versionRepo->get()['url'];
