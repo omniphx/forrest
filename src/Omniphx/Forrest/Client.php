@@ -680,7 +680,7 @@ abstract class Client
      * @param bool $withVersion
      * @return string
      */
-    public function instanceURL($withVersion = false)
+    public function getInstanceURL($withVersion = false)
     {
         if ($withVersion) {
             return $this->getBaseUrl();
