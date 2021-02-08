@@ -677,15 +677,10 @@ abstract class Client
     /**
      * Accessor to get instance URL
      *
-     * @param bool $withVersion
      * @return string
      */
-    public function getInstanceURL($withVersion = false)
+    public function getInstanceURL()
     {
-        if ($withVersion) {
-            return $this->getBaseUrl();
-        }
-
         return $this->instanceURLRepo->get();
     }
 
@@ -749,7 +744,7 @@ abstract class Client
      */
     abstract public function revoke();
 
-    protected function getBaseUrl()
+    public function getBaseUrl()
     {
         $url = $this->instanceURLRepo->get();
         $url .= $this->versionRepo->get()['url'];
