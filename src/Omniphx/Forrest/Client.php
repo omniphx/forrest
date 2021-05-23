@@ -839,6 +839,8 @@ abstract class Client
     {
         if ($ex->hasResponse() && 401 == $ex->getResponse()->getStatusCode()) {
             throw new TokenExpiredException('Salesforce token has expired', $ex);
+        } elseif ($ex->hasResponse() && 403 == $ex->getResponse()->getStatusCode() && 'Bad_OAuth_Token' == $ex->getResponse()->getBody()->getContents()) {
+            throw new TokenExpiredException('Salesforce token has expired', $ex);
         } elseif ($ex->hasResponse()) {
             $error = json_decode($ex->getResponse()->getBody()->getContents(), true);
             $ex->getResponse()->getBody()->rewind();
