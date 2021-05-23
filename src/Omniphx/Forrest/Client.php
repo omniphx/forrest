@@ -184,6 +184,7 @@ abstract class Client
         } catch (TokenExpiredException $e) {
             $this->refresh();
 
+            $this->url = $url;
             return $this->handleRequest();
         }
     }
