@@ -216,6 +216,12 @@ abstract class Client
         } else {
             unset($this->parameters['body']);
         }
+        
+        if (isset($this->options['query'])) {
+            $this->parameters['query'] = http_build_query($this->options['query']);
+        } else {
+            unset($this->parameters['query']);
+        }
 
         try {
             $response = $this->httpClient->request($this->options['method'], $this->url, $this->parameters);
