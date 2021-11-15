@@ -788,6 +788,8 @@ abstract class Client
             $this->formatter = new XMLFormatter($this->tokenRepo, $this->settings);
         } else if ($formatter === 'none' && strpos(get_class($this->formatter), 'BaseFormatter') === false) {
             $this->formatter = new BaseFormatter($this->tokenRepo, $this->settings);
+        } elseif ($formatter === 'csv' && strpos(get_class($this->formatter), 'CsvFormatter') === false) {
+            $this->formatter = new CsvFormatter($this->tokenRepo, $this->settings);
         }
     }
 
