@@ -853,7 +853,7 @@ abstract class Client
             $jsonError = json_encode($error,JSON_PRETTY_PRINT);
             throw new SalesforceException($jsonError, $ex);
         } else {
-            throw new SalesforceException('Invalid request: %s', $ex);
+            throw new SalesforceException(sprintf('Invalid request: %s', $ex->getMessage()), $ex);
         }
     }
 }
