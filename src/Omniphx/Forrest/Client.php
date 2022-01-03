@@ -22,6 +22,7 @@ use Omniphx\Forrest\Formatters\JSONFormatter;
 use Omniphx\Forrest\Formatters\URLEncodedFormatter;
 use Omniphx\Forrest\Formatters\XMLFormatter;
 use Omniphx\Forrest\Formatters\BaseFormatter;
+use Omniphx\Forrest\Formatters\CsvFormatter;
 
 /**
  * API resources.
