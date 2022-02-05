@@ -1,26 +1,25 @@
-
 # Salesforce REST API Client for Laravel <img align="right" src="https://raw.githubusercontent.com/omniphx/images/master/Forrest.png">
 
-[![Laravel](https://img.shields.io/badge/Laravel-8.0-orange.svg?style=flat-square)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-9.0-orange.svg?style=flat-square)](http://laravel.com)
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Total Downloads](https://img.shields.io/packagist/dt/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![License](https://img.shields.io/packagist/l/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Actions Status](https://github.com/omniphx/forrest/workflows/Tests/badge.svg)](https://github.com/omniphx/forrest/actions)
-
-
-
 
 Forrest is a Salesforce/Force.com REST API client for Laravel and Lumen.
 
 Interested in Eloquent Salesforce Models? Check out [@roblesterjr04](https://github.com/roblesterjr04)'s [EloquentSalesForce](https://github.com/roblesterjr04/EloquentSalesForce) project that utilizes Forrest as it's API layer.
 
 ## Installation
->If you are upgrading to Version 2.0, be sure to re-publish your config file.
+
+> If you are upgrading to Version 2.0, be sure to re-publish your config file.
 
 Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
+
 ```php
 "omniphx/forrest": "2.*"
 ```
+
 Next run `composer update` from the command line to install the package.
 
 ### Laravel Installation
@@ -32,7 +31,7 @@ Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
 'Forrest' => Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
 ```
 
->For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
+> For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
 
 ### Lumen Installation
 
@@ -42,16 +41,21 @@ $app->register(Omniphx\Forrest\Providers\Lumen\ForrestServiceProvider::class);
 $app->configure('forrest');
 $app->withFacades();
 ```
+
 Then you'll utilize the Lumen service provider by registering it in the `bootstrap/app.php` file.
 
 ### Configuration
+
 You will need a configuration file to add your credentials. Publish a config file using the `artisan` command:
+
 ```bash
 php artisan vendor:publish
 ```
+
 This will publish a `config/forrest.php` file that can switch between authentication types as well as other settings.
 
 After adding the config file, update your `.env` to include the following values (details for getting a consumer key and secret are outlined below):
+
 ```
 SF_CONSUMER_KEY=123455
 SF_CONSUMER_SECRET=ABCDEF
@@ -64,31 +68,35 @@ SF_USERNAME=mattjmitchener@gmail.com
 SF_PASSWORD=password123
 ```
 
->For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
+> For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
 
->For Laravel 4, run `php artisan config:publish omniphx/forrest` which create `app/config/omniphx/forrest/config.php`
+> For Laravel 4, run `php artisan config:publish omniphx/forrest` which create `app/config/omniphx/forrest/config.php`
 
 ## Getting Started
+
 ### Setting up a Connected App
+
 1. Log into to your Salesforce org
 2. Click on Setup in the upper right-hand menu
 3. Search App in quick find box, and select `App Manager`
 4. Click New Connected App.
 5. Enter the following details for the remote application:
-    * Connected App Name
-    * API Name
-    * Contact Email
-    * Enable OAuth Settings under the API dropdown
-    * Callback URL
-    * Select access scope (If you need a refresh token, specify it here)
+   - Connected App Name
+   - API Name
+   - Contact Email
+   - Enable OAuth Settings under the API dropdown
+   - Callback URL
+   - Select access scope (If you need a refresh token, specify it here)
 6. Click `Save`
 
 After saving, you will now be given a Consumer Key and Consumer Secret. Update your config file with values for `consumerKey`, `consumerSecret`, `loginURL` and `callbackURI`.
 
 ### Setup
+
 Creating authentication routes
 
 #### Web Server authentication flow
+
 ```php
 Route::get('/authenticate', function()
 {
@@ -104,9 +112,10 @@ Route::get('/callback', function()
 ```
 
 #### Username-Password authentication flow
+
 With the Username Password flow, you can directly authenticate with the `Forrest::authenticate()` method.
 
->To use this authentication you must add your username, and password to the config file. Security token might need to be ammended to your password unless your IP address is whitelisted.
+> To use this authentication you must add your username, and password to the config file. Security token might need to be ammended to your password unless your IP address is whitelisted.
 
 ```php
 Route::get('/authenticate', function()
@@ -117,15 +126,16 @@ Route::get('/authenticate', function()
 ```
 
 #### SOAP authentication flow
+
 (When you cannot create a connected App in Salesforce)
 
 1. Salesforce allows individual logins via a SOAP Login
 2. The Bearer access token returned from the SOAP login can be used similar to Oauth key
 3. Update your config file and set the `authentication` value to `UserPasswordSoap`
 4. Update your config file with values for `loginURL`, `username`, and `password`.
-With the Username Password SOAP flow, you can directly authenticate with the `Forrest::authenticate()` method.
+   With the Username Password SOAP flow, you can directly authenticate with the `Forrest::authenticate()` method.
 
->To use this authentication you can add your username, and password to the config file. Security token might need to be ammended to your password unless your IP address is whitelisted.
+> To use this authentication you can add your username, and password to the config file. Security token might need to be ammended to your password unless your IP address is whitelisted.
 
 ```php
 Route::get('/authenticate', function()
@@ -137,7 +147,7 @@ Route::get('/authenticate', function()
 
 If your application requires logging in to salesforce as different users, you can alternatively pass in the login url, username, and password to the `Forrest::authenticateUser()` method.
 
->Security token might need to be ammended to your password unless your IP address is whitelisted.
+> Security token might need to be ammended to your password unless your IP address is whitelisted.
 
 ```php
 Route::Post('/authenticate', function(Request $request)
@@ -148,12 +158,15 @@ Route::Post('/authenticate', function(Request $request)
 ```
 
 #### JWT authentication flow
+
 Initial setup
+
 1. Set `authentication` to `OAuthJWT` in `config/forrest.php`
 2. Generate a key and cert: `openssl req -newkey rsa:2048 -nodes -keyout server.key -x509 -days 365 -out server.crt`
 3. Configure private key in `config/forrest.php` (e.g., `file_get_contents('./../server.key'),`)
 
 Setting up a Connected App
+
 1. App Manager > Create Connected App
 2. Enable Oauth Settings
 3. Check "Use digital signatures"
@@ -162,6 +175,7 @@ Setting up a Connected App
 6. Click Save
 
 Next you need to pre-authorize a profile (As of now, can only do this step in Classic but it's important)
+
 1. Manage Apps > Connected Apps
 2. Click 'Edit' next to your application
 3. Set 'Permitted Users' = 'Admin approved users are pre-authorized'
@@ -170,6 +184,7 @@ Next you need to pre-authorize a profile (As of now, can only do this step in Cl
 6. Under 'Connected App Access' check the corresponding app name
 
 The implementation is exactly the same as UserPassword
+
 ```php
 Route::get('/authenticate', function()
 {
@@ -179,7 +194,9 @@ Route::get('/authenticate', function()
 ```
 
 #### Custom login urls
+
 Sometimes users will need to connect to a sandbox or custom url. To do this, simply pass the url as an argument for the authenticatation method:
+
 ```php
 Route::get('/authenticate', function()
 {
@@ -188,15 +205,21 @@ Route::get('/authenticate', function()
     return Forrest::authenticate($loginURL);
 });
 ```
->Note: You can specify a default login URL in your config file.
+
+> Note: You can specify a default login URL in your config file.
 
 ## Basic usage
+
 After authentication, your app will store an encrypted authentication token which can be used to make API requests.
+
 ### Query a record
+
 ```php
 Forrest::query('SELECT Id FROM Account');
 ```
+
 Sample result:
+
 ```php
 (
     [totalSize] => 2
@@ -226,7 +249,9 @@ Sample result:
         )
 )
 ```
+
 If you are querying more than 2000 records, your response will include:
+
 ```php
 (
     [nextRecordsUrl] => /services/data/v20.0/query/01gD0000002HU6KIAW-2000
@@ -236,7 +261,9 @@ If you are querying more than 2000 records, your response will include:
 Simply, call `Forrest::next($nextRecordsUrl)` to return the next 2000 records.
 
 ### Create a new record
+
 Records can be created using the following format.
+
 ```php
 Forrest::sobjects('Account',[
     'method' => 'post',
@@ -245,6 +272,7 @@ Forrest::sobjects('Account',[
 ```
 
 ### Update a record
+
 Update a record with the PUT method.
 
 ```php
@@ -258,6 +286,7 @@ Forrest::sobjects('Account/001i000000xxx',[
 ```
 
 ### Upsert a record
+
 Update a record with the PATCH method and if the external Id doesn't exist, it will insert a new record.
 
 ```php
@@ -273,6 +302,7 @@ Forrest::sobjects('Account/External_Id__c/' . $externalId, [
 ```
 
 ### Delete a record
+
 Delete a record with the DELETE method.
 
 ```php
@@ -280,7 +310,9 @@ Forrest::sobjects('Account/001i000000xxx', ['method' => 'delete']);
 ```
 
 ### Setting headers
+
 Sometimes you need the ability to set custom headers (e.g., creating a Lead with an assignment rule)
+
 ```php
 Forrest::sobjects('Lead',[
     'method' => 'post',
@@ -293,9 +325,11 @@ Forrest::sobjects('Lead',[
     ]
 ]);
 ```
->To disable assignment rules, use `'Sforce-Auto-Assign' => 'false'`
+
+> To disable assignment rules, use `'Sforce-Auto-Assign' => 'false'`
 
 ### XML format
+
 Change the request/response format to XML with the `format` key or make it default in your config file.
 
 ```php
@@ -307,10 +341,13 @@ Forrest::sobjects('Account',['format'=>'xml']);
 With the exception of the `search` and `query` resources, all resources are requested dynamically using method overloading.
 
 You can determine which resources you have access to by calling with the resource method
+
 ```php
 Forrest::resources();
 ```
+
 This sample output shows the resourses available to call via the API:
+
 ```php
 Array
 (
@@ -331,21 +368,27 @@ Array
     [appMenu] => /services/data/v30.0/appMenu
 )
 ```
+
 From the list above, I can call resources by referring to the specified key.
+
 ```php
 Forrest::theme();
 ```
+
 Or...
+
 ```php
 Forrest::appMenu();
 ```
 
 Additional resource url parameters can also be passed in
+
 ```php
 Forrest::sobjects('Account/describe/approvalLayouts/');
 ```
 
 As well as new formatting options, headers or other configurations
+
 ```php
 Forrest::theme(['format'=>'xml']);
 ```
@@ -417,44 +460,59 @@ $response = Forrest::jobs('ingest/' . $bulkJob['id'] . '/', [
 ### Additional API Requests
 
 #### Refresh
+
 If a refresh token is set, the server can refresh the access token on the user's behalf. Refresh tokens are only for the Web Server flow.
+
 ```php
 Forrest::refresh();
 ```
->If you need a refresh token, be sure to specify this under `access scope` in your [Connected App](#setting-up-connected-app). You can also specify this in your configuration file by adding `'scope' => 'full refresh_token'`. Setting scope access in the config file is optional, the default scope access is determined by your Salesforce org.
+
+> If you need a refresh token, be sure to specify this under `access scope` in your [Connected App](#setting-up-connected-app). You can also specify this in your configuration file by adding `'scope' => 'full refresh_token'`. Setting scope access in the config file is optional, the default scope access is determined by your Salesforce org.
 
 #### Revoke
+
 This will revoke the authorization token. The session will continue to store a token, but it will become invalid.
+
 ```php
 Forrest::revoke();
 ```
 
 #### Versions
+
 Returns all currently supported versions. Includes the verison, label and link to each version's root:
+
 ```php
 Forrest::versions();
 ```
 
 #### Resources
+
 Returns list of available resources based on the logged in user's permission and API version.
+
 ```php
 Forrest::resources();
 ```
 
 #### Identity
+
 Returns information about the logged-in user.
+
 ```php
 Forrest::identity();
 ```
 
 #### Base URL
+
 Returns the URL of the Salesforce instance with api info.
+
 ```php
 Forrest::getBaseUrl(); // https://my-instance.my.salesforce.com/services/data/v50.0
 ```
 
 #### Instance URL
+
 Returns the URL of the Salesforce instance.
+
 ```php
 Forrest::getInstanceURL(); // https://my-instance.my.salesforce.com
 ```
@@ -462,21 +520,28 @@ Forrest::getInstanceURL(); // https://my-instance.my.salesforce.com
 For a complete listing of API resources, refer to the [Force.com REST API Developer's Guide](http://www.salesforce.com/us/developer/docs/api_rest/api_rest.pdf)
 
 ### Custom Apex endpoints
+
 If you create a custom API using Apex, you can use the `custom()` method for consuming them.
+
 ```php
 Forrest::custom('/myEndpoint');
 ```
+
 Additional options and parameters can be passed in like this:
+
 ```php
 Forrest::custom('/myEndpoint', [
     'method' => 'post',
     'body' => ['foo' => 'bar'],
     'parameters' => ['flim' => 'flam']]);
 ```
+
 > Read [Creating REST APIs using Apex REST](https://developer.salesforce.com/page/Creating_REST_APIs_using_Apex_REST) for more information.
 
 ### Raw Requests
+
 If needed, you can make raw requests to an endpoint of your choice.
+
 ```php
 Forrest::get('/services/data/v20.0/endpoint');
 Forrest::head('/services/data/v20.0/endpoint');
@@ -487,6 +552,7 @@ Forrest::delete('/services/data/v20.0/endpoint');
 ```
 
 ### Raw response output
+
 By default, this package will return the body of a response as either a deserialized JSON object or a SimpleXMLElement object.
 
 There might be times, when you would rather handle this differently. To do this, simply use any format other than 'json' or 'xml' and the code will return a Guzzle response object.
@@ -497,7 +563,9 @@ $content = (string) $response->getBody(); // Guzzle response
 ```
 
 ### Event Listener
+
 This package makes use of Guzzle's event listers
+
 ```php
 Event::listen('forrest.response', function($request, $response) {
     dd((string) $response);
@@ -505,9 +573,11 @@ Event::listen('forrest.response', function($request, $response) {
 ```
 
 ### Creating multiple instances of Forrest
+
 There might be situations where you need to make calls to multiple Salesforce orgs. This can only be achieved only with the UserPassword flows.
 
 1. Set storage = `object` in the config file. This will store the token inside the object instance:
+
 ```php
 'storage'=> [
     'type' => 'object'
@@ -515,6 +585,7 @@ There might be situations where you need to make calls to multiple Salesforce or
 ```
 
 2. Create a multiple instance with the laravel `app()->make()` helper function:
+
 ```php
 $forrest1 = app()->make('forrest');
 $forrest1->setCredentials(['username' => 'user@email.com.org1', 'password'=> '1234']);

@@ -11,7 +11,7 @@ class LaravelCache implements StorageInterface
 {
     protected $cache;
     protected $path;
-    protected $minutes = 20;
+    protected $seconds = 600; // 10 minutes
     protected $storeForever;
 
     public function __construct(Config $config, Cache $cache)
@@ -20,7 +20,7 @@ class LaravelCache implements StorageInterface
         $this->path             = $config->get('forrest.storage.path');
         $this->storeForever     = $config->get('forrest.storage.store_forever');
         $this->expirationConfig = $config->get('forrest.storage.expire_in');
-        $this->setMinutes();
+        $this->setSeconds();
     }
 
     /**
@@ -36,7 +36,7 @@ class LaravelCache implements StorageInterface
         if ($this->storeForever) {
             return $this->cache->forever($this->path.$key, $value);
         } else {
-            return $this->cache->put($this->path.$key, $value, $this->minutes);
+            return $this->cache->put($this->path.$key, $value, $this->seconds);
         }
     }
 
@@ -69,9 +69,9 @@ class LaravelCache implements StorageInterface
     /**
      * @return void
      */
-    protected function setMinutes() {
+    protected function setSeconds() {
         if(!$this->checkIfPositiveInteger($this->expirationConfig)) return;
-        $this->minutes = $this->expirationConfig;
+        $this->seconds = $this->expirationConfig;
     }
 
     /**
