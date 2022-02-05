@@ -12,7 +12,7 @@ Next, update your `composer.json` to include the psr-4 auto-loader location. You
         "App\\": "app/",
         "Database\\Factories\\": "database/factories/",
         "Database\\Seeders\\": "database/seeders/",
-        "Omniphx\\Forrest\\": "libraries/forrest/"
+        "Omniphx\\Forrest\\": "libraries/forrest/src/Omniphx/Forrest"
     }
 },
 ```
