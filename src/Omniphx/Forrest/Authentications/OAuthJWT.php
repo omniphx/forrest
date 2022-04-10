@@ -11,7 +11,6 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
 {
     public static function getJWT($iss, $aud, $sub, $privateKey)
     {
-        $header = ['alg' => 'RS256'];
         $payload = [
             'iss' => $iss,
             'aud' => $aud,
@@ -19,7 +18,7 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
             'exp' => Carbon::now()->addMinutes(3)->timestamp
         ];
 
-        return JWT::encode($payload, $privateKey, 'RS256', $header);
+        return JWT::encode($payload, $privateKey, 'RS256');
     }
 
     public function authenticate($url = null)
