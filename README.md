@@ -555,11 +555,11 @@ Forrest::delete('/services/data/v20.0/endpoint');
 
 By default, this package will return the body of a response as either a deserialized JSON object or a SimpleXMLElement object.
 
-There might be times, when you would rather handle this differently. To do this, simply use any format other than 'json' or 'xml' and the code will return a Guzzle response object.
+There might be times, when you would rather handle this differently. To do this, simply use the format of 'none' and the code will return the entire response body as a string.
 
 ```php
 $response = Forrest::sobjects($resource, ['format'=> 'none']);
-$content = (string) $response->getBody(); // Guzzle response
+echo $response; // Unformatted string
 ```
 
 ### Event Listener
