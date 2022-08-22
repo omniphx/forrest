@@ -23,7 +23,7 @@ class UserPassword extends BaseAuthentication implements UserPasswordInterface
     /**
      * Refresh authentication token by re-authenticating.
      *
-     * @return mixed $response
+     * @return void
      */
     public function refresh()
     {
@@ -61,7 +61,7 @@ class UserPassword extends BaseAuthentication implements UserPasswordInterface
     /**
      * Revokes access token from Salesforce. Will not flush token from storage.
      *
-     * @return mixed
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function revoke()
     {

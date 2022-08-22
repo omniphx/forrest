@@ -50,11 +50,11 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
     /**
      * Refresh authentication token by re-authenticating.
      *
-     * @return mixed $response
+     * @return void
      */
     public function refresh()
     {
-        return $this->authenticate();
+        $this->authenticate();
         /* Per the SOAP Documenetationthe token life is extended at every call,
          * so the refresh is not needed. Token will expire in two hours from
          * last call by default.
@@ -101,7 +101,7 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
     /**
      * Revokes access token from Salesforce. Will not flush token from storage.
      *
-     * @return mixed
+     * @return void
      */
     public function revoke()
     {

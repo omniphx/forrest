@@ -50,11 +50,17 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         $this->storeResources();
     }
 
+    /**
+     * @return void
+     */
     public function refresh()
     {
         $this->authenticate();
     }
 
+    /**
+     * @return \Psr\Http\Message\ResponseInterface
+     */
     public function revoke()
     {
         $accessToken = $this->tokenRepo->get()['access_token'];

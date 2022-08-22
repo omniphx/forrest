@@ -95,7 +95,7 @@ class WebServer extends Client implements WebServerInterface
     /**
      * Refresh authentication token.
      *
-     * @return mixed $response
+     * @return void
      */
     public function refresh()
     {
@@ -122,7 +122,7 @@ class WebServer extends Client implements WebServerInterface
     /**
      * Revokes access token from Salesforce. Will not flush token from storage.
      *
-     * @return mixed
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function revoke()
     {
