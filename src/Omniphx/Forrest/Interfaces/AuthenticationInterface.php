@@ -7,7 +7,7 @@ interface AuthenticationInterface
     /**
      * Begin authentication process.
      *
-     * @param string $url
+     * @param string|null $url
      *
      * @return \Illuminate\Http\RedirectResponse|void
      */
