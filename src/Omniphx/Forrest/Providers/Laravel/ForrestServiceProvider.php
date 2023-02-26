@@ -40,6 +40,9 @@ class ForrestServiceProvider extends BaseServiceProvider
                 return new LaravelCache(app('config'), app('cache')->store());
             case 'object':
                 return new ObjectStorage();
+            case 'custom':
+                $customStorageClass = app('config')->get('forrest.storage.custom_storage_class');
+                return new $customStorageClass();
             default:
                 return new LaravelSession(app('config'), app('request')->session());
         }

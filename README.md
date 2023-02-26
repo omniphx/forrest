@@ -1,6 +1,6 @@
 # Salesforce REST API Client for Laravel <img align="right" src="https://raw.githubusercontent.com/omniphx/images/master/Forrest.png">
 
-[![Laravel](https://img.shields.io/badge/Laravel-9.0-orange.svg?style=flat-square)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-10.x-orange.svg?style=flat-square)](http://laravel.com)
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Total Downloads](https://img.shields.io/packagist/dt/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![License](https://img.shields.io/packagist/l/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
@@ -597,3 +597,77 @@ $forrest2->authenticate();
 ```
 
 For more information about Guzzle responses and event listeners, refer to their [documentation](http://guzzle.readthedocs.org).
+
+### Creating a custom store
+
+If you'd prefer to use storage other than `session`, `cache` or `object`, you can implement a custom implementation by configuring `storage.type` to `custom` and passing in the name of your class to `custom_storage_class`
+
+```php
+'storage' => [
+    'type'                 => 'custom',
+    'custom_storage_class' => App\Storage\CustomStorage::class,
+],
+```
+
+You class can be named anything but it must implement `Omniphx\Forrest\Interfaces\StorageInterface`:
+
+```php
+<?php
+
+namespace App\Storage;
+
+use Session;
+use Omniphx\Forrest\Exceptions\MissingKeyException;
+use Omniphx\Forrest\Interfaces\StorageInterface;
+
+class CustomStorage implements StorageInterface
+{
+    public $path;
+
+    public function __construct()
+    {
+        $this->path = 'app.custom.path';
+    }
+
+    /**
+     * Store into session.
+     *
+     * @param $key
+     * @param $value
+     *
+     * @return void
+     */
+    public function put($key, $value)
+    {
+        return Session::put($this->path.$key, $value);
+    }
+
+    /**
+     * Get from session.
+     *
+     * @param $key
+     *
+     * @return mixed
+     */
+    public function get($key)
+    {
+        if(!$this->has($key)) {
+            throw new MissingKeyException(sprintf('No value for requested key: %s', $key));
+        }
+
+        return Session::get($this->path.$key);
+    }
+
+    /**
+     * Check if storage has a key.
+     *
+     * @param $key
+     *
+     * @return bool
+     */
+    public function has($key)
+    {
+        return Session::has($this->path.$key);
+    }
+}
+```
