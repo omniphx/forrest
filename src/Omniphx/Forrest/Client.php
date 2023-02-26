@@ -702,6 +702,16 @@ abstract class Client implements AuthenticationInterface
     }
 
     /**
+     * Accessor to get the token object
+     *
+     * @return mixed
+     */
+    public function getToken()
+    {
+        return $this->tokenRepo->get();
+    }
+
+    /**
      * Returns any resource that is available to the authenticated
      * user. Reference Force.com's REST API guide to read about more
      * methods that can be called or refence them by calling the
