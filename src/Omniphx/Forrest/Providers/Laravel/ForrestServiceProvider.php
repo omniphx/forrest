@@ -7,6 +7,7 @@ use Omniphx\Forrest\Providers\BaseServiceProvider;
 use Omniphx\Forrest\Providers\Laravel\LaravelCache;
 use Omniphx\Forrest\Providers\Laravel\LaravelSession;
 use Omniphx\Forrest\Providers\ObjectStorage;
+use Omniphx\Forrest\Interfaces\StorageInterface;
 
 class ForrestServiceProvider extends BaseServiceProvider
 {
@@ -40,11 +41,12 @@ class ForrestServiceProvider extends BaseServiceProvider
                 return new LaravelCache(app('config'), app('cache')->store());
             case 'object':
                 return new ObjectStorage();
-            case 'custom':
-                $customStorageClass = app('config')->get('forrest.storage.custom_storage_class');
-                return new $customStorageClass();
             default:
-                return new LaravelSession(app('config'), app('request')->session());
+                if(class_exists($storageType) && new $storageType() instanceof StorageInterface) {
+                    return new $storageType();
+                } else {
+                    return new LaravelSession(app('config'), app('request')->session());
+                }
         }
     }
 }

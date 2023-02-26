@@ -600,12 +600,11 @@ For more information about Guzzle responses and event listeners, refer to their 
 
 ### Creating a custom store
 
-If you'd prefer to use storage other than `session`, `cache` or `object`, you can implement a custom implementation by configuring `storage.type` to `custom` and passing in the name of your class to `custom_storage_class`
+If you'd prefer to use storage other than `session`, `cache` or `object`, you can implement a custom implementation by configuring a custom class instance in `storage.type`:
 
 ```php
 'storage' => [
-    'type'                 => 'custom',
-    'custom_storage_class' => App\Storage\CustomStorage::class,
+    'type' => App\Storage\CustomStorage::class,
 ],
 ```
 
