@@ -42,7 +42,7 @@ class ForrestServiceProvider extends BaseServiceProvider
             case 'object':
                 return new ObjectStorage();
             default:
-                if(class_exists($storageType) && new $storageType() instanceof StorageInterface) {
+                if($storageType !== null && class_exists($storageType) && new $storageType() instanceof StorageInterface) {
                     return new $storageType();
                 } else {
                     return new LaravelSession(app('config'), app('request')->session());
