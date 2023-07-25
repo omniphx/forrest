@@ -13,6 +13,7 @@ class LaravelCache implements StorageInterface
     protected $path;
     protected $seconds = 600; // 10 minutes
     protected $storeForever;
+    protected $expirationConfig;
 
     public function __construct(Config $config, Cache $cache)
     {

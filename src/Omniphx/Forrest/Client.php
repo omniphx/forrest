@@ -118,6 +118,12 @@ abstract class Client implements AuthenticationInterface
      */
     protected $credentials;
 
+    /** @var \Omniphx\Forrest\Interfaces\RepositoryInterface  */
+    protected $instanceURLRepo;
+
+    /** @var \Omniphx\Forrest\Interfaces\RepositoryInterface  */
+    protected $refreshTokenRepo;
+
     /**
      * Request options.
      *
