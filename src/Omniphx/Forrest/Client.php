@@ -70,6 +70,8 @@ abstract class Client implements AuthenticationInterface
      */
     protected $event;
 
+    protected $url;
+
     protected $resourceRepo;
 
     protected $stateRepo;
