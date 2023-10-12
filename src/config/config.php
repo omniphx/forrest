@@ -5,7 +5,7 @@
  */
 return [
     /*
-     * Options include WebServer, UserPassword, UserPasswordSoap, and OAuthJWT
+     * Options include WebServer, UserPassword, UserPasswordSoap, ClientCredentials and OAuthJWT
      */
     'authentication' => env('SF_AUTH_METHOD', 'WebServer'),
 
@@ -24,7 +24,7 @@ return [
 
         // Only required for UserPassword authentication:
         'username'       => env('SF_USERNAME'),
-        // Security token might need to be ammended to password unless IP Address is whitelisted
+        // Security token might need to be amended to password unless IP Address is whitelisted
         'password'       => env('SF_PASSWORD'),
         // Only required for OAuthJWT authentication:
         'privateKey'     => '',
