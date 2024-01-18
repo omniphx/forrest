@@ -47,8 +47,14 @@ class CsvFormatter implements FormatterInterface
     public function formatResponse($response)
     {
         $body = $response->getBody();
+        $header = $response->getHeaders();
         $contents = (string) $body;
-        return $contents;
+        
+        return [ 
+            'header' => $header,
+            'body' => $contents,
+            
+        ];
     }
 
     public function getDefaultMIMEType()
