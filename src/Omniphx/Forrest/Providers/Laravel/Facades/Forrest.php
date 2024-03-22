@@ -51,12 +51,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|array compactLayouts(string $resource, array $options = [])
  * @method static string|array flexiPage(string $resource, array $options = [])
  * @method static string|array knowledgeManagement(string $resource, array $options = [])
- * @method static string|array sobjects(string $resource, array $options = [])
+ * @method static string|array sobjects(string $resource = "", array $options = [])
  * @method static string|array actions(string $resource, array $options = [])
  * @method static string|array support(string $resource, array $options = [])
- * @method static \GuzzleHttp\ClientInterface getClient()
- * @method static string getInstanceURL()
- * @method static string getBaseUrl()
+ * @method static \Omniphx\Forrest\Interfaces\RedirectInterface callback()
 */
 class Forrest extends Facade
 {
