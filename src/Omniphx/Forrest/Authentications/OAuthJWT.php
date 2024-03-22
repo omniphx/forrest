@@ -23,10 +23,10 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
 
     public function authenticate($fullInstanceUrl = null)
     {
-        $fullInstanceUrl = $fullInstanceUrl ?? $this->getInstanceURL() . '/services/oauth2/token';
+        $loginUrl = $this->credentials['loginURL'];
+        $fullInstanceUrl = $fullInstanceUrl ?? $loginUrl . '/services/oauth2/token';
 
         $consumerKey = $this->credentials['consumerKey'];
-        $loginUrl = $this->credentials['loginURL'];
         $username = $this->credentials['username'];
         $privateKey = $this->credentials['privateKey'];
 

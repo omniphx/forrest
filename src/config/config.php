@@ -30,6 +30,8 @@ return [
         'privateKey'     => '',
     ],
 
+    'instanceURL' => 'https://<YOUR_ORG>.my.salesforce.com',
+
     /*
      * These are optional authentication parameters that can be specified for the WebServer flow.
      * https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_web_server_flow.htm&language=en_US
@@ -78,7 +80,12 @@ return [
     'version' => '',
 
     /*
-     * Optional (and not recommended) if you need to override the instance_url returned from Saleforce
+     * Optional (and not recommended) if you need to override the instance_url returned from Salesforce
+     *
+     * This is useful for adding lightning and sandbox capability to OAuthJWT:
+     * Lightning: https://<YOUR_ORG>.my.salesforce.com
+     * Lightning Sandbox: https://<YOUR_ORG>--<SANDBOX_NAME>.sandbox.my.salesforce.com
+     * Developer Org : https://<DEV_DOMAIN>.develop.my.salesforce.com
      */
     'instanceURL' => '',
 
