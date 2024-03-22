@@ -21,24 +21,24 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         return JWT::encode($payload, $privateKey, 'RS256');
     }
 
-    public function authenticate($url = null)
+    public function authenticate($fullInstanceUrl = null)
     {
-        $domain = $url ?? $this->credentials['loginURL'] . '/services/oauth2/token';
-        $username = $this->credentials['username'];
-        // OAuth Client ID
+        $fullInstanceUrl = $fullInstanceUrl ?? $this->getInstanceURL() . '/services/oauth2/token';
+
         $consumerKey = $this->credentials['consumerKey'];
-        // Private Key
+        $loginUrl = $this->credentials['loginURL'];
+        $username = $this->credentials['username'];
         $privateKey = $this->credentials['privateKey'];
 
         // Generate the form parameters
-        $assertion = static::getJWT($consumerKey, $domain, $username, $privateKey);
+        $assertion = static::getJWT($consumerKey, $loginUrl, $username, $privateKey);
         $parameters = [
             'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
             'assertion' => $assertion
         ];
 
         // \Psr\Http\Message\ResponseInterface
-        $response = $this->httpClient->request('post', $domain, ['form_params' => $parameters]);
+        $response = $this->httpClient->request('post', $fullInstanceUrl, ['form_params' => $parameters]);
 
         $authToken = json_decode($response->getBody()->getContents(), true);
 
