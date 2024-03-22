@@ -4,7 +4,7 @@ namespace Omniphx\Forrest\Formatters;
 
 use Omniphx\Forrest\Interfaces\FormatterInterface;
 
-class CsvFormatter implements FormatterInterface
+class CsvHeadersFormatter implements FormatterInterface
 {
     protected $tokenRepository;
     protected $settings;
