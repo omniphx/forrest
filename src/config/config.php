@@ -30,8 +30,6 @@ return [
         'privateKey'     => '',
     ],
 
-    'instanceURL' => 'https://<YOUR_ORG>.my.salesforce.com',
-
     /*
      * These are optional authentication parameters that can be specified for the WebServer flow.
      * https://help.salesforce.com/apex/HTViewHelpDoc?id=remoteaccess_oauth_web_server_flow.htm&language=en_US
