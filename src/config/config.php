@@ -78,7 +78,12 @@ return [
     'version' => '',
 
     /*
-     * Optional (and not recommended) if you need to override the instance_url returned from Saleforce
+     * Optional (and not recommended) if you need to override the instance_url returned from Salesforce
+     *
+     * This is useful for configuring lightning or lightning sandboxes with OAuthJWT:
+     * Lightning: https://<YOUR_ORG>.my.salesforce.com
+     * Lightning Sandbox: https://<YOUR_ORG>--<SANDBOX_NAME>.sandbox.my.salesforce.com
+     * Developer Org: https://<DEV_DOMAIN>.develop.my.salesforce.com
      */
     'instanceURL' => '',
 

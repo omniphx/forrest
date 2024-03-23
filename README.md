@@ -56,7 +56,7 @@ This will publish a `config/forrest.php` file that can switch between authentica
 
 After adding the config file, update your `.env` to include the following values (details for getting a consumer key and secret are outlined below):
 
-```
+```txt
 SF_CONSUMER_KEY=123455
 SF_CONSUMER_SECRET=ABCDEF
 SF_CALLBACK_URI=https://test.app/callback
@@ -69,7 +69,6 @@ SF_PASSWORD=password123
 ```
 
 > For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
-
 > For Laravel 4, run `php artisan config:publish omniphx/forrest` which create `app/config/omniphx/forrest/config.php`
 
 ## Getting Started
@@ -124,7 +123,6 @@ Route::get('/authenticate', function()
     return Redirect::to('/');
 });
 ```
-
 
 #### Client Credentials authentication flow
 
@@ -198,7 +196,7 @@ Next you need to pre-authorize a profile (As of now, can only do this step in Cl
 5. Go to Settings > Manage Users > Profiles and edit the profile of the associated user (i.e., Salesforce Administrator)
 6. Under 'Connected App Access' check the corresponding app name
 
-The implementation is exactly the same as UserPassword
+The implementation is exactly the same as UserPassword (e.g., will need to explicitly specify a username and password)
 
 ```php
 Route::get('/authenticate', function()
@@ -206,6 +204,14 @@ Route::get('/authenticate', function()
     Forrest::authenticate();
     return Redirect::to('/');
 });
+```
+
+For connecting to Lightning orgs you will need to configure an `instanceUrl` inside your `forrest.php` config:
+
+```txt
+Lightning: https://<YOUR_ORG>.my.salesforce.com
+Lightning Sandbox: https://<YOUR_ORG>--<SANDBOX_NAME>.sandbox.my.salesforce.com
+Developer Org: https://<DEV_DOMAIN>.develop.my.salesforce.com
 ```
 
 #### Custom login urls

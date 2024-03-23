@@ -21,9 +21,18 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         return JWT::encode($payload, $privateKey, 'RS256');
     }
 
+    private function getDefaultInstanceURL()
+    {
+        if (isset($this->settings['instanceURL']) && !empty($this->settings['instanceURL'])) {
+            return $this->settings['instanceURL'];
+        } else {
+            return $this->credentials['loginURL'];
+        }
+    }
+
     public function authenticate($fullInstanceUrl = null)
     {
-        $fullInstanceUrl = $fullInstanceUrl ?? $this->getInstanceURL() . '/services/oauth2/token';
+        $fullInstanceUrl = $fullInstanceUrl ?? $this->getDefaultInstanceURL() . '/services/oauth2/token';
 
         $consumerKey = $this->credentials['consumerKey'];
         $loginUrl = $this->credentials['loginURL'];
