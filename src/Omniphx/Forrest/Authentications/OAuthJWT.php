@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Omniphx\Forrest\Client as BaseAuthentication;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
-use Omniphx\Forrest\Exceptions\MissingTokenException;
 
 class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
 {
