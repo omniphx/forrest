@@ -53,8 +53,9 @@ class WebServer extends Client implements WebServerInterface
     {
         //Salesforce sends us an authorization code as part of the Web Server OAuth Authentication Flow
         $code = $this->input->get('code');
+        $state = stripslashes($this->input->get('state'));
 
-        $stateOptions = json_decode(urldecode($this->input->get('state')), true);
+        $stateOptions = json_decode(urldecode($state), true);
 
         //Store instance URL
         $loginURL = $stateOptions['loginUrl'];
