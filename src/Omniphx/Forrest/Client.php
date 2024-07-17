@@ -247,6 +247,11 @@ abstract class Client implements AuthenticationInterface
             $this->assignExceptions($ex);
         }
 
+        // If the format is raw, return the response as is
+        if($this->options['format'] == 'raw') {
+            return $response;
+        }
+
         $formattedResponse = $this->formatter->formatResponse($response);
 
         $this->event->fire('forrest.response', [$formattedResponse]);
