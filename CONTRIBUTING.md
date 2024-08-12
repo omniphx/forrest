@@ -24,7 +24,7 @@ Add required dependencies:
 ```
 "require": {
     "firebase/php-jwt": "^5.2",
-    "nesbot/carbon": "^2.0"
+    "nesbot/carbon": "^2.0|^3.0"
 },
 ```
 
