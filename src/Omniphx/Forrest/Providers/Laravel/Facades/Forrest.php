@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Http\RedirectResponse|void authenticate()
  * @method static void refresh()
  * @method static \Psr\Http\Message\ResponseInterface|void revoke()
+ * @method static bool hasToken()
  * @method static void setCredentials(array $credentials)
  * @method static string|array versions(array $options = [])
  * @method static string|array resources(array $options = [])
@@ -55,7 +56,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|array actions(string $resource, array $options = [])
  * @method static string|array support(string $resource, array $options = [])
  * @method static \Omniphx\Forrest\Interfaces\RedirectInterface callback()
-*/
+ */
 class Forrest extends Facade
 {
     /**

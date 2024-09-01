@@ -720,6 +720,16 @@ abstract class Client implements AuthenticationInterface
     }
 
     /**
+     * Determine whether token exists
+     *
+     * @return bool
+     */
+    public function hasToken()
+    {
+        return $this->tokenRepo->has();
+    }
+
+    /**
      * Returns any resource that is available to the authenticated
      * user. Reference Force.com's REST API guide to read about more
      * methods that can be called or refence them by calling the
