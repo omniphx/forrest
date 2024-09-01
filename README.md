@@ -571,6 +571,16 @@ Forrest::put('/services/data/v20.0/endpoint', ['my'=>'param']);
 Forrest::patch('/services/data/v20.0/endpoint', ['my'=>'param']);
 Forrest::delete('/services/data/v20.0/endpoint');
 ```
+### Get file body from ContentVersion and Attachment
+You can use the Forrest::getContentVersionBody() and Forrest::getAttachmentBody() to retrieve the content of the 
+uploaded files. They return a streamed response, so it may be a bit cumbersome to use if now used to streams. 
+Bellow you can find an example to retrieve the content of a uploaded content version. 
+ 
+```php
+# example 
+$data = Forrest::getContentVersionBody($version->Id);
+$content =  $data->getBody()->getContents();
+```
 
 ### Raw response output
 

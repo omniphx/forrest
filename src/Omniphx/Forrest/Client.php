@@ -3,27 +3,24 @@
 namespace Omniphx\Forrest;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Message\ResponseInterface;
 use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
-use Omniphx\Forrest\Exceptions\MissingVersionException;
-
+use Omniphx\Forrest\Formatters\BaseFormatter;
+use Omniphx\Forrest\Formatters\CsvFormatter;
+use Omniphx\Forrest\Formatters\JSONFormatter;
+use Omniphx\Forrest\Formatters\XMLFormatter;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
+use Omniphx\Forrest\Interfaces\FormatterInterface;
 use Omniphx\Forrest\Interfaces\InputInterface;
 use Omniphx\Forrest\Interfaces\RedirectInterface;
-use Omniphx\Forrest\Interfaces\FormatterInterface;
 use Omniphx\Forrest\Interfaces\RepositoryInterface;
 use Omniphx\Forrest\Interfaces\ResourceRepositoryInterface;
-
-use Omniphx\Forrest\Formatters\JSONFormatter;
-use Omniphx\Forrest\Formatters\URLEncodedFormatter;
-use Omniphx\Forrest\Formatters\XMLFormatter;
-use Omniphx\Forrest\Formatters\BaseFormatter;
-use Omniphx\Forrest\Formatters\CsvFormatter;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * API resources.
@@ -120,10 +117,10 @@ abstract class Client implements AuthenticationInterface
      */
     protected $credentials;
 
-    /** @var \Omniphx\Forrest\Interfaces\RepositoryInterface  */
+    /** @var \Omniphx\Forrest\Interfaces\RepositoryInterface */
     protected $instanceURLRepo;
 
-    /** @var \Omniphx\Forrest\Interfaces\RepositoryInterface  */
+    /** @var \Omniphx\Forrest\Interfaces\RepositoryInterface */
     protected $refreshTokenRepo;
 
     /**
@@ -162,28 +159,27 @@ abstract class Client implements AuthenticationInterface
         FormatterInterface $formatter,
         $settings)
     {
-        $this->httpClient       = $httpClient;
-        $this->encryptor        = $encryptor;
-        $this->event            = $event;
-        $this->input            = $input;
-        $this->redirect         = $redirect;
-        $this->instanceURLRepo  = $instanceURLRepo;
+        $this->httpClient = $httpClient;
+        $this->encryptor = $encryptor;
+        $this->event = $event;
+        $this->input = $input;
+        $this->redirect = $redirect;
+        $this->instanceURLRepo = $instanceURLRepo;
         $this->refreshTokenRepo = $refreshTokenRepo;
-        $this->resourceRepo     = $resourceRepo;
-        $this->stateRepo        = $stateRepo;
-        $this->tokenRepo        = $tokenRepo;
-        $this->versionRepo      = $versionRepo;
-        $this->formatter        = $formatter;
-        $this->settings         = $settings;
-        $this->credentials      = $settings['credentials'];
+        $this->resourceRepo = $resourceRepo;
+        $this->stateRepo = $stateRepo;
+        $this->tokenRepo = $tokenRepo;
+        $this->versionRepo = $versionRepo;
+        $this->formatter = $formatter;
+        $this->settings = $settings;
+        $this->credentials = $settings['credentials'];
     }
 
     /**
      * Try requesting token, if token expired try refreshing token.
      *
-     * @param string $url
-     * @param array  $options
-     *
+     * @param  string  $url
+     * @param  array  $options
      * @return string|array
      */
     public function request($url, $options)
@@ -197,11 +193,13 @@ abstract class Client implements AuthenticationInterface
             $this->refresh();
 
             $this->url = $url;
+
             return $this->handleRequest();
         }
     }
 
-    public function setCredentials($credentials) {
+    public function setCredentials($credentials)
+    {
         $this->credentials = array_replace_recursive($this->credentials, $credentials);
     }
 
@@ -257,10 +255,9 @@ abstract class Client implements AuthenticationInterface
     /**
      * GET method call using any custom path.
      *
-     * @param string $path
-     * @param array  $requestBody
-     * @param array  $options
-     *
+     * @param  string  $path
+     * @param  array  $requestBody
+     * @param  array  $options
      * @return mixed
      */
     public function get($path, $requestBody = [], $options = [])
@@ -271,10 +268,9 @@ abstract class Client implements AuthenticationInterface
     /**
      * POST method call using any custom path.
      *
-     * @param string $path
-     * @param array  $requestBody
-     * @param array  $options
-     *
+     * @param  string  $path
+     * @param  array  $requestBody
+     * @param  array  $options
      * @return mixed
      */
     public function post($path, $requestBody = [], $options = [])
@@ -285,10 +281,9 @@ abstract class Client implements AuthenticationInterface
     /**
      * PUT method call using any custom path.
      *
-     * @param string $path
-     * @param array  $requestBody
-     * @param array  $options
-     *
+     * @param  string  $path
+     * @param  array  $requestBody
+     * @param  array  $options
      * @return mixed
      */
     public function put($path, $requestBody = [], $options = [])
@@ -299,10 +294,9 @@ abstract class Client implements AuthenticationInterface
     /**
      * DELETE method call using any custom path.
      *
-     * @param string $path
-     * @param array  $requestBody
-     * @param array  $options
-     *
+     * @param  string  $path
+     * @param  array  $requestBody
+     * @param  array  $options
      * @return mixed
      */
     public function delete($path, $requestBody = [], $options = [])
@@ -313,10 +307,9 @@ abstract class Client implements AuthenticationInterface
     /**
      * HEAD method call using any custom path.
      *
-     * @param string $path
-     * @param array  $requestBody
-     * @param array  $options
-     *
+     * @param  string  $path
+     * @param  array  $requestBody
+     * @param  array  $options
      * @return mixed
      */
     public function head($path, $requestBody = [], $options = [])
@@ -327,10 +320,9 @@ abstract class Client implements AuthenticationInterface
     /**
      * PATCH method call using any custom path.
      *
-     * @param string $path
-     * @param array  $requestBody
-     * @param array  $options
-     *
+     * @param  string  $path
+     * @param  array  $requestBody
+     * @param  array  $options
      * @return mixed
      */
     public function patch($path, $requestBody = [], $options = [])
@@ -341,10 +333,6 @@ abstract class Client implements AuthenticationInterface
     /**
      * Prepares options and sends the request.
      *
-     * @param $path
-     * @param $requestBody
-     * @param $options
-     * @param $method
      *
      * @return mixed
      */
@@ -354,7 +342,7 @@ abstract class Client implements AuthenticationInterface
         $url .= '/'.trim($path, "/\t\n\r\0\x0B");
 
         $options['method'] = $method;
-        if (!empty($requestBody)) {
+        if (! empty($requestBody)) {
             $options['body'] = $requestBody;
         }
 
@@ -367,8 +355,7 @@ abstract class Client implements AuthenticationInterface
      * Formats: json, xml
      * Methods: get.
      *
-     * @param array $options
-     *
+     * @param  array  $options
      * @return array $versions
      */
     public function versions($options = [])
@@ -387,8 +374,7 @@ abstract class Client implements AuthenticationInterface
      * Formats: json, xml
      * Methods: get.
      *
-     * @param array $options
-     *
+     * @param  array  $options
      * @return array $resources
      */
     public function resources($options = [])
@@ -403,7 +389,6 @@ abstract class Client implements AuthenticationInterface
      * Returns information about the logged-in user.
      *
      * @param  array
-     *
      * @return array $identity
      */
     public function identity($options = [])
@@ -425,8 +410,7 @@ abstract class Client implements AuthenticationInterface
      * Available for API version 29.0 and later.
      * Returns limits for daily API calls, Data storage, etc.
      *
-     * @param array $options
-     *
+     * @param  array  $options
      * @return array $limits
      */
     public function limits($options = [])
@@ -442,16 +426,15 @@ abstract class Client implements AuthenticationInterface
     /**
      * Describes all global objects available in the organization.
      *
-     * @param string $object_name
-     * @param array  $options
-     *
+     * @param  string  $object_name
+     * @param  array  $options
      * @return array
      */
     public function describe($object_name = null, $options = [])
     {
         $url = sprintf('%s/sobjects', $this->getBaseUrl());
 
-        if (!empty($object_name)) {
+        if (! empty($object_name)) {
             $url .= sprintf('/%s/describe', $object_name);
         }
 
@@ -461,9 +444,8 @@ abstract class Client implements AuthenticationInterface
     /**
      * Executes a specified SOQL query.
      *
-     * @param string $query
-     * @param array  $options
-     *
+     * @param  string  $query
+     * @param  array  $options
      * @return array $queryResults
      */
     public function query($query, $options = [])
@@ -481,9 +463,7 @@ abstract class Client implements AuthenticationInterface
     /**
      * Calls next query.
      *
-     * @param       $nextUrl
-     * @param array $options
-     *
+     * @param  array  $options
      * @return mixed
      */
     public function next($nextUrl, $options = [])
@@ -500,9 +480,8 @@ abstract class Client implements AuthenticationInterface
      * Details how Salesforce will process your query.
      * Available for API verison 30.0 or later.
      *
-     * @param string $query
-     * @param array  $options
-     *
+     * @param  string  $query
+     * @param  array  $options
      * @return array $queryExplain
      */
     public function queryExplain($query, $options = [])
@@ -522,9 +501,8 @@ abstract class Client implements AuthenticationInterface
      * been deleted.
      * Available for API version 29.0 or later.
      *
-     * @param string $query
-     * @param array  $options
-     *
+     * @param  string  $query
+     * @param  array  $options
      * @return array $queryResults
      */
     public function queryAll($query, $options = [])
@@ -542,9 +520,8 @@ abstract class Client implements AuthenticationInterface
     /**
      * Executes the specified SOSL query.
      *
-     * @param string $query
-     * @param array  $options
-     *
+     * @param  string  $query
+     * @param  array  $options
      * @return array
      */
     public function search($query, $options = [])
@@ -566,8 +543,7 @@ abstract class Client implements AuthenticationInterface
      * search results accordingly. Objects used most frequently appear
      * at the top of the list.
      *
-     * @param array $options
-     *
+     * @param  array  $options
      * @return array
      */
     public function scopeOrder($options = [])
@@ -584,9 +560,8 @@ abstract class Client implements AuthenticationInterface
     /**
      * Returns search result layout information for the objects in the query string.
      *
-     * @param array $objectList
-     * @param array $options
-     *
+     * @param  array  $objectList
+     * @param  array  $options
      * @return array
      */
     public function searchLayouts($objectList, $options = [])
@@ -607,9 +582,8 @@ abstract class Client implements AuthenticationInterface
      * relevant articles, before the user performs a search.
      * Available for API version 30.0 or later.
      *
-     * @param string $query
-     * @param array  $options
-     *
+     * @param  string  $query
+     * @param  array  $options
      * @return array
      */
     public function suggestedArticles($query, $options = [])
@@ -620,7 +594,7 @@ abstract class Client implements AuthenticationInterface
         $url .= urlencode($query);
 
         $parameters = [
-            'language'      => $this->settings['language'],
+            'language' => $this->settings['language'],
             'publishStatus' => 'Online',
         ];
 
@@ -641,9 +615,8 @@ abstract class Client implements AuthenticationInterface
      *
      * Tested this and can't get it to work. I think the request is set up correctly.
      *
-     * @param string $query
-     * @param array  $options
-     *
+     * @param  string  $query
+     * @param  array  $options
      * @return array
      */
     public function suggestedQueries($query, $options = [])
@@ -668,9 +641,8 @@ abstract class Client implements AuthenticationInterface
     /**
      * Request to a custom Apex REST endpoint.
      *
-     * @param string $customURI
-     * @param array  $options
-     *
+     * @param  string  $customURI
+     * @param  array  $options
      * @return mixed
      */
     public function custom($customURI, $options = [])
@@ -735,9 +707,8 @@ abstract class Client implements AuthenticationInterface
      * methods that can be called or refence them by calling the
      * Session::get('resources') method.
      *
-     * @param string $name
-     * @param array  $arguments
-     *
+     * @param  string  $name
+     * @param  array  $arguments
      * @return string|array
      */
     public function __call($name, $arguments)
@@ -751,14 +722,20 @@ abstract class Client implements AuthenticationInterface
         return $this->request($url, $options);
     }
 
-    private function appendURL($arguments) {
-        if (!isset($arguments[0])) return '';
-        if (!is_string($arguments[0])) return '';
+    private function appendURL($arguments)
+    {
+        if (! isset($arguments[0])) {
+            return '';
+        }
+        if (! is_string($arguments[0])) {
+            return '';
+        }
 
         return "/$arguments[0]";
     }
 
-    private function setOptions($arguments) {
+    private function setOptions($arguments)
+    {
         $options = [];
 
         foreach ($arguments as $argument) {
@@ -768,8 +745,11 @@ abstract class Client implements AuthenticationInterface
         return $options;
     }
 
-    private function setArgument($argument, &$options) {
-        if (!is_array($argument)) return;
+    private function setArgument($argument, &$options)
+    {
+        if (! is_array($argument)) {
+            return;
+        }
         foreach ($argument as $key => $value) {
             $options[$key] = $value;
         }
@@ -816,15 +796,15 @@ abstract class Client implements AuthenticationInterface
     /**
      * Overrides the default formatter set during register.
      *
-     * @param string $formatter - Name of the formatter to use
+     * @param  string  $formatter  - Name of the formatter to use
      */
     protected function setFormatter($formatter)
     {
         if ($formatter === 'json' && strpos(get_class($this->formatter), 'JSONFormatter') === false) {
             $this->formatter = new JSONFormatter($this->tokenRepo, $this->settings);
-        } else if ($formatter === 'xml' && strpos(get_class($this->formatter), 'XMLFormatter') === false) {
+        } elseif ($formatter === 'xml' && strpos(get_class($this->formatter), 'XMLFormatter') === false) {
             $this->formatter = new XMLFormatter($this->tokenRepo, $this->settings);
-        } else if ($formatter === 'none' && strpos(get_class($this->formatter), 'BaseFormatter') === false) {
+        } elseif ($formatter === 'none' && strpos(get_class($this->formatter), 'BaseFormatter') === false) {
             $this->formatter = new BaseFormatter($this->tokenRepo, $this->settings);
         } elseif ($formatter === 'csv' && strpos(get_class($this->formatter), 'CsvFormatter') === false) {
             $this->formatter = new CsvFormatter($this->tokenRepo, $this->settings);
@@ -834,16 +814,20 @@ abstract class Client implements AuthenticationInterface
     private function storeConfiguredVersion($versions)
     {
         $configVersion = $this->settings['version'];
-        if (empty($configVersion)) return;
+        if (empty($configVersion)) {
+            return;
+        }
 
-        foreach($versions as $version) {
+        foreach ($versions as $version) {
             $this->determineIfConfiguredVersionExists($version, $configVersion);
         }
     }
 
     private function determineIfConfiguredVersionExists($version, $configVersion)
     {
-        if ($version['version'] !== $configVersion) return;
+        if ($version['version'] !== $configVersion) {
+            return;
+        }
         $this->versionRepo->put($version);
     }
 
@@ -868,7 +852,9 @@ abstract class Client implements AuthenticationInterface
 
     protected function handleAuthenticationErrors(array $response)
     {
-        if (!isset($response['error'])) return;
+        if (! isset($response['error'])) {
+            return;
+        }
 
         throw new InvalidLoginCreditialsException($response['error_description']);
     }
@@ -876,24 +862,76 @@ abstract class Client implements AuthenticationInterface
     /**
      * Method will elaborate on RequestException.
      *
-     * @param RequestException $ex
      *
      * @throws SalesforceException
      * @throws TokenExpiredException
      */
     private function assignExceptions(RequestException $ex)
     {
-        if ($ex->hasResponse() && 401 == $ex->getResponse()->getStatusCode()) {
+        if ($ex->hasResponse() && $ex->getResponse()->getStatusCode() == 401) {
             throw new TokenExpiredException('Salesforce token has expired', $ex);
-        } elseif ($ex->hasResponse() && 403 == $ex->getResponse()->getStatusCode() && 'Bad_OAuth_Token' == $ex->getResponse()->getBody()->getContents()) {
+        } elseif ($ex->hasResponse() && $ex->getResponse()->getStatusCode() == 403 && $ex->getResponse()->getBody()->getContents() == 'Bad_OAuth_Token') {
             throw new TokenExpiredException('Salesforce token has expired', $ex);
         } elseif ($ex->hasResponse()) {
             $error = json_decode($ex->getResponse()->getBody()->getContents(), true);
             $ex->getResponse()->getBody()->rewind();
-            $jsonError = json_encode($error,JSON_PRETTY_PRINT);
+            $jsonError = json_encode($error, JSON_PRETTY_PRINT);
             throw new SalesforceException($jsonError, $ex);
         } else {
             throw new SalesforceException(sprintf('Invalid request: %s', $ex->getMessage()), $ex);
         }
+    }
+
+    /**
+     * @param  string  $id  Attachment.Id
+     *
+     * @throws GuzzleException
+     */
+    public function getAttachmentBody(string $id): ResponseInterface
+    {
+        $url = $this->getBaseUrl().sprintf('/sobjects/Attachment/%s/body', $id);
+
+        $parameters = [
+            'headers' => $this->formatter->setHeaders(),
+        ];
+
+        $response = $this->httpClient->request('get', $url, $parameters);
+
+        $this->event->fire('forrest.response', json_encode([
+            'url' => $url,
+            'method' => 'get',
+            'status_code' => $response->getStatusCode(),
+            'body_size' => (string) $response->getBody()->getSize(),
+        ]));
+
+        return $response;
+    }
+
+    /**
+     * @param  string  $id  ContentVersion.Id
+     *
+     * @throws GuzzleException
+     */
+    public function getContentVersionBody(string $id): ResponseInterface
+    {
+
+        $url = $this->getBaseUrl().sprintf('/sobjects/ContentVersion/%s/VersionData', $id);
+
+        $parameters = [
+            'headers' => $this->formatter->setHeaders(),
+        ];
+
+        $response = $this->httpClient->request('get', $url, $parameters);
+
+        $this->event->fire(
+            'forrest.response',
+            json_encode([
+                'url' => $url,
+                'method' => 'get',
+                'status_code' => $response->getStatusCode(),
+                'body_size' => (string) $response->getBody()->getSize(),
+            ]));
+
+        return $response;
     }
 }
