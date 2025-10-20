@@ -8,7 +8,7 @@
 
 Forrest is a Salesforce/Force.com REST API client for Laravel and Lumen.
 
-Interested in Eloquent Salesforce Models? Check out [@roblesterjr04](https://github.com/roblesterjr04)'s [EloquentSalesForce](https://github.com/roblesterjr04/EloquentSalesForce) project that utilizes Forrest as it's API layer.
+Interested in Eloquent Salesforce Models? Check out [@daikazu](https://github.com/daikazu)'s [Eloquent Salesforce Objects](https://github.com/daikazu/eloquent-salesforce-objects) project that utilizes Forrest as it's API layer.
 
 ## Installation
 
