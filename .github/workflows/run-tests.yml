@@ -11,10 +11,10 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        php: ["7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
-        laravel: [8.x, 9.x, 10.x, 11.x, 12.x]
-        dependency-version: [prefer-stable]
+        os: [ ubuntu-latest, windows-latest ]
+        php: [ "7.3", "7.4", "8.0", "8.1", "8.2", "8.3", "8.4", "8.5" ]
+        laravel: [ 8.x, 9.x, 10.x, 11.x, 12.x ]
+        dependency-version: [ prefer-stable ]
         exclude:
           - laravel: 9.x
             php: 7.3
@@ -51,10 +51,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v5
         with:
           path: ~/.composer/cache/files
           key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
@@ -70,5 +70,6 @@ jobs:
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
           composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
+
       - name: Execute tests
         run: vendor/bin/phpspec
