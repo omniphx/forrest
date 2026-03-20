@@ -156,7 +156,7 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
         // Create an empty response Object, then pick and choose items to insert from XML,
         $tokenResponse = [];
         $tokenResponse['signature'] = 'SOAPHasNoSecretSig';
-        // $tokenResponse['issued_at'] = time(); // including this causes phpspec to fail
+        // $tokenResponse['issued_at'] = time(); // intentionally omitted to preserve the expected token payload shape
 
         // Handle errors from Login
         if (isset($data->faultcode)) {

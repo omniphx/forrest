@@ -43,14 +43,14 @@ For more details on application configuration, see `README.md`.
 
 ## Testing
 
-This project uses PHPSpec. PHPSpec leverages mocks so that we only test the code that we have written and assume that external libraries and integrations, such as the Salesforce REST API, are working correctly. You can read more about PHPSpec here: `http://www.phpspec.net/en/stable/`
+This project uses PHPUnit for unit coverage. The test suite focuses on package behavior with mocked collaborators and PSR-7 responses rather than live Salesforce integration tests.
 
 Run package tests from the Forrest directory, not the Laravel application root:
 
 1. `cd libraries/forrest`
 2. `composer update`
-3. `vendor/bin/phpspec run` (it should be fast!)
+3. `vendor/bin/phpunit`
 
-All tests are located in the `spec` folder and use namespaces that mirror the files in `src`.
+All tests are located in the `tests` folder and generally mirror the areas under `src`.
 
-If you add new test methods, please use descriptive method naming. For instance, `it_should_not_call_refresh_method_if_there_is_no_token`
+If you add new test methods, please use descriptive names that explain the behavior being asserted.
