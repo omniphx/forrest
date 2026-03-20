@@ -8,4 +8,4 @@ composer.lock
 mm.log
 /vin
 /bin
-/tests
+.phpunit.result.cache

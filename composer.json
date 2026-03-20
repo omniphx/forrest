@@ -29,15 +29,20 @@
         "guzzlehttp/guzzle": "~6.0|~7.0"
     },
     "require-dev": {
-        "phpspec/phpspec": "~6.0|~7.0|^8.0"
+        "phpunit/phpunit": "^8.5 || ^9.6 || ^10.5 || ^11.5 || ^12.0"
     },
     "autoload": {
         "psr-4": {
             "Omniphx\\Forrest\\": "src/Omniphx/Forrest/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "scripts": {
-        "test": "vendor/bin/phpspec run"
+        "test": "vendor/bin/phpunit"
     },
     "config": {
         "sort-packages": true
