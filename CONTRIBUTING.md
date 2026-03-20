@@ -2,55 +2,55 @@
 
 ## Build
 
-After you've forked the repo, clone forrest into a new Laravel application or existing project. I recommend creating a new directory to store this project to seperate it from the rest of your codebase. This guide will assume it is named `library` but you can call it anything you like.
+Clone Forrest into a Laravel application or existing project. A separate sandbox app is recommended so package changes are easy to test in isolation. This guide assumes the package lives at `libraries/forrest`.
 
-`git clone git@github.com:<username>/forrest.git libraries/forrest`
-
-Next, update your `composer.json` to include the psr-4 auto-loader location. Your should already see the `App\\` namespace unless you've named it something else:
-
+```bash
+git clone git@github.com:<username>/forrest.git libraries/forrest
 ```
-"autoload": {
-    "psr-4": {
-        "App\\": "app/",
-        "Database\\Factories\\": "database/factories/",
-        "Database\\Seeders\\": "database/seeders/",
-        "Omniphx\\Forrest\\": "libraries/forrest/src/Omniphx/Forrest"
+
+Next, point your Laravel app at the local package clone using a Composer path repository and require the package from that path. A minimal root `composer.json` setup looks like this:
+
+```json
+{
+  "require": {
+    "omniphx/forrest": "dev-master"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "libraries/forrest",
+      "options": {
+        "symlink": true
+      }
     }
-},
+  ]
+}
 ```
 
-Add required dependencies:
+Then install or update dependencies from the Laravel app root:
 
-```
-"require": {
-    "firebase/php-jwt": "^5.2",
-    "nesbot/carbon": "^2.0|^3.0"
-},
+```bash
+composer update omniphx/forrest firebase/php-jwt
 ```
 
-Next run: `composer update`
+Laravel will auto-discover the service provider and `Forrest` alias. Publish the package configuration from the application root:
 
-From your project's root, add the service provider and alias to your `config/app.php` (same as the install guide):
-
-```
-Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
-'Forrest' => Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
+```bash
+php artisan vendor:publish --provider="Omniphx\\Forrest\\Providers\\Laravel\\ForrestServiceProvider"
 ```
 
-And publish the forrest configuration: `php artisan vendor:publish`
-
-For more details on configuration, see the README.md
+For more details on application configuration, see `README.md`.
 
 ## Testing
 
-This project uses the PHPSpec testing framework. PHPSpec leverages mocks so that we only test the code that we've written and assume that other libraries and integrations (such as the Salesforce REST API) are working perfectly fine. You can read more about PHPSpec here: `http://www.phpspec.net/en/stable/`
+This project uses PHPSpec. PHPSpec leverages mocks so that we only test the code that we have written and assume that external libraries and integrations, such as the Salesforce REST API, are working correctly. You can read more about PHPSpec here: `http://www.phpspec.net/en/stable/`
 
-You'll also need to be in the forrest directory, not your root/project directory to run tests.
+Run package tests from the Forrest directory, not the Laravel application root:
 
-1. `cd libary/forrest`
+1. `cd libraries/forrest`
 2. `composer update`
 3. `vendor/bin/phpspec run` (it should be fast!)
 
-All test are located in the `spec` folder and have a similar namespace to the files in our `src` folder.
+All tests are located in the `spec` folder and use namespaces that mirror the files in `src`.
 
 If you add new test methods, please use descriptive method naming. For instance, `it_should_not_call_refresh_method_if_there_is_no_token`

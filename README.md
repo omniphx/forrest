@@ -1,6 +1,6 @@
 # Salesforce REST API Client for Laravel <img align="right" src="https://raw.githubusercontent.com/omniphx/images/master/Forrest.png">
 
-[![Laravel](https://img.shields.io/badge/Laravel-10.x-orange.svg?style=flat-square)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-6.x--13.x-orange.svg?style=flat-square)](https://laravel.com)
 [![Latest Stable Version](https://img.shields.io/packagist/v/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![Total Downloads](https://img.shields.io/packagist/dt/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
 [![License](https://img.shields.io/packagist/l/omniphx/forrest.svg?style=flat-square)](https://packagist.org/packages/omniphx/forrest)
@@ -8,30 +8,17 @@
 
 Forrest is a Salesforce/Force.com REST API client for Laravel and Lumen.
 
-Interested in Eloquent Salesforce Models? Check out [@roblesterjr04](https://github.com/roblesterjr04)'s [EloquentSalesForce](https://github.com/roblesterjr04/EloquentSalesForce) project that utilizes Forrest as it's API layer.
-
 ## Installation
 
-> If you are upgrading to Version 2.0, be sure to re-publish your config file.
+Install Forrest with Composer:
 
-Forrest can be installed through composer. Open your `composer.json` file and add the following to the `require` key:
-
-```php
-"omniphx/forrest": "2.*"
+```bash
+composer require omniphx/forrest
 ```
-
-Next run `composer update` from the command line to install the package.
 
 ### Laravel Installation
 
-The package will automatically register the service provider and `Forrest` alias for Laravel `>=5.5`. For earlier versions, add the service provider and alias to your `config/app.php` file:
-
-```php
-Omniphx\Forrest\Providers\Laravel\ForrestServiceProvider::class
-'Forrest' => Omniphx\Forrest\Providers\Laravel\Facades\Forrest::class
-```
-
-> For Laravel 4, add `Omniphx\Forrest\Providers\Laravel4\ForrestServiceProvider` in `app/config/app.php`. Alias will remain the same.
+The package automatically registers the service provider and `Forrest` alias for supported Laravel versions.
 
 ### Lumen Installation
 
@@ -46,10 +33,10 @@ Then you'll utilize the Lumen service provider by registering it in the `bootstr
 
 ### Configuration
 
-You will need a configuration file to add your credentials. Publish a config file using the `artisan` command:
+You will need a configuration file to add your credentials. Publish the package config using Artisan:
 
 ```bash
-php artisan vendor:publish
+php artisan vendor:publish --provider="Omniphx\\Forrest\\Providers\\Laravel\\ForrestServiceProvider"
 ```
 
 This will publish a `config/forrest.php` file that can switch between authentication types as well as other settings.
@@ -69,7 +56,6 @@ SF_PASSWORD=password123
 ```
 
 > For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
-> For Laravel 4, run `php artisan config:publish omniphx/forrest` which create `app/config/omniphx/forrest/config.php`
 
 ## Getting Started
 
@@ -163,7 +149,7 @@ If your application requires logging in to salesforce as different users, you ca
 > Security token might need to be amended to your password unless your IP address is whitelisted.
 
 ```php
-Route::Post('/authenticate', function(Request $request)
+Route::post('/authenticate', function(Request $request)
 {
     Forrest::authenticateUser('https://login.salesforce.com',$request->username, $request->password);
     return Redirect::to('/');
@@ -216,7 +202,7 @@ Developer Org: https://<DEV_DOMAIN>.develop.my.salesforce.com
 
 #### Custom login urls
 
-Sometimes users will need to connect to a sandbox or custom url. To do this, simply pass the url as an argument for the authenticatation method:
+Sometimes users will need to connect to a sandbox or custom URL. To do this, simply pass the URL as an argument to the authentication method:
 
 ```php
 Route::get('/authenticate', function()
@@ -367,7 +353,7 @@ You can determine which resources you have access to by calling with the resourc
 Forrest::resources();
 ```
 
-This sample output shows the resourses available to call via the API:
+This sample output shows the resources available to call via the API:
 
 ```php
 Array
@@ -571,13 +557,15 @@ Forrest::put('/services/data/v20.0/endpoint', ['my'=>'param']);
 Forrest::patch('/services/data/v20.0/endpoint', ['my'=>'param']);
 Forrest::delete('/services/data/v20.0/endpoint');
 ```
+
 ### Get file body from ContentVersion and Attachment
-You can use the Forrest::getContentVersionBody() and Forrest::getAttachmentBody() to retrieve the content of the 
-uploaded files. They return a streamed response, so it may be a bit cumbersome to use if now used to streams. 
-Bellow you can find an example to retrieve the content of a uploaded content version. 
- 
+
+You can use the Forrest::getContentVersionBody() and Forrest::getAttachmentBody() to retrieve the content of the
+uploaded files. They return a streamed response, so it may be a bit cumbersome to use if now used to streams.
+Bellow you can find an example to retrieve the content of a uploaded content version.
+
 ```php
-# example 
+# example
 $data = Forrest::getContentVersionBody($version->Id);
 $content =  $data->getBody()->getContents();
 ```
