@@ -35,6 +35,10 @@ abstract class TestCase extends BaseTestCase
                 'compression' => false,
                 'compressionType' => 'gzip',
             ],
+            'client' => [
+                'http_errors' => true,
+                'verify' => false,
+            ],
             'storage' => [
                 'type' => 'session',
                 'path' => 'forrest_',
