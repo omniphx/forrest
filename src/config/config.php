@@ -20,7 +20,7 @@ return [
         'consumerKey'    => env('SF_CONSUMER_KEY'),
         'consumerSecret' => env('SF_CONSUMER_SECRET'),
         'callbackURI'    => env('SF_CALLBACK_URI'),
-        'loginURL'       => env('SF_LOGIN_URL'),
+        'loginURL'       => env('SF_LOGIN_URL', 'https://login.salesforce.com'),
 
         // Only required for UserPassword authentication:
         'username'       => env('SF_USERNAME'),

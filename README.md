@@ -53,6 +53,7 @@ SF_LOGIN_URL=https://login.salesforce.com
 
 SF_USERNAME=mattjmitchener@gmail.com
 SF_PASSWORD=password123
+RUN_SALESFORCE_INTEGRATION_TESTS=false
 ```
 
 > For Lumen, you should copy the config file from `src/config/config.php` and add it to a `forrest.php` configuration file under a config directory in the root of your application.
@@ -214,6 +215,29 @@ Route::get('/authenticate', function()
 ```
 
 > Note: You can specify a default login URL in your config file.
+
+## Running the live Salesforce integration test
+
+The package includes an opt-in integration test that uses the Username-Password flow to authenticate against a real Salesforce org and then exercises `identity()`, `resources()`, and a SOQL query against the authenticated `User` record.
+
+Set the required environment variables:
+
+```txt
+RUN_SALESFORCE_INTEGRATION_TESTS=true
+SF_CONSUMER_KEY=123455
+SF_CONSUMER_SECRET=ABCDEF
+SF_LOGIN_URL=https://login.salesforce.com
+SF_USERNAME=mattjmitchener@gmail.com
+SF_PASSWORD=password123
+```
+
+Then run:
+
+```bash
+vendor/bin/phpunit --filter UserPasswordIntegrationTest
+```
+
+The test is disabled by default so normal package test runs remain deterministic and do not make live network calls.
 
 ## Basic usage
 
