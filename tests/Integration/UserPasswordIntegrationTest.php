@@ -21,6 +21,7 @@ use Tests\TestCase;
 class UserPasswordIntegrationTest extends TestCase
 {
     private UserPassword $client;
+    private static ?array $dotenv = null;
 
     protected function setUp(): void
     {
@@ -157,6 +158,68 @@ class UserPasswordIntegrationTest extends TestCase
     {
         $value = getenv($key);
 
-        return $value === false ? $default : $value;
+        if ($value !== false) {
+            return $value;
+        }
+
+        $dotenv = $this->dotenv();
+
+        return $dotenv[$key] ?? $default;
+    }
+
+    private function dotenv(): array
+    {
+        if (self::$dotenv !== null) {
+            return self::$dotenv;
+        }
+
+        $paths = [
+            dirname(__DIR__, 2).'/.env',
+            dirname(__DIR__, 4).'/.env',
+        ];
+
+        foreach ($paths as $path) {
+            if (is_file($path)) {
+                self::$dotenv = $this->parseDotenvFile($path);
+
+                return self::$dotenv;
+            }
+        }
+
+        self::$dotenv = [];
+
+        return self::$dotenv;
+    }
+
+    private function parseDotenvFile(string $path): array
+    {
+        $values = [];
+
+        foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+            $line = trim($line);
+
+            if ($line === '' || str_starts_with($line, '#') || ! str_contains($line, '=')) {
+                continue;
+            }
+
+            [$name, $value] = explode('=', $line, 2);
+            $name = trim($name);
+            $value = trim($value);
+
+            if ($name === '') {
+                continue;
+            }
+
+            if (
+                (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+                (str_starts_with($value, "'") && str_ends_with($value, "'"))
+            ) {
+                $value = substr($value, 1, -1);
+            }
+
+            $values[$name] = $value;
+        }
+
+        return $values;
     }
 }
