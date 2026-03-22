@@ -73,7 +73,7 @@ jobs:
       SF_CONSUMER_SECRET: ${{ secrets.SF_CONSUMER_SECRET }}
       SF_LOGIN_URL: ${{ secrets.SF_LOGIN_URL }}
       SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
-      SF_USERNAME: ${{ secrets.SF_USERNAME }}
+      SF_USERNAME: ${{ vars.SF_USERNAME }}
 
     steps:
       - name: Checkout code
