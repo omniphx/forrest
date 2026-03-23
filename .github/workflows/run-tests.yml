@@ -63,3 +63,67 @@ jobs:
 
       - name: Execute tests
         run: vendor/bin/phpunit
+
+  salesforce-integration:
+    runs-on: ubuntu-latest
+    name: Salesforce Integration
+    env:
+      RUN_SALESFORCE_INTEGRATION_TESTS: true
+      SF_CONSUMER_KEY: ${{ secrets.SF_CONSUMER_KEY }}
+      SF_CONSUMER_SECRET: ${{ secrets.SF_CONSUMER_SECRET }}
+      SF_LOGIN_URL: ${{ secrets.SF_LOGIN_URL }}
+      SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+      SF_USERNAME: ${{ vars.SF_USERNAME }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          coverage: none
+
+      - name: Mask Salesforce secrets
+        run: |
+          for value in "$SF_CONSUMER_KEY" "$SF_CONSUMER_SECRET" "$SF_LOGIN_URL" "$SF_PASSWORD" "$SF_USERNAME"; do
+            if [ -n "$value" ]; then
+              echo "::add-mask::$value"
+            fi
+          done
+
+      - name: Resolve Salesforce test configuration
+        id: salesforce-config
+        run: |
+          missing=0
+          for key in SF_CONSUMER_KEY SF_CONSUMER_SECRET SF_USERNAME SF_PASSWORD; do
+            if [ -z "${!key}" ]; then
+              echo "Missing Salesforce secret: $key"
+              missing=1
+            fi
+          done
+
+          if [ -z "$SF_LOGIN_URL" ]; then
+            echo "SF_LOGIN_URL=https://login.salesforce.com" >> "$GITHUB_ENV"
+          fi
+
+          if [ "$missing" -ne 0 ]; then
+            echo "can_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "can_run=true" >> "$GITHUB_OUTPUT"
+
+      - name: Skip Salesforce integration test
+        if: steps.salesforce-config.outputs.can_run != 'true'
+        run: echo "Skipping Salesforce integration tests because the required GitHub secrets are not configured for this pull request."
+
+      - name: Install dependencies
+        if: steps.salesforce-config.outputs.can_run == 'true'
+        run: composer update --prefer-stable --prefer-dist --no-interaction --no-suggest
+
+      - name: Execute Salesforce integration test
+        if: steps.salesforce-config.outputs.can_run == 'true'
+        run: vendor/bin/phpunit --filter UserPasswordIntegrationTest
