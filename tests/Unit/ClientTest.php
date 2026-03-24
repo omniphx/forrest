@@ -123,6 +123,17 @@ class ClientTest extends TestCase
         $this->assertSame('macro test', $client->test());
     }
 
+    public function testStaticMacroable(): void
+    {
+        $client = $this->makeClient();
+
+        $client->macro('test', function () {
+            return 'macro test';
+        });
+
+        $this->assertSame('macro test', $client::test());
+    }
+
     private function makeClient(?ClientInterface $http = null, ?EventInterface $event = null, ?RepositoryInterface $tokenRepo = null): InspectableClient
     {
         $http = $http ?: $this->createMock(ClientInterface::class);
