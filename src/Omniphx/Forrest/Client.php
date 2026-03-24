@@ -5,6 +5,7 @@ namespace Omniphx\Forrest;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Traits\Macroable;
 use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
@@ -53,6 +54,10 @@ use Psr\Http\Message\ResponseInterface;
  */
 abstract class Client implements AuthenticationInterface
 {
+    use Macroable {
+        __call as macroable__call;
+    }
+
     /**
      * HTTP request client.
      *
@@ -718,6 +723,10 @@ abstract class Client implements AuthenticationInterface
      */
     public function __call($name, $arguments)
     {
+        if ($this->hasMacro($name)) {
+            return $this->macroable__call($name, $arguments);
+        }
+
         $url = $this->instanceURLRepo->get();
         $url .= $this->resourceRepo->get($name);
         $url .= $this->appendURL($arguments);
