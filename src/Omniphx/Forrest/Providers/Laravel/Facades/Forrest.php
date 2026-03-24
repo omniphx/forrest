@@ -59,6 +59,7 @@ use Psr\Http\Message\ResponseInterface;
  * @method static ResponseInterface getAttachmentBody(string $id)
  * @method static ResponseInterface getContentVersionBody(string $id)
  * @method static \Omniphx\Forrest\Interfaces\RedirectInterface callback()
+ * @method static void macro(string $name, object|callable $macro)
  */
 class Forrest extends Facade
 {
