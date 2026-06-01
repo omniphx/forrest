@@ -11,6 +11,7 @@ use Omniphx\Forrest\Interfaces\RedirectInterface;
 use Omniphx\Forrest\Interfaces\RepositoryInterface;
 use Omniphx\Forrest\Interfaces\ResourceRepositoryInterface;
 use Tests\Fixtures\InspectableClient;
+use Tests\Fixtures\ResourceRefreshingClient;
 use Tests\TestCase;
 
 class ClientTest extends TestCase
@@ -65,6 +66,44 @@ class ClientTest extends TestCase
 
         $this->assertSame(['id' => '001'], $client->query('SELECT Id FROM Account'));
         $this->assertSame(1, $client->refreshCalls);
+    }
+
+    public function testRequestRestoresOriginalUrlAndOptionsAfterTokenExpiry(): void
+    {
+        $calls = [];
+
+        $http = $this->createMock(ClientInterface::class);
+        $http->expects($this->exactly(3))
+            ->method('request')
+            ->willReturnCallback(function ($method, $url, $parameters) use (&$calls) {
+                $calls[] = ['method' => $method, 'url' => $url, 'parameters' => $parameters];
+
+                return match (count($calls)) {
+                    // initial POST: token expired
+                    1 => throw $this->requestException(401),
+                    // refresh re-fetches resources
+                    2 => $this->jsonResponse(['sobjects' => '/services/data/v59.0/sobjects']),
+                    // retried POST succeeds
+                    default => $this->jsonResponse(['id' => '001']),
+                };
+            });
+
+        $client = $this->makeClient($http, clientClass: ResourceRefreshingClient::class);
+
+        $response = $client->sobjects('Account', [
+            'method' => 'post',
+            'body' => ['Name' => 'Dunder Mifflin'],
+        ]);
+
+        $this->assertSame(['id' => '001'], $response);
+        $this->assertSame(1, $client->refreshCalls);
+
+        // The retry (third HTTP call) must repeat the original request url and options
+        $retry = $calls[2];
+        $this->assertSame('post', $retry['method']);
+        $this->assertSame('https://instance.salesforce.com/services/data/v59.0/sobjects/Account', $retry['url']);
+        $this->assertArrayHasKey('body', $retry['parameters']);
+        $this->assertSame('{"Name":"Dunder Mifflin"}', $retry['parameters']['body']);
     }
 
     public function testRequestCanReturnRawResponses(): void
@@ -134,7 +173,7 @@ class ClientTest extends TestCase
         $this->assertSame('macro test', $client::test());
     }
 
-    private function makeClient(?ClientInterface $http = null, ?EventInterface $event = null, ?RepositoryInterface $tokenRepo = null): InspectableClient
+    private function makeClient(?ClientInterface $http = null, ?EventInterface $event = null, ?RepositoryInterface $tokenRepo = null, string $clientClass = InspectableClient::class): InspectableClient
     {
         $http = $http ?: $this->createMock(ClientInterface::class);
         $event = $event ?: $this->createStub(EventInterface::class);
@@ -153,7 +192,7 @@ class ClientTest extends TestCase
             ['sobjects', '/services/data/v59.0/sobjects'],
         ]);
 
-        return new InspectableClient(
+        return new $clientClass(
             $http,
             $this->createStub(EncryptorInterface::class),
             $event,

@@ -201,6 +201,57 @@ class AuthenticationTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function testOauthJwtRetryAfterTokenExpiryRepeatsOriginalRequest(): void
+    {
+        // OAuthJWT::refresh() re-runs authenticate(), which re-fetches the version and resource
+        // listings. Those nested requests overwrite the client's in-flight request state, so
+        // the retry after a mid-request 401 must still repeat the original method and body.
+        $calls = [];
+
+        $http = $this->createMock(ClientInterface::class);
+        $http->expects($this->exactly(5))
+            ->method('request')
+            ->willReturnCallback(function ($method, $url, $options) use (&$calls) {
+                $calls[] = ['method' => $method, 'url' => $url, 'options' => $options];
+
+                return match (count($calls)) {
+                    // initial POST: token expired
+                    1 => throw $this->requestException(401),
+                    // refresh -> authenticate(): new token
+                    2 => $this->jsonResponse([
+                        'access_token' => 'token',
+                        'instance_url' => 'https://instance.salesforce.com',
+                        'id' => 'https://login.salesforce.com/id/org/user',
+                        'token_type' => 'Bearer',
+                    ]),
+                    // refresh -> storeVersion()
+                    3 => $this->jsonResponse([
+                        ['label' => 'Winter 24', 'url' => '/services/data/v59.0', 'version' => '59.0'],
+                    ]),
+                    // refresh -> storeResources()
+                    4 => $this->jsonResponse(['query' => '/services/data/v59.0/query']),
+                    // retried POST succeeds
+                    default => $this->jsonResponse(['id' => '001']),
+                };
+            });
+
+        $client = $this->makePasswordStyleClient(OAuthJWT::class, $http, $this->tokenRepo());
+
+        $response = $client->sobjects('Account', [
+            'method' => 'post',
+            'body' => ['Name' => 'Dunder Mifflin'],
+        ]);
+
+        $this->assertSame(['id' => '001'], $response);
+
+        // The retry (fifth HTTP call) must repeat the original request the refresh interrupted.
+        $initial = $calls[0];
+        $retry = $calls[4];
+        $this->assertSame('post', $retry['method']);
+        $this->assertSame($initial['url'], $retry['url']);
+        $this->assertSame('{"Name":"Dunder Mifflin"}', $retry['options']['body']);
+    }
+
     public function testUserPasswordSoapTransformsSoapLoginResponses(): void
     {
         $http = $this->createMock(ClientInterface::class);

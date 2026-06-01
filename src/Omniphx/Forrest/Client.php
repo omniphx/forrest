@@ -198,6 +198,7 @@ abstract class Client implements AuthenticationInterface
             $this->refresh();
 
             $this->url = $url;
+            $this->options = array_replace_recursive($this->settings['defaults'], $options);
 
             return $this->handleRequest();
         }
