@@ -6,7 +6,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Traits\Macroable;
-use Omniphx\Forrest\Exceptions\InvalidLoginCreditialsException;
+use Omniphx\Forrest\Exceptions\InvalidLoginCredentialsException;
 use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Formatters\BaseFormatter;
@@ -870,7 +870,7 @@ abstract class Client implements AuthenticationInterface
             return;
         }
 
-        throw new InvalidLoginCreditialsException($response['error_description']);
+        throw new InvalidLoginCredentialsException($response['error_description']);
     }
 
     /**
