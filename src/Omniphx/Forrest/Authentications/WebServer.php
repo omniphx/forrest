@@ -75,7 +75,7 @@ class WebServer extends Client implements WebServerInterface
             ],
         ]);
 
-        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
+        // Response returns JSON with access_token, instance_url, id, issued_at, and signature.
         $response = json_decode($jsonResponse->getBody(), true);
         $this->handleAuthenticationErrors($response);
 
@@ -113,7 +113,7 @@ class WebServer extends Client implements WebServerInterface
             ],
         ]);
 
-        // Response returns an json of access_token, instance_url, id, issued_at, and signature.
+        // Response returns JSON with access_token, instance_url, id, issued_at, and signature.
         $token = json_decode($response->getBody(), true);
 
         // Encrypt token and store token and in storage.

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Configuration options for Salesforce Oauth settings and REST API defaults.
+ * Configuration options for Salesforce OAuth settings and REST API defaults.
  */
 return [
     /*

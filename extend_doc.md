@@ -5,13 +5,13 @@ Forrest::query('SELECT Id FROM Account');
 ```
 
 #### Query Explain
-Returns details of how Salesforce will process your query. Available for API verison 30.0 or later.
+Returns details of how Salesforce will process your query. Available for API version 30.0 or later.
 ```php
 Forrest::queryExplain('SELECT Id FROM Account');
 ```
 
 #### Query All
-Returns results for a specified SOQL query, but will also inlcude deleted records.
+Returns results for a specified SOQL query, but will also include deleted records.
 ```php
 Forrest::queryAll('SELECT Id FROM Account');
 ```
@@ -35,7 +35,7 @@ Forrest::searchLayouts('Account,Contact,Lead');
 ```
 
 #### Suggested Articles
-Returns a list of Salesforce Knowledge articles based on the a search query. Pass additional parameters into the second argument. Available for API verison 30.0 or later.
+Returns a list of Salesforce Knowledge articles based on the a search query. Pass additional parameters into the second argument. Available for API version 30.0 or later.
 
 > Salesforce Knowledge must be enabled for this to work.
 
