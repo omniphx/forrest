@@ -167,7 +167,7 @@ Initial setup
 Setting up a Connected App
 
 1. App Manager > Create Connected App
-2. Enable Oauth Settings
+2. Enable OAuth Settings
 3. Check "Use digital signatures"
 4. Add `server.crt` or whatever you choose to name it
 5. Scope must includes "refresh_token, offline_access"
