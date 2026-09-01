@@ -128,8 +128,8 @@ Route::get('/authenticate', function()
 
 (When you cannot create a Connected App in Salesforce)
 
-1. Salesforce allows individual logins via a SOAP Login
-2. The Bearer access token returned from the SOAP login can be used similar to Oauth key
+1. Salesforce allows individual logins via a SOAP login.
+2. The Bearer access token returned from the SOAP login can be used similarly to an OAuth key.
 3. Update your config file and set the `authentication` value to `UserPasswordSoap`
 4. Update your config file with values for `loginURL`, `username`, and `password`.
    With the Username Password SOAP flow, you can directly authenticate with the `Forrest::authenticate()` method.
