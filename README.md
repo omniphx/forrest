@@ -61,7 +61,7 @@ SF_PASSWORD=password123
 
 ### Setting up a Connected App
 
-1. Log into to your Salesforce org
+1. Log in to your Salesforce org
 2. Click on Setup in the upper right-hand menu
 3. Search App in quick find box, and select `App Manager`
 4. Click New Connected App.
@@ -144,7 +144,7 @@ Route::get('/authenticate', function()
 });
 ```
 
-If your application requires logging in to Salesforce as different users, you can alternatively pass in the login url, username, and password to the `Forrest::authenticateUser()` method.
+If your application requires logging in to Salesforce as different users, you can alternatively pass in the login URL, username, and password to the `Forrest::authenticateUser()` method.
 
 > Security token might need to be amended to your password unless your IP address is whitelisted.
 
@@ -170,7 +170,7 @@ Setting up a Connected App
 2. Enable OAuth Settings
 3. Check "Use digital signatures"
 4. Add `server.crt` or whatever you choose to name it
-5. Scope must includes "refresh_token, offline_access"
+5. Scope must include "refresh_token, offline_access"
 6. Click Save
 
 Next you need to pre-authorize a profile (As of now, can only do this step in Classic but it's important)
@@ -388,7 +388,7 @@ Or...
 Forrest::appMenu();
 ```
 
-Additional resource url parameters can also be passed in
+Additional resource URL parameters can also be passed in
 
 ```php
 Forrest::sobjects('Account/describe/approvalLayouts/');
@@ -486,7 +486,7 @@ Forrest::revoke();
 
 #### Versions
 
-Returns all currently supported versions. Includes the verison, label and link to each version's root:
+Returns all currently supported versions. Includes the version, label and link to each version's root:
 
 ```php
 Forrest::versions();
@@ -561,8 +561,8 @@ Forrest::delete('/services/data/v20.0/endpoint');
 ### Get file body from ContentVersion and Attachment
 
 You can use the Forrest::getContentVersionBody() and Forrest::getAttachmentBody() to retrieve the content of the
-uploaded files. They return a streamed response, so it may be a bit cumbersome to use if now used to streams.
-Bellow you can find an example to retrieve the content of a uploaded content version.
+uploaded files. They return a streamed response, so it may be a bit cumbersome to use if not used to streams.
+Below you can find an example to retrieve the content of a uploaded content version.
 
 ```php
 # example
@@ -583,7 +583,7 @@ echo $response; // Unformatted string
 
 ### Event Listener
 
-This package makes use of Guzzle's event listers
+This package makes use of Guzzle's event listeners
 
 ```php
 Event::listen('forrest.response', function($request, $response) {
@@ -593,7 +593,7 @@ Event::listen('forrest.response', function($request, $response) {
 
 ### Creating multiple instances of Forrest
 
-There might be situations where you need to make calls to multiple Salesforce orgs. This can only be achieved only with the UserPassword flows.
+There might be situations where you need to make calls to multiple Salesforce orgs. This can only be achieved with the UserPassword flows.
 
 1. Set storage = `object` in the config file. This will store the token inside the object instance:
 
@@ -627,7 +627,7 @@ If you'd prefer to use storage other than `session`, `cache` or `object`, you ca
 ],
 ```
 
-You class can be named anything but it must implement `Omniphx\Forrest\Interfaces\StorageInterface`:
+Your class can be named anything but it must implement `Omniphx\Forrest\Interfaces\StorageInterface`:
 
 ```php
 <?php

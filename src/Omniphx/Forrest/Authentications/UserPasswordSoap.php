@@ -55,9 +55,9 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
     public function refresh()
     {
         $this->authenticate();
-        /* Per the SOAP Documenetationthe token life is extended at every call,
          * so the refresh is not needed. Token will expire in two hours from
          * last call by default.
+        /* Per the SOAP documentation, the token life is extended at every call,
          */
     }
 
@@ -114,7 +114,7 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
 
         Here is the gist of it. When you make an API call to Salesforce, the they authenticate the calls by examining the SOAP header that contains a session key. Session keys are allocated on a per-user basis. What this means is that if you create two connections at the same time (i.e. using login() from two different threads) - they will both be using the same session key.
 
-        Decision:  Dont invoke any type of logout/revoke method.  Protect your session keys!
+        Decision:  Don't invoke any type of logout/revoke method.  Protect your session keys!
         */
     }
 
@@ -170,7 +170,7 @@ class UserPasswordSoap extends BaseAuthentication implements UserPasswordSoapInt
 
         // Handle successful SOAP login
         if (isset($data->userId)) {
-            // Forrest is looking for id.  SOAP doesnt return this, so build it
+            // Forrest is looking for id.  SOAP doesn't return this, so build it
             // based on well known format.
             // https://login.salesforce.com/id/<organizationId>/<userId>
             if ('false' == $data->sandbox) {

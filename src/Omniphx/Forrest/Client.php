@@ -97,14 +97,14 @@ abstract class Client implements AuthenticationInterface
     protected $redirect;
 
     /**
-     * Inteface for Input calls.
+     * Interface for Input calls.
      *
      * @var \Omniphx\Forrest\Interfaces\InputInterface
      */
     protected $input;
 
     /**
-     * Inteface for Input calls.
+     * Interface for Encryptor calls.
      *
      * @var \Omniphx\Forrest\Interfaces\EncryptorInterface
      */
@@ -361,7 +361,7 @@ abstract class Client implements AuthenticationInterface
 
     /**
      * Request that returns all currently supported versions.
-     * Includes the verison, label and link to each version's root.
+     * Includes the version, label and link to each version's root.
      * Formats: json, xml
      * Methods: get.
      *
@@ -379,7 +379,7 @@ abstract class Client implements AuthenticationInterface
     }
 
     /**
-     * Lists availabe resources for specified API version.
+     * Lists available resources for specified API version.
      * Includes resource name and URI.
      * Formats: json, xml
      * Methods: get.
@@ -488,7 +488,7 @@ abstract class Client implements AuthenticationInterface
 
     /**
      * Details how Salesforce will process your query.
-     * Available for API verison 30.0 or later.
+     * Available for API version 30.0 or later.
      *
      * @param  string  $query
      * @param  array  $options
@@ -714,7 +714,7 @@ abstract class Client implements AuthenticationInterface
     /**
      * Returns any resource that is available to the authenticated
      * user. Reference Force.com's REST API guide to read about more
-     * methods that can be called or refence them by calling the
+     * methods that can be called or reference them by calling the
      * Session::get('resources') method.
      *
      * @param  string  $name
@@ -854,7 +854,7 @@ abstract class Client implements AuthenticationInterface
     /**
      * Checks to see if version is specified. If not then call storeVersion.
      * Once a version is determined, determine the available resources the
-     * user has access to and store them in teh user's sesion.
+     * user has access to and store them in the user's session.
      *
      * @return void
      */
