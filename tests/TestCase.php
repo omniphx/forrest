@@ -67,8 +67,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function requestException(int $status, string $body = '{}'): RequestException
     {
-        return new RequestException(
-            'Request failed',
+        return RequestException::create(
             new Request('GET', 'https://example.test'),
             new Response($status, ['Content-Type' => 'application/json'], $body)
         );

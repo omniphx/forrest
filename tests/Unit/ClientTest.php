@@ -2,7 +2,14 @@
 
 namespace Tests\Unit;
 
+use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
+use Omniphx\Forrest\Exceptions\SalesforceException;
 use Omniphx\Forrest\Formatters\JSONFormatter;
 use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
@@ -24,7 +31,7 @@ class ClientTest extends TestCase
         $http->expects($this->once())
             ->method('request')
             ->with(
-                'post',
+                'POST',
                 'https://instance.salesforce.com/services/data/v59.0/sobjects/Account',
                 [
                     'headers' => [
@@ -84,7 +91,7 @@ class ClientTest extends TestCase
         $http->expects($this->once())
             ->method('request')
             ->with(
-                'get',
+                'GET',
                 'https://instance.salesforce.com/services/data/v59.0/query?q=SELECT+Id+FROM+Account',
                 $this->anything()
             )
@@ -101,7 +108,7 @@ class ClientTest extends TestCase
         $http->expects($this->once())
             ->method('request')
             ->with(
-                'get',
+                'GET',
                 'https://instance.salesforce.com/services/data/v59.0/theme/mobile',
                 $this->anything()
             )
@@ -132,6 +139,65 @@ class ClientTest extends TestCase
         });
 
         $this->assertSame('macro test', $client::test());
+    }
+
+    public function testRealGuzzleClientRefreshesTokenAndRetriesAfter401(): void
+    {
+        $history = [];
+        $client = $this->makeClient($this->guzzleClient([
+            new Response(401, ['Content-Type' => 'application/json'], '[{"errorCode":"INVALID_SESSION_ID"}]'),
+            $this->jsonResponse(['totalSize' => 1]),
+        ], $history));
+
+        $this->assertSame(['totalSize' => 1], $client->query('SELECT Id FROM Account'));
+        $this->assertSame(1, $client->refreshCalls);
+        $this->assertCount(2, $history);
+        $this->assertSame('GET', $history[0]['request']->getMethod());
+        $this->assertSame('GET', $history[1]['request']->getMethod());
+    }
+
+    public function testRealGuzzleClientWrapsErrorResponsesInSalesforceException(): void
+    {
+        $history = [];
+        $client = $this->makeClient($this->guzzleClient([
+            new Response(400, ['Content-Type' => 'application/json'], '[{"errorCode":"INVALID_FIELD"}]'),
+        ], $history));
+
+        try {
+            $client->query('SELECT Nope FROM Account');
+            $this->fail('Expected a SalesforceException.');
+        } catch (SalesforceException $e) {
+            $this->assertTrue($e->hasResponse());
+            $this->assertSame(400, $e->getResponse()->getStatusCode());
+            $this->assertSame('[{"errorCode":"INVALID_FIELD"}]', (string) $e->getResponse()->getBody());
+            $this->assertSame(400, $e->getCode());
+            $this->assertStringContainsString('INVALID_FIELD', $e->getMessage());
+            $this->assertInstanceOf(RequestException::class, $e->getPrevious());
+            $this->assertSame('GET', $e->getRequest()->getMethod());
+        }
+    }
+
+    public function testRealGuzzleClientSendsUppercaseMethods(): void
+    {
+        $history = [];
+        $client = $this->makeClient($this->guzzleClient([
+            $this->jsonResponse(['success' => true]),
+        ], $history));
+
+        $client->sobjects('Account/001', [
+            'method' => 'patch',
+            'body' => ['Name' => 'Dunder Mifflin'],
+        ]);
+
+        $this->assertSame('PATCH', $history[0]['request']->getMethod());
+    }
+
+    private function guzzleClient(array $responses, array &$history): GuzzleClient
+    {
+        $stack = HandlerStack::create(new MockHandler($responses));
+        $stack->push(Middleware::history($history));
+
+        return new GuzzleClient(['handler' => $stack, 'http_errors' => true]);
     }
 
     private function makeClient(?ClientInterface $http = null, ?EventInterface $event = null, ?RepositoryInterface $tokenRepo = null): InspectableClient

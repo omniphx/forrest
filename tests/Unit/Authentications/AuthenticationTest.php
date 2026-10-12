@@ -150,7 +150,7 @@ class AuthenticationTest extends TestCase
                 $calls++;
 
                 if ($calls === 1) {
-                    $this->assertSame('post', $method);
+                    $this->assertSame('POST', $method);
                     $this->assertSame('https://login.salesforce.com/services/oauth2/token', $url);
                     $this->assertSame([
                         'form_params' => [

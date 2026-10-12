@@ -245,7 +245,7 @@ abstract class Client implements AuthenticationInterface
         }
 
         try {
-            $response = $this->httpClient->request($this->options['method'], $this->url, $this->parameters);
+            $response = $this->httpClient->request(strtoupper($this->options['method']), $this->url, $this->parameters);
         } catch (RequestException $ex) {
             $this->assignExceptions($ex);
         }
@@ -882,13 +882,15 @@ abstract class Client implements AuthenticationInterface
      */
     private function assignExceptions(RequestException $ex)
     {
-        if ($ex->hasResponse() && $ex->getResponse()->getStatusCode() == 401) {
+        $response = SalesforceException::responseFrom($ex);
+
+        if ($response && $response->getStatusCode() == 401) {
             throw new TokenExpiredException('Salesforce token has expired', $ex);
-        } elseif ($ex->hasResponse() && $ex->getResponse()->getStatusCode() == 403 && $ex->getResponse()->getBody()->getContents() == 'Bad_OAuth_Token') {
+        } elseif ($response && $response->getStatusCode() == 403 && $response->getBody()->getContents() == 'Bad_OAuth_Token') {
             throw new TokenExpiredException('Salesforce token has expired', $ex);
-        } elseif ($ex->hasResponse()) {
-            $error = json_decode($ex->getResponse()->getBody()->getContents(), true);
-            $ex->getResponse()->getBody()->rewind();
+        } elseif ($response) {
+            $error = json_decode($response->getBody()->getContents(), true);
+            $response->getBody()->rewind();
             $jsonError = json_encode($error, JSON_PRETTY_PRINT);
             throw new SalesforceException($jsonError, $ex);
         } else {
@@ -909,7 +911,7 @@ abstract class Client implements AuthenticationInterface
             'headers' => $this->formatter->setHeaders(),
         ];
 
-        $response = $this->httpClient->request('get', $url, $parameters);
+        $response = $this->httpClient->request('GET', $url, $parameters);
 
         $this->event->fire('forrest.response', json_encode([
             'url' => $url,
@@ -935,7 +937,7 @@ abstract class Client implements AuthenticationInterface
             'headers' => $this->formatter->setHeaders(),
         ];
 
-        $response = $this->httpClient->request('get', $url, $parameters);
+        $response = $this->httpClient->request('GET', $url, $parameters);
 
         $this->event->fire(
             'forrest.response',

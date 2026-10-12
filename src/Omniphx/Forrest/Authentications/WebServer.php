@@ -65,7 +65,7 @@ class WebServer extends Client implements WebServerInterface
 
         $tokenURL = $loginURL.'/services/oauth2/token';
 
-        $jsonResponse = $this->httpClient->request('post', $tokenURL, [
+        $jsonResponse = $this->httpClient->request('POST', $tokenURL, [
             'form_params' => [
                 'code'          => $code,
                 'grant_type'    => 'authorization_code',
@@ -104,7 +104,7 @@ class WebServer extends Client implements WebServerInterface
         $tokenURL = $this->getLoginURL();
         $tokenURL .= '/services/oauth2/token';
 
-        $response = $this->httpClient->request('post', $tokenURL, [
+        $response = $this->httpClient->request('POST', $tokenURL, [
             'form_params'    => [
                 'refresh_token' => $refreshToken,
                 'grant_type'    => 'refresh_token',

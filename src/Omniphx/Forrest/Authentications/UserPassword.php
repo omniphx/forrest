@@ -49,7 +49,7 @@ class UserPassword extends BaseAuthentication implements UserPasswordInterface
         ];
 
         // \Psr\Http\Message\ResponseInterface
-        $response = $this->httpClient->request('post', $url, $parameters);
+        $response = $this->httpClient->request('POST', $url, $parameters);
 
         $authTokenDecoded = json_decode($response->getBody()->getContents(), true);
 
@@ -71,6 +71,6 @@ class UserPassword extends BaseAuthentication implements UserPasswordInterface
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['form_params']['token'] = $accessToken;
 
-        return $this->httpClient->request('post', $url, $options);
+        return $this->httpClient->request('POST', $url, $options);
     }
 }

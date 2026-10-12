@@ -47,7 +47,7 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         ];
 
         // \Psr\Http\Message\ResponseInterface
-        $response = $this->httpClient->request('post', $fullInstanceUrl, ['form_params' => $parameters]);
+        $response = $this->httpClient->request('POST', $fullInstanceUrl, ['form_params' => $parameters]);
 
         $authToken = json_decode($response->getBody()->getContents(), true);
 
@@ -78,6 +78,6 @@ class OAuthJWT extends BaseAuthentication implements AuthenticationInterface
         $options['headers']['content-type'] = 'application/x-www-form-urlencoded';
         $options['form_params']['token'] = $accessToken;
 
-        return $this->httpClient->request('post', $url, $options);
+        return $this->httpClient->request('POST', $url, $options);
     }
 }
