@@ -149,6 +149,13 @@ abstract class Client implements AuthenticationInterface
      */
     private $parameters;
 
+    /**
+     * Whether a refresh triggered by an expired token is in progress.
+     *
+     * @var bool
+     */
+    private $refreshing = false;
+
     public function __construct(
         ClientInterface $httpClient,
         EncryptorInterface $encryptor,
@@ -195,7 +202,20 @@ abstract class Client implements AuthenticationInterface
         try {
             return $this->handleRequest();
         } catch (TokenExpiredException $e) {
-            $this->refresh();
+            // A 401 during the refresh comes from a request made with the token it just obtained
+            // (e.g. the resource listing in authenticate()). Refreshing again would get a token
+            // with the same scopes and recurse until memory runs out, so let it surface instead.
+            if ($this->refreshing) {
+                throw $e;
+            }
+
+            $this->refreshing = true;
+
+            try {
+                $this->refresh();
+            } finally {
+                $this->refreshing = false;
+            }
 
             $this->url = $url;
 
@@ -883,7 +903,10 @@ abstract class Client implements AuthenticationInterface
     private function assignExceptions(RequestException $ex)
     {
         if ($ex->hasResponse() && $ex->getResponse()->getStatusCode() == 401) {
-            throw new TokenExpiredException('Salesforce token has expired', $ex);
+            $body = $ex->getResponse()->getBody()->getContents();
+            $ex->getResponse()->getBody()->rewind();
+
+            throw new TokenExpiredException(trim('Salesforce token has expired '.$body), $ex);
         } elseif ($ex->hasResponse() && $ex->getResponse()->getStatusCode() == 403 && $ex->getResponse()->getBody()->getContents() == 'Bad_OAuth_Token') {
             throw new TokenExpiredException('Salesforce token has expired', $ex);
         } elseif ($ex->hasResponse()) {

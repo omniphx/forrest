@@ -8,6 +8,7 @@ use Omniphx\Forrest\Authentications\OAuthJWT;
 use Omniphx\Forrest\Authentications\UserPassword;
 use Omniphx\Forrest\Authentications\UserPasswordSoap;
 use Omniphx\Forrest\Authentications\WebServer;
+use Omniphx\Forrest\Exceptions\TokenExpiredException;
 use Omniphx\Forrest\Formatters\JSONFormatter;
 use Omniphx\Forrest\Interfaces\EncryptorInterface;
 use Omniphx\Forrest\Interfaces\EventInterface;
@@ -199,6 +200,52 @@ class AuthenticationTest extends TestCase
 
         $client->authenticate();
         $this->addToAssertionCount(1);
+    }
+
+    public function testOauthJwtSurfacesA401OnTheFreshTokenInsteadOfRecursing(): void
+    {
+        // A Connected App without the `api` scope issues tokens that every REST call rejects with
+        // a 401. authenticate() fetches the resource listing with the token it just stored, and
+        // the 401 used to trigger refresh() -> authenticate() again, recursing until PHP ran out
+        // of memory. One refresh is allowed; the second 401 must surface with its reason.
+        // token, versions, resources (401), then the single refresh: token, versions, resources (401).
+        $http = $this->createMock(ClientInterface::class);
+        $http->expects($this->exactly(6))
+            ->method('request')
+            ->willReturnCallback(function ($method, $url) {
+                if (str_ends_with($url, '/services/oauth2/token')) {
+                    return $this->jsonResponse([
+                        'access_token' => 'token',
+                        'instance_url' => 'https://instance.salesforce.com',
+                        'id' => 'https://login.salesforce.com/id/org/user',
+                        'token_type' => 'Bearer',
+                    ]);
+                }
+
+                if (str_ends_with($url, '/services/data')) {
+                    return $this->jsonResponse([
+                        ['label' => 'Winter 24', 'url' => '/services/data/v59.0', 'version' => '59.0'],
+                    ]);
+                }
+
+                throw $this->requestException(401, '[{"message":"INVALID_SCOPES","errorCode":"INVALID_AUTH_HEADER"}]');
+            });
+
+        $tokenRepo = $this->createStub(RepositoryInterface::class);
+        $tokenRepo->method('get')->willReturn([
+            'access_token' => 'token',
+            'token_type' => 'Bearer',
+            'id' => 'https://login.salesforce.com/id/org/user',
+        ]);
+
+        $client = $this->makePasswordStyleClient(OAuthJWT::class, $http, $tokenRepo);
+
+        try {
+            $client->authenticate();
+            $this->fail('Expected a TokenExpiredException');
+        } catch (TokenExpiredException $e) {
+            $this->assertStringContainsString('INVALID_SCOPES', $e->getMessage());
+        }
     }
 
     public function testUserPasswordSoapTransformsSoapLoginResponses(): void
